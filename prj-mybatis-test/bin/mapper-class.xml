@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.mybatis.dao.ClassDao">
+  <!-- 开启本mapper下的namespace的二级缓存 系统默认的 -->
+  
+  <cache></cache>
+  
+  <!-- 
+  	<select id="selectAllClass"  resultType="com.mybatis.bean.ClassInfo">
+  		select class_id as id,class_teacher_name  as teacher_name,class_teacher_age as  teacher_age ,class_teacher_sex as teacher_sex from class
+  	</select>
+  	
+  	<select id="selectClassOne"  resultType="com.mybatis.bean.ClassInfo">
+  		select class_id as id,class_teacher_name  as teacher_name,class_teacher_age as  teacher_age ,class_teacher_sex as teacher_sex  from class where class_id=#{id}
+  	</select>
+
+  	<select id="selectAllClass"  resultType="com.mybatis.bean.ClassInfo">
+  		select * from class
+  	</select>
+  	
+  	<select id="selectClassOne"  resultType="com.mybatis.bean.ClassInfo">
+  		--><!-- select *  from class where class_id=#{id} 
+  		select *  from class where class_id="110"
+  	</select>
+  	
+  	<select id="selectOneClass"   resultType="com.mybatis.bean.ClassInfo">
+  		SELECT * FROM class WHERE class_teacher_name=#{classInfo.class_teacher_name} AND class_teacher_age=#{classInfo.class_teacher_age}
+  	</select>
+  	
+  	<select id="selectOneClass"   resultType="com.mybatis.bean.ClassInfo">
+  		SELECT * FROM class WHERE class_teacher_name=#{class_teacher_name} AND class_teacher_age=#{class_teacher_age}
+  	</select>
+  	
+  	<select id="selectOneClass"   resultType="com.mybatis.bean.ClassInfo">
+  		SELECT ${clumn_name} FROM class WHERE 1=1 order by class_id ${paixu_flag}
+  	</select>
+  	
+  	<select id="selectTableClumn"  resultType="java.util.List">
+  		select * from ${table_name}
+  	</select>
+  	
+  	<select id="selectMoHu" resultType="com.mybatis.bean.ClassInfo">
+  		select * from class where class_teacher_name like concat('%',#{teacher_name})
+  	</select>
+  	
+  	<insert id="insertClass">
+  		insert into class (class_id,class_teacher_name,class_teacher_age,class_teacher_sex) 
+  		values (#{class_id},#{class_teacher_name},#{class_teacher_age},#{class_teacher_sex})
+  	</insert>
+  	
+  	<update id="updateClass">
+  		update class set class_teacher_name = #{class_teacher_name} where class_id = #{class_id}
+  	</update>
+  	
+  	<delete id="deletClass">
+  		delete from class where  class_id = #{class_id}
+  	</delete>
+  	
+  	<select id="selectMoHu" resultType="java.util.HashMap">
+  		select * from class where class_teacher_name like concat('%',#{teacher_name})
+  	</select>
+   -->	  	
+  	<resultMap type="com.mybatis.bean.ClassInfo" id="classMap">
+  		<id column="class_id" property="class_id"/>
+	  	 	<result column="class_teacher_name" property="class_teacher_name"/>
+	  	 	<result column="class_teacher_age" property="class_teacher_age"/>
+	  	 	<result column="class_teacher_sex" property="class_teacher_sex"/>
+	  	 	<collection property="studentList" column="class_id" ofType="com.mybatis.bean.StudentInfo" select="com.mybatis.dao.StudentDao.selectStudentByClassId">
+	  	 		<id column="student_id" property="student_id"/>
+		  	 	<result column="student_name" property="student_name"/>
+		  	 	<result column="student_sex" property="student_sex"/>
+		  	 	<result column="student_age" property="student_age"/>
+		  	 	<result column="student_course" property="student_course"/>
+		  	 	<result column="student_class_id" property="student_class_id"/>
+	  	 	</collection>
+  	</resultMap>
+  	<select id="selectStudentByClass" resultMap="classMap">
+  		select * from class where class_id = #{class_id}
+  	</select>
+  </mapper>

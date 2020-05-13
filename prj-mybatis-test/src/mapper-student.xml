@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.mybatis.dao.StudentDao">
+  	<!-- 
+  	<select id="luoJiFenYe" resultType="com.mybatis.bean.StudentInfo">
+  		select * from student
+  	</select>
+  	
+  	<select id="wuLiFenYe" resultType="com.mybatis.bean.StudentInfo">
+  		select * from student limit #{startIndex}, #{pagesize}
+  	</select>
+  	
+  	<select id="dongTaiChaXun" resultType="com.mybatis.bean.StudentInfo">
+  	 	select * from student 
+  	 	<where>
+  	 		<if test="ids!=null" >
+  	 		student_id in
+	  	 		<foreach collection="ids" item="id" open="(" separator="," close=")" >
+	  	 			#{id}
+	  	 		</foreach>
+  	 		</if>
+  	 	</where> 	
+  	 </select>
+  	 
+  	 <select id="dongTaiChaXun" resultType="com.mybatis.bean.StudentInfo">
+  	 	select * from student where 1=1 
+		<if test="ids!=null" >
+			and student_id in
+	 		<foreach collection="ids" item="id" open="(" separator="," close=")" >
+	 			#{id}
+	 		</foreach>
+		</if>
+		<if test="username!=null">
+			and student_name = #{username}
+		</if>	
+  	 </select>
+  	 -->
+  	 <!-- 错误例子由于学生表与班级表关联 外键无法得到更新又没有默认值导致无法做插入更新操作 -->
+  	 <!--
+  	 <insert id="insertStudent">
+	 	insert into student (student_id,student_name,student_sex,student_age,student_course) 
+	 	values (#{student_id},#{student_name},#{student_sex},#{student_age},#{student_course})
+  	 </insert>
+  	 -->
+  	 <resultMap type="com.mybatis.bean.StudentInfo" id="studentMap">
+  	 	<id column="student_id" property="student_id"/>
+  	 	<result column="student_name" property="student_name"/>
+  	 	<result column="student_sex" property="student_sex"/>
+  	 	<result column="student_age" property="student_age"/>
+  	 	<result column="student_course" property="student_course"/>
+  	 	<result column="student_class_id" property="student_class_id"/>
+  	 	<association property="classInfo"  javaType="com.mybatis.bean.ClassInfo">
+  	 		<id column="class_id" property="class_id"/>
+	  	 	<result column="class_teacher_name" property="class_teacher_name"/>
+	  	 	<result column="class_teacher_age" property="class_teacher_age"/>
+	  	 	<result column="class_teacher_sex" property="class_teacher_sex"/>
+  	 	</association>
+  	 </resultMap>
+  	 <select id="selectClassTeacherName" resultMap="studentMap">
+  	 	select * from student s join class c on s.student_class_id=c.class_id where student_name=#{student_name}
+  	 </select>
+  	 
+  	 <select id="selectStudentByClassId" resultType="com.mybatis.bean.StudentInfo">
+  	 	select * from student where student_class_id = #{student_class_id}
+  	 </select>
+  	 
+  	 
+  </mapper>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="lib" path="ref-libs/asm-3.3.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="ref-libs/cglib-2.2.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="ref-libs/commons-logging-1.1.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="ref-libs/javassist-3.17.1-GA.jar"/>
+	<classpathentry exported="true" kind="lib" path="ref-libs/log4j-1.2.17.jar"/>
+	<classpathentry exported="true" kind="lib" path="ref-libs/mybatis-3.2.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="ref-libs/mysql-connector-java-5.1.23-bin.jar"/>
+	<classpathentry exported="true" kind="lib" path="ref-libs/ojdbc6.jar"/>
+	<classpathentry exported="true" kind="lib" path="ref-libs/slf4j-api-1.7.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="ref-libs/slf4j-log4j12-1.7.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="F:/SbootDemo/ja包/Json应用jar包/lib/commons-beanutils.jar"/>
+	<classpathentry exported="true" kind="lib" path="F:/SbootDemo/ja包/Json应用jar包/lib/commons-collections-3.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="F:/SbootDemo/ja包/Json应用jar包/lib/commons-lang-2.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="F:/SbootDemo/ja包/Json应用jar包/lib/commons-logging.jar"/>
+	<classpathentry exported="true" kind="lib" path="F:/SbootDemo/ja包/Json应用jar包/lib/ezmorph-1.0.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="F:/SbootDemo/ja包/Json应用jar包/lib/json-lib-1.1-jdk13.jar"/>
+	<classpathentry exported="true" kind="lib" path="F:/SbootDemo/ja包/Json应用jar包/lib/xom-1.0d10.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
