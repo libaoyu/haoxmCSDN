@@ -1,0 +1,324 @@
+ *{
+            margin: 0;
+            padding: 0;
+        }
+        li{
+            list-style: none;
+        }
+       a,div,i{
+        	-webkit-tap-highlight-color:rgba(0,0,0,0);
+        }
+        .container {
+            width: 100%;
+            min-width: 320px;
+            max-width: 640px;
+            margin: 0 auto;
+        }
+        body{
+            margin: 0;
+            padding: 0;
+            font-family: "微软雅黑", Helvetica, Arial, sans-serif;
+		    font-size: 16px;
+            color: #555;
+        }
+        a{
+            color: #fff;
+            text-decoration: none;
+        }
+        .ex_top{
+        	border-bottom:1px solid #ccc;
+        	background:#fff;
+        	/* padding: 20px 0; */
+        	box-shadow: 0px 1px 8px rgba(57, 61, 85, 0.2);
+            -webkit-box-shadow:0px 1px 8px rgba(57, 61, 85, 0.2);
+        }
+        .ex_top img{
+        	display:block;
+            width: 100%;
+            margin:0 auto;
+        }
+        .title{
+            position: relative;
+        }
+        .linet{
+            border: 1px solid #399fd0;
+            width: 96%;
+            margin: 45px auto;
+            
+        }
+        .ex_top_title{
+            font-size: 18px;
+            color: #399fd0;
+            padding: 0 10px;
+            box-sizing: border-box;
+            background: #fff;
+            display: inline-block;
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            -webkit-transform:translateX(-50%);
+        }
+        .ex_top_title_s{
+            font-size: 18px;
+            color: #399fd0;
+            padding: 0 10px;
+            box-sizing: border-box;
+            background: #fff;
+            display: inline-block;
+            position: absolute;
+            top: -10px;
+            left: 40%;
+            transform: translateX(-33%);
+            -webkit-transform:translateX(-33%);
+        }
+        .ex_main{
+            margin-top: 20px;
+        }
+        .ex_noinfo span{
+            height: 50px;
+            line-height: 50px;
+            font-size: 18px;
+            margin-left: 10px;
+        }
+        .arrow{
+            padding: 0 5px;
+            font-size: 24px;
+        }
+        .doctor_info{
+            position: relative;
+        }
+        .ex_logo{
+            width: 150px;
+            height: 150px;
+            margin: 20px auto;
+            border-radius: 50%;
+            background: url(../images/logo.jpg) repeat;
+            background-size: 100% 100%;
+        }
+        .doctor_logo{
+            width: 100px;
+            height: 100px;
+            left: 50%;
+            top:0%;
+            transform: translate(-50%,-50%);
+            -webkit-transform: translate(-50%,-50%);
+            border-radius: 50%;
+            background:url(../../images/doctor.png) repeat;
+            background-size: 100% 100%;
+            border:3px solid #fff;
+            position: absolute;
+            box-shadow: 0 3px 7px #555;
+            -webkit-box-shadow: 0 3px 7px #555;
+            
+        }
+        .doctor_text{
+            margin-top: 100px;
+            margin-left: 12%;
+        }
+        .doctor_profile{
+            border: 1px solid rgba(167, 161, 161,.6);
+            width: 96%;
+            margin: 0 auto;
+            padding: 20px;
+            box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            margin-top: 80px;
+            border-radius: 16px;
+            background:#fff;
+            box-shadow: 0px 1px 8px rgba(57, 61, 85, 0.2);
+            -webkit-box-shadow:0px 1px 8px rgba(57, 61, 85, 0.2);
+        }
+        .doctor_profile p{
+            margin-bottom: 5px;
+        }
+        /* .ex_name{
+            text-align: center;
+            display: block;
+            margin-top: 115px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        } */
+          .ex_name{
+            text-align: center;
+            display: block;
+           /*  margin-top: 115px;
+            margin-bottom: 5px; */
+            margin:0 auto;
+            
+            font-weight: 600;
+            width: 150px;
+            position: absolute;
+            top: 115px;
+            left: 50%;
+            margin-left: -75px;
+        }
+        .ex_evaluation{
+            text-align: center;
+            height: 60px;
+            line-height: 60px;
+        }
+        .line{
+            padding: 0 5px;
+            color: #ccc;
+        }
+        .ex_star{
+            text-align: center;
+            font-size: 32px;
+            color: #ccc;
+            cursor: pointer;
+            padding: 5px 0 0;
+        }
+        .ex_star i{
+            margin-left: 10px;
+            cursor:pointer;
+        }
+        .star_info{
+            color: #399fd0;
+            text-align: center;
+            height: 60px;
+            line-height: 60px;
+        }
+        .star_infoc{
+            color: #ccc;
+            text-align: center;
+            height: 60px;
+            line-height: 60px;
+        }
+        .ex_solgan{
+            width: 90%;
+            margin: 0 auto;
+        }
+        .ex_solgan span{
+            padding: 5px 8px;
+            text-align: center;
+            border: 1px solid #ccc;
+             margin:0 5px 15px;
+            display: inline-block;
+            border-radius: 5px;
+        }
+        .ex_solgan .choose{
+            color: #399fd0;
+            border: 1px solid #399fd0;
+        }
+         .ex_solgan .choosee{
+            color: #FFF;
+            background:#399fd0;
+            border-color:#399fd0;
+        }
+        textarea{
+            width: 96%;
+            outline: none;
+            resize: none;
+            margin: 10px 5px;
+            font-size: 20px;
+            border-color:#eee;
+            background-color: #eee;
+            border: 1px solid rgba(167, 161, 161,.6);
+            border-radius: 4px;
+            text-indent: 10px;
+        }
+        textarea::-webkit-input-placeholder { /* WebKit browsers */  
+            color:#cacccb;  
+            font-size: 16px;
+            padding-top: 5px;
+            text-indent: 10px;
+        }  
+        .ex_text{
+            width: 100%;
+        }
+        .contentWrap{
+        	width:100%;
+        	padding:12px 14px 12px 14px;
+       	    box-sizing: border-box;
+       	    overflow:hidden;
+        }
+        .ex_text textarea{
+        	width:100%;
+        	 box-sizing: border-box;
+        }
+        .active{
+            color: #ee7800;
+        }
+        .resultText{
+            background: #eee;
+            width: 95%;
+            margin: 0 auto;
+            padding: 5px;
+            margin-bottom: 70px;
+        }
+        .ex_enbutton{
+            background: #399fd0;
+            font-size: 20px;
+            padding: 5px;
+            text-align: center;
+            display:block;
+            border-radius: 20px;
+            width: 30%;
+            margin:50px auto 60px;
+        }
+        .clearfix:before,.clearfix:after{
+            content: "";
+            display: table;
+        }
+        .clearfix:after{
+            clear: both;
+        }
+        .footer{
+            width: 100%;
+            padding: 30px 30px 20px;
+            box-sizing: border-box;
+            background: rgba(212, 206, 206, 0.3);
+            box-shadow: 0px 1px 8px rgba(57, 61, 85, 0.2);
+            -webkit-box-shadow:0px 1px 8px rgba(57, 61, 85, 0.2);
+        }
+        .footer_logo{
+            float: left;
+            clear:both;
+            font-size:18px;
+           margin-top: 5px;
+        }
+      
+        .footer_logo i{
+        	display:inline-block;
+        }
+        .footer_logo span{
+            display: block;
+            color:#5c5c5c;
+            font-family: Cambria, Cochin, Georgia, Times, Times New Roman, serif;
+            margin-top: 5px;
+        }
+        .concat{
+        	color: #858484;
+        	margin-bottom:24px;
+        	font-weight: normal;
+        }
+        .footer_logo a{
+            display: inline-block;
+            font-size: 14px;
+            color: #232f6d;
+            font-family: Cambria, Cochin, Georgia, Times, Times New Roman, serif;
+        }
+        .footer_logo .mr{
+            margin:0 10px 5px 0;
+        }
+        .QRCode{
+        	width:104px;
+        	float:right;
+        	text-align:center;
+        }
+        .QRCode img{
+            width: 90px;
+            height: 90px;    
+        }
+        .xlwx{
+       	 	padding-top:4px;
+        	font-size:.075rem;
+        	color:#b2b0b1;
+        	text-align:center;
+        	float:left;
+        	margin-left:4px;
+        	    width: 98px;
+    height: auto;
+    font-size: 0.12rem;
+        }

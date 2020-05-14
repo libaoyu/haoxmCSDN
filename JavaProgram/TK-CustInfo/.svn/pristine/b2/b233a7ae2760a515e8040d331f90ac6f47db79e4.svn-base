@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="LinkagePullDataMapper">
+	<resultMap type="LinkagePullData" id="LinkagePullDataMap">
+		<id column="linkageId" property="linkageId"/>
+		<result column="linkageName" property="linkageName"/>
+		<result column="parentId" property="parentId"/>
+		<result column="level" property="level"/>
+		<result column="questionnaireId" property="questionnaireId"/>
+		<result column="createTime" property="createTime"/>
+		<result column="createUser" property="createUser"/>
+		<result column="updateTime" property="updateTime"/>
+		<result column="updateUser" property="updateUser"/>
+	</resultMap>
+	<cache type="org.mybatis.caches.ehcache.LoggingEhcache"/>  
+	<!-- 获取联动树形结构 -->
+	<select id="list" resultType="pd" parameterType="pd">
+		select linkageId id,parentId pId ,linkageName name,`level` from tb_linkage_pull_data  
+	</select>
+	<!-- 根据id获取联动数据 -->
+	<select id="findLinkagePullDataById" parameterType="pd" resultType="pd">
+		select linkageId id,parentId pId ,linkageName name,`level` from tb_linkage_pull_data  where linkageId=#{parentId}
+	</select>
+	<!-- 保存节点 -->
+	<insert id="saveLinkagePullData" parameterType="LinkagePullData">
+		insert INTO tb_linkage_pull_data (linkageId,linkageName , parentId , level, questionnaireId,createTime,createUser) values (
+			#{linkageId},
+			#{linkageName} , 
+			#{parentId}, 
+			#{level}, 
+			#{questionnaireId},
+			#{createTime},
+			#{createUser}
+		)
+	</insert>
+	<!-- 联动数据删除 -->
+	<delete id="deleteLinkagePullData" parameterType="pd">
+		delete from tb_linkage_pull_data  where linkageId=#{linkageId}
+	</delete>
+	<!-- 修改节点名称 -->
+	<update id="updateLinkagePullData" parameterType="pd">
+		update tb_linkage_pull_data set linkageName=#{linkageName},updateTime=#{updateTime},updateUser=#{updateUser} where linkageId=#{linkageId}
+	</update>
+	<!-- 批量删除子节点 -->
+	<delete id="deleteAllLinkagePullData">
+		delete from tb_linkage_pull_data  where parentId=#{linkageId}
+	</delete>
+	<!-- 查看详情 -->
+	<select id="lookDetailForLinkageId" parameterType="pd" resultType="pd">
+		<!-- select linkageId ,parentId  ,linkageName ,`level` from tb_linkage_pull_data  where linkageId=#{linkageId} -->
+		select 
+		linkageId,
+		linkageName , 
+		parentId , 
+		level, 
+		questionnaireId,
+		date_format(createTime,'%Y-%m-%d') as createTime,
+		createUser,
+		date_format(updateTime,'%Y-%m-%d') as updateTime,
+		updateUser,
+		(select linkageName from tb_linkage_pull_data where linkageId=tlpd.parentId) parentName 
+		from tb_linkage_pull_data tlpd where tlpd.linkageId=#{linkageId}
+	</select>
+	<!-- 展示所以一级联动菜单 -->
+	<select id="listOneLevel" resultType="pd" parameterType="pd">
+		select linkageId,linkageName  from tb_linkage_pull_data  where `level`=1
+	</select>
+	<!-- 根据父类id查询所有子类 -->
+	<select id="findLinkageByParentId" parameterType="pd" resultType="pd">
+		select linkageId id,parentId pId ,linkageName name,`level` from tb_linkage_pull_data  where parentId=#{linkageId} order by sort
+	</select>
+	
+	
+	<select id="findLinkageByParentIdForLinkageCount" parameterType="pd" resultType="pd">
+		select count(1) countLinkage from tb_linkage_pull_data  where parentId=#{linkageId}
+	</select>
+	
+	<select id="findLinkageParentAll" parameterType="pd" >
+		select * from tb_linkage_pull_data where `level`=1 and parentId is null
+	</select>
+	
+</mapper>

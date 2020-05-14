@@ -1,0 +1,604 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="yes" name="apple-mobile-web-app-capable">
+    <meta content="black" name="apple-mobile-web-app-status-bar-style">
+    <meta content="telephone=no" name="format-detection">
+    <link href="../static/weixin/css/bootstrap.css" rel="stylesheet">
+    <title></title>
+    <style>
+        body{
+            font-family: "微软雅黑", Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            color: #333;
+            background-color: #fff;
+        }
+        p{
+            margin: 0;
+        }
+        label{
+            display: inline;
+            font-weight: normal;
+        }
+        hr{
+            margin: 0;
+
+        }
+        a:focus{
+    		outline: none;
+		}
+		a:hover{
+    		text-decoration: none;
+		}
+        .container {
+            padding-right: 10px;
+            padding-left: 10px;
+            margin-right: auto;
+            margin-top: 0px;
+            margin-left: auto;
+        }
+        .f1{
+            float: left;
+        }
+        .f2{
+            float: right;
+            padding-right:5px;
+        }
+        .c1{
+            clear: both;
+        }
+        .ensure {
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+            color: #999;
+            background: #fff;
+            padding: 3% 13%;
+            margin-top:5%;
+            /* margin-right: 5%; */
+        }
+        .hr_div{
+            margin-top: 15px;
+        }
+        .div_center{
+        	width: 80%;
+    		margin: 0 auto;
+    		text-align: center;
+    		/*
+    		font-size: .6rem;
+    		color: #333;*/
+        }
+        .user_hr1{
+            height: 0;
+            width: 35%;
+            border: 1px dashed #73B42C;
+            margin-top: 7px;
+        }
+        .user_p1{
+            width: 28%;
+            text-align: center;
+            margin: 0;
+            color:#73B42C;
+            font-weight: bold;
+        }
+        .user_h2{
+            font-size: 1.6rem;
+            color: #333;
+
+            text-align: center;
+        }
+        .user_div01{
+            margin-top: 10px;
+        }
+        .user_span01{
+            width: 22%;
+            display: inline-block;
+            text-align: right;
+        }
+        .user_in01{
+            display: inline-block;
+            width: 72%;
+            padding: 6px 12px;
+            font-size: 14px;
+            line-height: 1.42857143;
+            color: #555;
+            background-color: #fff;
+            background-image: none;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+        }
+        .user_in02{
+           width:1.3rem;
+            height:1.3rem;
+        }
+        input[type="radio"]{
+       /*      margin: 1px 0 0 0; */
+        }
+        .user_span02{
+            display: inline-block;
+            width: 17.5%;
+        }
+        .in_div01{
+            width: 25%;
+        }
+        .user_in03{
+            width:1.3rem;
+            height:1.3rem;
+            margin: 0;
+        }
+        .table-bordered{
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 12px;
+            border:none;
+
+        }
+        .table-bordered > tbody > tr > td{
+             border:none;
+        }
+        .table-bordered >tbody> .user_td > td {
+            border: 1px solid #ccc;
+            text-align: center ;
+            padding: 8px 4px;
+            width: 18%;
+        }
+        .table-bordered >tbody> .user_tr > td {
+            /*width: 20%;*/
+            border: 1px solid #ccc;
+            text-align: center ;
+            padding: 8px 4px;
+            padding-left: 3%;
+        }
+        .ti_p1{
+            margin: 10px 0;
+        }
+        .hide_p{
+            color: #ff6405;
+        }
+        .ti_b1{
+            margin: 5px 0;
+            display: inline-block;
+            font-size: 15px;
+        }
+        .user_text01{
+            width: 98%;
+            overflow-y: scroll;
+        }
+        .sub_a{
+            background: #73B42C;
+            line-height:40px;
+            display: inline-block;
+            width: 40%;
+            color: #fff !important;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 0;
+            margin-left: 30%;
+            margin: 20px 0 20px 30%;
+            text-decoration: none;
+            text-align: center;
+        }
+        .user_div02{
+            border:1px solid #cccccc;
+            padding: 8px 5px;
+            margin: 10px 0;
+        }
+        .line-green{
+            border: 1px dashed #73B42C;
+            height: 1px;
+            width: 100%;
+            margin: 10px 0;
+        }
+        .sp_ma{
+        	margin-top: 3px;
+    		display: inline-block;
+        }
+        .container-fluid{
+        	padding-right: 0px;
+  			padding-left: 0px;
+        	margin-right: auto;
+  			margin-left: auto;
+        }
+    </style>
+</head>
+<body>
+<!--navbar -->
+<div class="div_center">
+<h2 class="user_h2">
+${pagePd.PAGENAME }
+<!-- 2017年泰康之家养老社区护理区<br/>客户满意度调研问卷 -->
+</h2>    
+</div>
+ <div class="c1" style="margin:3% 3%;line-height:1.5">
+   	尊敬的客户，您好！为持续改进和提升我们的服务品质，泰康之家总部质量和精益管理部每年定期向客户发放满意度调查问卷，以倾听客户的声音。恳请您抽出宝贵时间，填写这份问卷。我们会对您所填写的内容予以保密，感谢您的合作与支持！如果您希望做更详细深入的交流，可致电泰康之家客户服务热线：<b>40060-95522</b>
+ 	<div style="margin-top:10px;text-align: right">泰康之家总部<br>质量和精益管理部</div>
+ </div>
+<!--navbar end-->
+<!--section-->
+<div class="hr_div">
+    <hr class="f1 user_hr1"/>
+    <p class="f1 user_p1">被访者信息</p>
+    <hr class="f1 user_hr1"/>
+    <div class="c1"></div>
+</div>
+<form action="userAnswer" method="post" name="Form" id="questionForm">
+<input type="hidden" value="${pageId }" name="pageId" />
+<div class="container-fluid">
+	<a name="userdata"></a>
+    <div class="user_div01">
+        <span class="user_span01"> 姓名：</span>
+        <input class="user_in01" name="USERNAME" id="USERNAME" placeholder="可只填姓氏" type="text" />
+    </div>
+    <div class="user_div01">
+        <span class="user_span01"> 电话号码：</span>
+        <input class="user_in01" name="PHONE" type="text" id="PHONE"/>
+    </div>
+    <div class="user_div01">
+        <span class="user_span01"> 所属社区：</span>
+        <select name="BUILDING" id="BUILDING" placeholder="您的家人居住在哪个养老社区" class="user_in01">
+        	<option value="1" style="color: #b6b6b6" disabled selected>您的家人居住在哪个养老社区</option>
+        	<option value="燕园社区">燕园社区</option>
+        	<option value="申园社区">申园社区</option>
+        	<option value="粤园社区">粤园社区</option>
+        </select>
+    </div>
+    <div class="user_div01">
+        <span class="user_span01"> 居住时间：</span>
+        <select name="CHECKIN" id="CHECK_IN" placeholder="您家人在社区居住的时间" class="user_in01">
+        	<option value="1" style="color: #b6b6b6" disabled selected>您家人在社区居住的时间</option>
+        	<option value="3个月以下">3个月以下</option>
+        	<option value="3-6个月">3-6个月</option>
+        	<option value="6-12个月">6-12个月</option>
+        	<option value="一年以上">一年以上</option>
+        </select>
+    </div>
+    <!-- <div class="user_div01">
+        <span class="user_span01 f1"> 所属社区：</span>
+        <input class="user_in02 f1" id="BUILDING" name="BUILDING" type="hidden"/>
+        <label>
+            <input class="user_in02 f1" onclick="setUser('BUILDING',this)" name="build" type="radio" value="燕园养老社区"/>
+            <span class="user_span02 f1">燕园社区</span>
+        </label>
+        <label>
+            <input class="user_in02 f1" onclick="setUser('BUILDING',this)" name="build" type="radio" value="申园养老社区"/>
+            <span class="user_span02 f1">申园社区</span>
+        </label>
+        <label>
+            <input class="user_in02 f1" onclick="setUser('BUILDING',this)" name="build" type="radio" value="粤园养老社区"/>
+            <span class="user_span02 f1">粤园社区</span>
+        </label>
+        <div class="c1"></div>
+    </div>
+    <div class="user_div01">
+        <span class="user_span01 f1"> 居住时间：</span>
+        <input class="user_in02 f1" id="CHECK_IN" name="CHECKIN" type="hidden"/>
+        <table style="width:60%">
+        	<tr>
+        		<td><label>
+            		<input class="user_in02 f1" onclick="setUser('CHECK_IN',this)" name="zulin" type="radio" value="3月以内"/>
+            		<span>3月以内</span>
+        		</label></td>
+        		<td><label>
+            		<input class="user_in02 f1" onclick="setUser('CHECK_IN',this)" name="zulin" type="radio" value="3-6个月"/>
+            		<span>3-6个月</span>
+       			</label></td>
+        	</tr>
+        	<tr>
+        		<td><label>
+            		<input class="user_in02 f1" onclick="setUser('CHECK_IN',this)" name="zulin" type="radio" value="6-12个月"/>
+            		<span>6-12个月</span>
+        		</label></td>
+        		<td><label>
+            		<input class="user_in02 f1" onclick="setUser('CHECK_IN',this)" name="zulin" type="radio" value="一年以上"/>
+            		<span>一年以上</span>
+        		</label></td>
+        	</tr>
+        </table>
+        <br/>
+        <div class="c1"></div>
+    </div> -->
+</div>
+<div class="hr_div">
+    <hr class="f1 user_hr1"/>
+    <p class="f1 user_p1">填写提示</p>
+    <hr class="f1 user_hr1"/>
+    <div class="c1"></div>
+</div>
+<div class="container">
+    <p>所有题目均为必答题，选项含义如下:</p>
+    <table class="table-bordered table-responsive">
+        <!-- <tr class="user_td text-center">
+            <td>非常满意</td>
+            <td>比较满意</td>
+            <td>一般</td>
+            <td>不太满意</td>
+            <td>非常不满意</td>
+        </tr> -->
+        <tr class="user_td text-center">
+            <td>十分满意</td>
+            <td>满意</td>
+            <td>一般</td>
+            <td>不满意</td>
+            <td>十分不满意</td>
+        </tr>
+        <tr class="user_td text-center">
+            <td>
+                <label class="">
+                    <span>5分</span>
+                </label>
+            </td>
+            <td>
+                <label class="">
+                    <span>4分</span>
+                </label>
+            </td>
+            <td>
+                <label class="">
+                    <span>3分</span>
+                </label>
+            </td>
+            <td>
+                <label class="">
+                    <span>2分</span>
+                </label>
+            </td>
+            <td>
+                <label class="">
+                    <span>1分</span>
+                </label>
+            </td>
+        </tr>
+    </table>
+    <p style="color:#ff6405"> *  不清楚的题目可以选择“不适用”</p>
+</div>
+<!--section end-->
+<!--main-->
+<div class="main">
+    <div class="hr_div">
+        <hr class="f1 user_hr1"/>
+        <p class="f1 user_p1">问卷正文</p>
+        <hr class="f1 user_hr1"/>
+        <div class="c1"></div>
+    </div>
+    <c:forEach items="${questionList}" varStatus="vs" var="question">
+    		<c:choose>
+				<c:when test="${not empty question.ISPARENT }">
+					<c:if test="${vs.index+1 != 1}">
+						<div class="line-green"></div>
+					</c:if>
+					<div class="container">
+					<b class="ti_b1">${question.QUESTIONFLAG }.${question.QUESTIONTITLE }</b>
+				</c:when>
+				<c:otherwise>
+						<div class="container">
+							<a name="${question.QUESTION_ID}" ></a>
+							<p class="ti_p1">${question.QUESTIONFLAG }${question.QUESTIONCODE }.${question.QUESTIONTITLE }</p>
+							<c:if test="${question.QUESTIONTYPE == 0 }">
+								<table class="table-bordered">
+								<tr class="user_tr">
+									<td><label class="f1"> <input class="user_in03 f1"
+											name="${question.QUESTION_ID}" type="radio" value="5" onclick="infoIdAndNum('${question.QUESTION_ID}',this)" /> <span class="sp_ma">5分</span>
+									</label></td>
+									<td><label class="f1"> <input class="user_in03 f1"
+											name="${question.QUESTION_ID}" type="radio" value="4" onclick="infoIdAndNum('${question.QUESTION_ID}',this)"/> <span class="sp_ma">4分</span>
+									</label></td>
+									<td><label class="f1"> <input class="user_in03 f1"
+											name="${question.QUESTION_ID}" type="radio" value="3" onclick="infoIdAndNum('${question.QUESTION_ID}',this)"/> <span class="sp_ma">3分</span>
+									</label></td>
+									<td><label class="f1"> <input class="user_in03 f1"
+											name="${question.QUESTION_ID}" type="radio" value="2" onclick="infoIdAndNum('${question.QUESTION_ID}',this)"/> <span class="sp_ma">2分</span>
+									</label></td>
+									<td><label class="f1"> <input class="user_in03 f1"
+											name="${question.QUESTION_ID}" type="radio" value="1" onclick="infoIdAndNum('${question.QUESTION_ID}',this)"/> <span class="sp_ma">1分</span>
+									</label></td>
+									<td><label class="f1"> <input class="user_in03 f1"
+											name="${question.QUESTION_ID}" type="radio" value="0" onclick="infoIdAndNum('${question.QUESTION_ID}',this)"/> <span class="sp_ma">不适用</span>
+									</label></td>
+									<input name="${question.QUESTION_ID}_0" id="${question.QUESTION_ID}_0" type="hidden"/>
+								</tr>
+							</table>
+							</c:if>
+							<c:if test="${question.QUESTIONTYPE == 3 }">
+								<div data-toggle="modal" data-target="#id_number" onclick="choseNum('${question.QUESTION_ID}')"
+									class="user_div02">
+									<p class="f1" id="choiseNum">请选择</p>
+									<p class="f2">
+										<span style="font-weight: normal"class="glyphicon glyphicon-chevron-right"></span>
+									</p>
+									<div class="c1"></div>
+								</div>
+								<input name="${question.QUESTION_ID}_3" id="${question.QUESTION_ID}_3" type="hidden"/>
+							</c:if>
+							<c:if test="${question.QUESTIONTYPE == 2 }">
+								<textarea name="${question.QUESTION_ID}_2" id="${question.QUESTION_ID}_2" rows="6" cols="30" class="user_text01"></textarea>
+							</c:if>
+							<a class="hide_p" id="${question.QUESTION_ID}_red" style="display:none">这道题必须回答哦。</a>
+					</c:otherwise>
+			</c:choose>
+    	</div>
+    </c:forEach>
+</div>
+</form>
+<a href="javascript:void(0)" onclick="saveData()" class="sub_a">提交答卷</a><a id="maodian" class="hide_p" href="" style="display:none"><span id="click">转到锚点</span></a>
+<!--main end-->
+<!--footer-->
+<!--footer end-->
+<!--填写模态框-->
+<div id="id_number" class="modal fade" style="display: none;"> <!--最底层的半透明遮罩-->
+    <div style="width: 80%;margin:50% auto" class="modal-dialog"> <!--用于设定宽高、定位-->
+        <div class="modal-content"> <!--背景、边框、倒角-->
+            <div style="border-bottom: 1px solid transparent;margin-bottom: -5%" class="modal-header">
+                <!--<button data-dismiss="modal" class="close" type="button">&times;</button>-->
+                <h4 style="color: #333;" class="modal-title text-center">请选择</h4>
+            </div>
+            <div class="modal-body">
+                <div style="width: 50%;border-right: 1px dashed #ccc;padding-left: 10%" class="f1">
+                    <label style="display: block;padding: 5px;">
+                        <input class="user_in03" name="tuijian" type="radio" value="10"/>
+                        <span>10</span>
+                    </label>
+                    <label style="display: block;padding: 5px;">
+                        <input class="user_in03" name="tuijian" type="radio" value="8"/>
+                        <span>8</span>
+                    </label>
+                    <label style="display: block;padding: 5px;">
+                        <input class="user_in03" name="tuijian" type="radio" value="6"/>
+                        <span>6</span>
+                    </label>
+                    <label style="display: block;padding: 5px;">
+                        <input class="user_in03" name="tuijian" type="radio" value="4"/>
+                        <span>4</span>
+                    </label>
+                    <label style="display: block;padding: 5px;">
+                        <input class="user_in03" name="tuijian" type="radio" value="2"/>
+                        <span>2</span>
+                    </label>
+                    <label style="display: block;padding: 5px;">
+                        <input class="user_in03" name="tuijian" type="radio" value="0"/>
+                        <span>0</span>
+                    </label>
+                </div>
+                <div style="width: 50%;padding-left:10%" class="f1">
+                    <label style="display: block;padding: 5px;">
+                        <input class="user_in03" name="tuijian" type="radio" value="9"/>
+                        <span>9</span>
+                    </label>
+                    <label style="display: block;padding: 5px;">
+                        <input class="user_in03" name="tuijian" type="radio" value="7"/>
+                        <span>7</span>
+                    </label>
+                    <label style="display: block;padding: 5px;">
+                        <input class="user_in03" name="tuijian" type="radio" value="5"/>
+                        <span>5</span>
+                    </label>
+                    <label style="display: block;padding: 5px;">
+                        <input class="user_in03" name="tuijian" type="radio" value="3"/>
+                        <span>3</span>
+                    </label>
+                    <label style="display: block;padding: 5px;">
+                        <input class="user_in03" name="tuijian" type="radio" value="1"/>
+                        <span>1</span>
+                    </label>
+                </div>
+                <div class="c1"></div>
+            </div>
+            <div style="border-top: 1px solid transparent;text-align: center;margin-top: -10%" class="modal-footer">
+                <button data-dismiss="modal" class="ensure" type="button">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="../static/js/jquery-1.9.1.min.js"></script>
+<script src="../static/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+function AnswerSubmit(){
+	$("#questionForm").submit();
+}
+//单选选择事件
+function infoIdAndNum(questionId,obj){
+	var qValue = obj.value;
+	$("#"+questionId+"_0").val(qValue)
+}
+//评分题选择事件
+function choseNum(questionId){
+	 var obj = document.getElementsByName("tuijian");
+	 for(var i = 0 ;i < obj.length ; i++){
+		 obj[i].setAttribute("onclick","toChoseNum('"+questionId+"',this)");
+	 }
+}
+//评分题评值
+function toChoseNum(question,obj){
+	var qValue = obj.value;
+	$("#choiseNum").html(qValue+"分");
+	$("#"+question+"_3").val(qValue);
+}
+function setUser(param,obj){				//為選擇框賦值
+	$("#"+param).val(obj.value);
+}
+var testPhone = /^0?1[3|4|5|8][0-9]\d{8}$/;
+function testUser(){
+	var name = $("#USERNAME").val();
+	//var company = $("#COMPANY").val();
+	var building = $("#BUILDING").val();
+	//var tenancytime = $("#TENANCYTIME").val();
+	var check_id = $("#CHECK_IN").val();
+	if(name == null || name == "" || building == null || building == ""){
+		return false;
+	}
+	/* if(tenancytime != null && tenancytime != ""){
+		return true;
+	} */
+	if(check_id != null && check_id != ""){
+		return true;
+	}
+	return false;
+}
+//提交问卷
+function saveData(){
+	var bool = false;
+	if(testUser()){
+		var phone = $("#PHONE").val();
+		if(!testPhone.test(phone)){
+			$("#maodian").attr("href","#userdata");			//跳转到指定id的锚点
+			$("#click").click();
+			alert("手机号格式有误！");
+		}else{
+			bool = true;
+		}
+	}else{
+		$("#maodian").attr("href","#userdata");			//跳转到指定id的锚点
+		$("#click").click();
+		alert("请完善个人信息！");
+	}
+	var dataList = $('input[type="hidden"]');
+	if(bool){
+		//alert('dataListLength1:'+dataList.length);
+		for(var i = 0 ;i < dataList.length; i++){
+			if( null == dataList[i].value || "" == dataList[i].value){
+				var inputId = dataList[i].id;
+				var id = inputId.substring(0,inputId.length-2 );
+				var showRed = $("#"+id+"_red");
+				showRed.css('display','block');
+				$("#maodian").attr("href","#"+id);			//跳转到指定id的锚点
+				$("#click").click();
+				bool = false;
+				break; 
+			}  
+		}
+	}
+	if(bool){
+		//不作为必答题[主观开放题]
+		/**
+		var textList = document.getElementsByTagName("textarea");
+		alert('textList2:'+textList.length);
+		for(var i = 0 ;i < textList.length; i++){
+			var textareaId = textList[i].id;
+			var id = textareaId.substring(0,textareaId.length-2);
+			if(textareaId.substring(textareaId.length - 1,textareaId.length) == '2' && textList[i].value == ""){
+				bool = false;
+				var showRed = $("#"+id+"_red");
+				showRed.css('display','block');
+				$("#maodian").attr("href","#"+id);			//跳转到指定id的锚点
+				$("#click").click();
+			}
+		}**/
+	}
+	if(bool){
+			$("#questionForm").submit();
+		}
+	}
+</script>
+</html>

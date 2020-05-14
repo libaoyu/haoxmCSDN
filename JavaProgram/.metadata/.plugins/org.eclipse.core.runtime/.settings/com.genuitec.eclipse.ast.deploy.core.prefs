@@ -1,0 +1,13 @@
+eclipse.preferences.version=1
+tomcat7Server.TK-CustInfo.IEARProjectName=
+tomcat7Server.TK-CustInfo.altContextRoot=
+tomcat7Server.TK-CustInfo.contextRoot=/TK-CustInfo
+tomcat7Server.TK-CustInfo.deployIsOverProject=false
+tomcat7Server.TK-CustInfo.deploymentPath=D\:\\soft\\tomcat7\\apache-tomcat-7.0.65\\webapps\\TK-CustInfo
+tomcat7Server.TK-CustInfo.isDeployed=true
+tomcat7Server.TK-CustInfo.isExploded=true
+tomcat7Server.TK-CustInfo.isUptoDate=true
+tomcat7Server.TK-CustInfo.noFileCopy=false
+tomcat7Server.TK-CustInfo.shouldBackup=false
+tomcat7Server.TK-CustInfo.shouldOverwrite=false
+tomcat7Server.TK-CustInfo.type=WebDeployment

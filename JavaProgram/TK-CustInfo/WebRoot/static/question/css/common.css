@@ -1,0 +1,70 @@
+html,body{
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	position: relative;
+}
+ul,dl,ol,dd,dt,table,legend,p,h1,h2,h3,h4,h5,h6{
+	margin: 0;
+	padding: 0;
+}
+img{
+	display: inline-block;
+	border: 0;
+}
+ul,li{
+	list-style: none;
+}
+a{
+	text-decoration: none;
+	display: inline-block;
+}
+a:link,a:visited,a:hover,a:active{
+	text-decoration: none;
+}
+
+
+/*以下为字体适配*/
+@media screen and (min-width: 960px) {
+   	html{
+   		font-size:108px;	
+   	}
+}
+
+/*以下为小PAD，过渡*/
+@media screen and (max-width: 790px){	
+	html{
+   		font-size:105px;	
+   	}
+}	
+/*以下为迷你PAD，手机横屏*/
+@media screen and (max-width: 670px){
+	html{
+		font-size:102px
+	}
+}	
+/*以下为plus,L*/
+@media screen and (max-width: 440px){	
+	html{
+		font-size:102px
+	}
+}
+/*以下为手机标准尺寸-较大*/
+@media screen and (max-width: 400px){	
+	html{
+		font-size:100px
+	}
+}
+/*以下为手机标准尺寸,M*/
+@media screen and (max-width: 380px){  
+	html{
+		font-size:100px
+	}
+}	
+/*以下为小尺寸手机,S*/
+@media screen and (max-width: 330px){  
+	html{
+		font-size:90px
+	}	
+}

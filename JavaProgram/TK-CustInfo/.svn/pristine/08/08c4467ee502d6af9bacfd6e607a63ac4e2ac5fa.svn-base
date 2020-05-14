@@ -1,0 +1,329 @@
+package com.fh.service.questionnaire;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+
+import com.fh.dao.DaoSupport;
+import com.fh.util.ConversionUtil;
+import com.fh.util.DateUtil;
+import com.fh.util.PageData;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
+@Service("questionnaireResultsService")
+public class QuestionnaireResultsService {
+
+	@Resource(name = "daoSupport")
+	private DaoSupport dao;
+
+	public List<PageData> findCountResultT2(PageData pd, JSONArray json) throws Exception {
+		List<PageData> list = new ArrayList<PageData>();
+		for (int i = 0; i < json.size(); i++) {
+			JSONObject obj = json.getJSONObject(i);
+			pd.put("answerResult", obj.get("value"));
+			Long sum = (Long) dao.findForObject("QuestionnaireResultsMapper.finCountResultT2", pd);
+			PageData pd2 = new PageData();
+			pd2.put("opt", obj.get("key"));
+			pd2.put("sum", sum);
+			list.add(pd2);
+		}
+		return list;
+	}
+
+	public List<PageData> findCountResult(PageData pd) throws Exception {
+		return (List<PageData>) dao.findForList("QuestionnaireResultsMapper.findCountResult", pd);
+	}
+
+	public Long findCountT2Sum(PageData pd) throws Exception {
+		return (Long) dao.findForObject("QuestionnaireResultsMapper.findCountT2Sum", pd);
+	}
+
+	/**
+	 * 满意度计算
+	 * 
+	 * @param pd
+	 * @return
+	 * @throws Exception
+	 */
+	public PageData findCountResultStatL1(PageData pd) throws Exception {
+		PageData pdf = new PageData();
+		List<PageData> list = new ArrayList<PageData>();
+		if ("L1".equals(pd.get("tx"))) {
+			list = (List<PageData>) dao.findForList("QuestionnaireResultsMapper.findCountResultStatL1", pd);
+		}
+		if ("L2".equals(pd.get("tx"))) {
+			list = (List<PageData>) dao.findForList("QuestionnaireResultsMapper.findCountResultStatL2", pd);
+		}
+		if ("qb".equals(pd.get("tx"))) {
+			list = (List<PageData>) dao.findForList("QuestionnaireResultsMapper.findCountResultStat", pd);
+		}
+		if (list.size() == 0) {
+			return pdf;
+		}
+		Long yxyb = 0L;
+		Long wxyb = 0L;
+		Long fz = 0L;
+		Long fm = 0L;
+		for (int i = 0; i < list.size(); i++) {
+			PageData ybPd = list.get(i);
+			Long sum = (Long) ybPd.get("sum");
+			if (!"".equals(ybPd.getString("opt"))) {
+				Long opt = Long.valueOf(ybPd.getString("opt"));
+				if (!"0".equals(ybPd.get("opt")) && !"".equals(opt)) {
+					yxyb = yxyb + sum;
+					fz = fz + sum * opt;
+				} else {
+					wxyb = wxyb + sum;
+				}
+			} else {
+				wxyb = wxyb + sum;
+			}
+		}
+		fm = yxyb * 5;
+		BigDecimal bfb = new BigDecimal("0");
+		if (fm != 0) {
+			BigDecimal bigFz = new BigDecimal(fz);
+			BigDecimal bigFm = new BigDecimal(fm);
+			bfb = bigFz.divide(bigFm, 4, RoundingMode.HALF_DOWN).multiply(new BigDecimal(100)).stripTrailingZeros();
+			if (bfb.compareTo(BigDecimal.ZERO) == 0) {
+				bfb = new BigDecimal("0");
+			}
+		}
+		pdf.put("bfb", bfb.toPlainString());
+		pdf.put("yxyb", yxyb.toString());
+		pdf.put("wxyb", wxyb.toString());
+		pdf.put("fz", fz.toString());
+		pdf.put("fm", fm.toString());
+		return pdf;
+
+	}
+
+	public PageData findCountResultStatT4(PageData pd) throws Exception {
+		PageData pdf = new PageData();
+		List<PageData> list = (List<PageData>) dao.findForList("QuestionnaireResultsMapper.findCountResultStatL2", pd);
+		Long fz = 0L;
+		Long fm = 0L;
+		Long l = 0L;
+		Long d = 0L;
+		for (int i = 0; i < list.size(); i++) {
+			PageData ybPd = list.get(i);
+			Long sum = (Long) ybPd.get("sum");
+			String opt = ybPd.getString("opt");
+			if (!"".equals(opt)) {
+				opt = opt.substring(0, opt.indexOf("分"));
+				Long optl = Long.valueOf(opt);
+				// 9-10
+				if (optl <= 10 && optl >= 9) {
+					l = l + sum;
+				}
+				// 0-6
+				if (optl >= 0 && optl <= 6) {
+					d = d + sum;
+				}
+				fm = fm + sum;
+			}
+
+		}
+		fz = l - d;
+		BigDecimal bfb = new BigDecimal("0");
+		if (fm != 0) {
+			BigDecimal bigFz = new BigDecimal(fz);
+			BigDecimal bigFm = new BigDecimal(fm);
+			bfb = bigFz.divide(bigFm, 4, RoundingMode.HALF_DOWN).multiply(new BigDecimal(100)).stripTrailingZeros();
+			if (bfb.compareTo(BigDecimal.ZERO) == 0) {
+				bfb = new BigDecimal("0");
+			}
+		}
+		pdf.put("bfb", bfb.toPlainString());
+		pdf.put("fz", fz.toString());
+		pdf.put("fm", fm.toString());
+		return pdf;
+	}
+
+	/**
+	 * 星级评定饼图
+	 * 
+	 * @throws Exception
+	 * 
+	 */
+	public PageData findStarBt(PageData pd) throws Exception {
+		List<PageData> btList = (List<PageData>) dao.findForList("QuestionnaireResultsMapper.findCountResultStatL2",pd);
+		// 组装前台展示数据
+		String[] btData = null; //
+		List<PageData> bt = new ArrayList<PageData>();
+		Map<String, String> map = ConversionUtil.getDefaultOption();// T0选项
+		// 初始化饼图
+		if(btList!=null){
+			btData = new String[btList.size()];
+		}
+		int i = 0;
+		Long fz = 0L;
+		Long fm = 0L;
+			
+		for (PageData pd2 : btList) {
+			PageData btpd2 = new PageData();
+			Long sum = (Long) pd2.get("sum");//人数
+			Long source = Long.valueOf(pd2.getString("opt"));//分数
+			fz += sum * source;
+			fm += sum;
+			if(source == 0){
+				btData[i] = "不适用";
+				btpd2.put("name","不适用");
+			}else{
+				btData[i] = source+"分";
+				btpd2.put("name", source+"分");
+			}
+			btpd2.put("value", pd2.get("sum"));
+			
+			bt.add(btpd2);
+			i++;
+		}
+		BigDecimal bfb = new BigDecimal("0");
+		if(fm != 0){
+			BigDecimal bigFz = new BigDecimal(fz);
+			BigDecimal bigFm = new BigDecimal(fm);
+			bfb = bigFz.divide(bigFm,1,RoundingMode.HALF_DOWN).stripTrailingZeros();
+			if(bfb.compareTo(BigDecimal.ZERO)==0){
+				bfb = new BigDecimal("0");
+			}
+		}
+		pd.put("bfb", bfb);
+		pd.put("bt", bt);
+		pd.put("btData", btData);
+
+		return pd;
+	}
+
+	/**
+	 * 星级评定折线图数据查询时间段
+	 * 
+	 * @param start
+	 * @param end
+	 * @throws Exception
+	 */
+	public Map<String, String[]> findStarZX(int isFinance, int kd, String questionId, Date start, Date end) throws Exception {
+		List<String> listkey = new ArrayList<String>();
+		String sql = getFinanceSql(isFinance, kd, start, end, listkey, questionId);
+		Collections.reverse(listkey);
+		PageData pdResult = (PageData) dao.findForObject("QuestionnaireResultsMapper.commonSql", sql);
+		String[] xData = new String[listkey.size()];
+		String[] yData = new String[listkey.size()];
+		for (int i = listkey.size()-1; i >=0 ; i--) {
+			xData[i] = listkey.get(i);
+			if (pdResult == null) {
+				yData[i] = "0";
+			} else {
+				Object obj = pdResult.get(listkey.get(i));
+				if (obj != null) {
+					yData[i] = pdResult.get(listkey.get(i)).toString();
+				} else {
+					yData[i] = "0";
+				}
+			}
+		}
+		Map<String, String[]> map = new HashMap<String, String[]>();
+		map.put("x", xData);
+		map.put("y", yData);
+		return map;
+	}
+
+
+	/**
+	 * 
+	 * @param isFinance
+	 *            是否财务月
+	 * @param kd
+	 *            刻度
+	 * @param start
+	 *            开始时间
+	 * @param end
+	 *            结束时间
+	 */
+	public static String getFinanceSql(int isFinance, int kd, Date start, Date end, List<String> listkey ,String questionId) {
+		// 时间段差值
+		StringBuffer sb = new StringBuffer("select ");
+		SimpleDateFormat sdfd = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat sdfdy = new SimpleDateFormat("yy-MM-dd");
+		SimpleDateFormat sf = new SimpleDateFormat("yy-MM");
+		SimpleDateFormat sfdd = new SimpleDateFormat("dd");
+		
+		int day = DateUtil.differentDaysByMillisecond(start, end)+1;
+		for (int i = 0; i < kd; i++) {
+			Date s1 = new Date(); // 开始时间x月25
+			Date s2 = new Date(); // 结束时间x月26
+			Calendar calendarL = Calendar.getInstance();
+			calendarL.setTime(end);
+			if (isFinance == 1) {// 非财务月
+				calendarL.setTime(end);
+				calendarL.add(Calendar.DAY_OF_MONTH, -day);
+//				calendarL.set(Calendar.HOUR_OF_DAY, 0);
+//				calendarL.set(Calendar.MINUTE, 0);
+//				calendarL.set(Calendar.SECOND, 0);
+				s1 = calendarL.getTime();
+				s2 = end;
+				end = s1;
+				calendarL.add(Calendar.DAY_OF_MONTH, 1);
+				s1 = calendarL.getTime();
+			} else {
+				if (calendarL.get(Calendar.MONDAY) == 0) { //一月份
+					calendarL.set(Calendar.DAY_OF_MONTH, 1);
+				} else {
+					calendarL.add(Calendar.MONDAY, -1);
+					calendarL.set(Calendar.DAY_OF_MONTH, 25);
+				}
+//				calendarL.set(Calendar.HOUR_OF_DAY, 0);
+//				calendarL.set(Calendar.MINUTE, 0);
+//				calendarL.set(Calendar.SECOND, 0);
+				s1 = calendarL.getTime();
+				calendarL.setTime(end);
+				if (calendarL.get(Calendar.MONDAY) == 11) { //12月份
+					calendarL.set(Calendar.DAY_OF_MONTH, 31);
+//					calendarL.set(Calendar.HOUR_OF_DAY, 23);
+//					calendarL.set(Calendar.MINUTE, 59);
+//					calendarL.set(Calendar.SECOND, 59);
+					s2 = calendarL.getTime();
+				} else {
+					calendarL.set(Calendar.DAY_OF_MONTH, 25);
+//					calendarL.set(Calendar.HOUR_OF_DAY, 23);
+//					calendarL.set(Calendar.MINUTE, 59);
+//					calendarL.set(Calendar.SECOND, 59);
+					s2 = calendarL.getTime();
+				}
+				calendarL.add(Calendar.MONDAY, -1);
+				end = calendarL.getTime();
+			}
+			// 组装各时间段sql ---(),
+			StringBuffer sb1 = new StringBuffer();
+			sb1.append(
+					"(select cast(avg(answerResult) as decimal(2,1)) as average from tb_questionnaire_results where questionId=");
+			sb1.append("'" + questionId + "' ");
+			sb1.append("and `status` = 1 ");
+			sb1.append("and Date(createTime) >= '" + sdfd.format(s1) + "'  and Date(createTime) <= '" + sdfd.format(s2) + "'");
+			if(isFinance == 1){
+				sb1.append(") as '" + sdfdy.format(s1) + "至" + sfdd.format(s2) + "',");
+				listkey.add(sdfdy.format(s1) + "至" + sfdd.format(s2));
+			}else{
+				sb1.append(") as '" + sf.format(s2) + "',");
+				listkey.add(sf.format(s2));
+			}
+			sb.append(sb1.toString());
+			//System.out.println(sdfd.format(s1) +"----------"+sdfd.format(s2));
+		}
+		sb.deleteCharAt(sb.length() - 1);
+		return sb.toString();
+	}
+
+}

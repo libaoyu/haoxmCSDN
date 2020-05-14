@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="QuestionnaireMapper">
+	
+	<resultMap type="Questionnaire" id="QuestionnaireResultMap">
+		<id column="questionnaireId" property="questionnaireId"/>
+		<result column="title" property="title"/>
+		<result column="preface" property="preface"/>
+		<result column="logoImgId" property="logoImgId"/>
+		<result column="backgroundImgId" property="backgroundImgId"/>
+		<result column="releaseStatus" property="releaseStatus"/>
+		<result column="questionUrl" property="questionUrl"/>
+		<result column="qrCodePath" property="qrCodePath"/>
+		<result column="respondents" property="respondents"/>
+		<result column="description" property="description"/>
+		<result column="validState" property="validState"/>
+		<result column="createUser" property="createUser"/>
+		<result column="createTime" property="createTime"/>
+		<result column="modifyUser" property="modifyUser"/>
+		<result column="modifyTime" property="modifyTime"/>
+		
+		<result column="startTime" property="startTime"/>
+		<result column="endTime" property="endTime"/>
+		
+		<result column="backMusic" property="backMusic"/>
+		<result column="backMusicSwith" property="backMusicSwith"/>
+		<result column="finishBackground" property="finishBackground"/>
+		<result column="create_user" property="create_user"/>
+		<result column="role_id" property="role_id"/>
+		
+		<result column="respondentsParentId" property="respondentsParentId"/>
+		<result column="questionnaireType" property="questionnaireType"/>
+		<!-- 星级问卷底部logo  bootomType -->
+		<result column="bootomType" property="bootomType"/>
+	</resultMap>
+	
+	
+	<!-- 新增-->
+	<insert id="save" parameterType="Questionnaire">
+		INSERT INTO tb_questionnaire(
+			questionnaireId,
+			title,
+			preface,
+			logoImgId,
+			backgroundImgId,
+			releaseStatus,
+			questionUrl,
+			qrCodePath,
+			respondents,
+			description,
+			validState,
+			createUser,
+			createTime,
+			endTime,
+			startTime,
+			backMusic,
+			backMusicSwith,
+			finishBackground,
+			create_user,
+			role_id,
+			respondentsParentId,
+			questionnaireType,
+			bootomType
+		)VALUES(
+			#{questionnaireId},
+			#{title},
+			#{preface},
+			#{logoImgId},
+			#{backgroundImgId},
+			#{releaseStatus},
+			#{questionUrl},
+			#{qrCodePath},
+			#{respondents},
+			#{description},
+			#{validState},
+			#{createUser},
+			#{createTime},
+			#{endTime},
+			#{startTime},
+			#{backMusic},
+			#{backMusicSwith},
+			#{finishBackground},
+			#{create_user},
+			#{role_id},
+			#{respondentsParentId},
+			#{questionnaireType},
+			#{bootomType}
+		);
+	</insert>
+	
+	
+	<!-- 删除 单条数据删除-->
+	<delete id="delete" parameterType="pd">
+		delete from tb_questionnaire
+		where 
+			questionnaireId = #{questionnaireId}
+	</delete>
+	
+	<delete id="updateQuestionnaire" parameterType="pd">
+		update  tb_questionnaire set status=0
+		where 
+			questionnaireId = #{questionnaireId}
+	</delete>
+	<!-- 修改 -->
+	<update id="edit" parameterType="Questionnaire">
+		update  tb_questionnaire
+			set 
+				title = #{title},
+				preface = #{preface},
+				logoImgId =	#{logoImgId},
+				backgroundImgId = #{backgroundImgId},
+				releaseStatus = #{releaseStatus},
+				questionUrl = #{questionUrl},
+				qrCodePath = #{qrCodePath},
+				respondents = #{respondents},
+				description = #{description},
+				validState = #{validState},
+				modifyUser = #{modifyUser},
+				modifyTime = #{modifyTime},
+				endTime=#{endTime},
+				startTime=#{startTime},
+				backMusic=#{backMusic},
+				backMusicSwith=#{backMusicSwith},
+				finishBackground=#{finishBackground},
+				respondentsParentId=#{respondentsParentId},
+				bootomType=#{bootomType}
+			where 
+				questionnaireId = #{questionnaireId}
+	</update>
+	
+	
+	<!-- 通过ID获取数据 -->
+	<select id="findById" parameterType="pd" resultType="pd">
+		select 
+			questionnaireId,
+			title,
+			preface,
+			logoImgId,
+			backgroundImgId,
+			releaseStatus,
+			questionUrl,
+			qrCodePath,
+			respondents,
+			description,
+			validState,
+			createUser,
+			createTime,
+			modifyUser,
+			modifyTime,
+			endTime,
+			startTime,
+			backMusic,
+			backMusicSwith,
+			finishBackground	,
+			respondentsParentId,
+			questionnaireType,
+			bootomType
+		from 
+			tb_questionnaire
+		where 
+			questionnaireId = #{questionnaireId}
+			and status=1
+	</select>
+	
+	
+	<!-- 列表(全部):选择有效的所属问卷,编辑问题 -->
+	<select id="datalistPage" parameterType="page" resultType="pd">
+		select
+			a.questionnaireId,
+			replace((strip_tags(a.title)),'&amp;nbsp;','') title,
+			a.preface,
+			a.logoImgId,
+			a.backgroundImgId,
+			a.releaseStatus,
+			a.questionUrl,
+			a.qrCodePath,
+			a.respondents,
+			a.description,
+			a.validState,
+			a.createUser,
+			date_format(a.createTime,'%Y-%m-%d') as createTime,
+			a.modifyUser,
+			date_format(a.modifyTime,'%Y-%m-%d') as modifyTime,
+			endTime,
+			startTime,
+			respondentsParentId,
+			questionnaireType,
+			bootomType
+		from 
+			tb_questionnaire a 
+			where 1=1 
+			<if test="pd.questionnaireId != null and pd.questionnaireId != ''">
+				and a.questionnaireId = #{pd.questionnaireId}  
+			</if>
+			<if test="pd.title != null and pd.title != ''">
+				and replace((strip_tags(a.title)),'&amp;nbsp;','') like CONCAT('%','${pd.title}','%') 
+			</if>
+			<if test="pd.startTimeStrHeader != null and pd.startTimeStrHeader != ''">
+				and ${pd.startTimeStrHeader}
+			</if>
+			<if test="pd.validState != null and pd.validState != ''">
+				and validState=#{pd.validState}
+			</if>
+			<if test="pd.releaseStatus != null and pd.releaseStatus != ''">
+				and releaseStatus=#{pd.releaseStatus}
+			</if>
+			<if test="pd.ROLE_ID != null and pd.ROLE_ID != ''">
+			and a.ROLE_ID in  
+			<foreach collection="pd.ROLE_ID" item="ROLE_ID" index="index" open="(" close=")" separator=",">  
+	            '${ROLE_ID}'  
+	        </foreach>
+		        <if test="pd.CREATE_USER != null and pd.CREATE_USER != ''">
+						or a.CREATE_USER = #{pd.CREATE_USER} 
+				</if>
+			</if>
+			<if test="pd.ROLE_ID == null">
+				and a.CREATE_USER = #{pd.CREATE_USER} 
+			</if>
+			and status = 1
+		order by a.createTime desc
+	</select>
+	
+	
+	<!-- 列表(全部有效问卷列表查询项) -->
+	<select id="findEntityDataAll" parameterType="pd" resultMap="QuestionnaireResultMap">
+		select
+			a.questionnaireId,
+			replace((strip_tags(a.title)),'&amp;nbsp;','') title
+		from 
+			tb_questionnaire a
+			where status=1
+			<if test="ROLE_ID != null and ROLE_ID != ''">
+			and a.ROLE_ID in  
+			<foreach collection="ROLE_ID" item="ROLE_ID" index="index" open="(" close=")" separator=",">  
+	            '${ROLE_ID}'  
+	        </foreach>
+		        <if test="CREATE_USER != null and CREATE_USER != ''">
+						or a.CREATE_USER = #{CREATE_USER} 
+				</if>
+			</if>
+			<if test="ROLE_ID == null">
+				and a.CREATE_USER = #{CREATE_USER} 
+			</if>
+			<if test="questionDataAll != null and questionDataAll != ''">
+				and questionnaireId in 
+				<foreach collection="questionDataAll" item="item" index="index" open="(" close=")" separator=",">  
+	            #{item}
+	        </foreach>
+			</if>
+			
+			
+	</select>
+	
+	
+	<select id="entityDataList" parameterType="pd" resultMap="QuestionnaireResultMap">
+		select
+			a.questionnaireId,
+			a.title,
+			a.preface,
+			a.logoImgId,
+			a.backgroundImgId,
+			a.releaseStatus,
+			a.questionUrl,
+			a.qrCodePath,
+			a.respondents,
+			a.description,
+			a.validState,
+			a.createUser,
+			a.createTime,
+			a.modifyUser,
+			a.modifyTime,
+			endTime,
+			startTime	,
+			respondentsParentId,
+			questionnaireType,
+			bootomType
+		from 
+			tb_questionnaire a
+	</select>
+	
+	<select id="entityFindDataById" parameterType="pd" resultMap="QuestionnaireResultMap">
+		select
+			a.questionnaireId,
+			a.title,
+			a.preface,
+			a.logoImgId,
+			a.backgroundImgId,
+			a.releaseStatus,
+			a.questionUrl,
+			a.qrCodePath,
+			a.respondents,
+			a.description,
+			a.validState,
+			a.createUser,
+			date_format(a.createTime,'%Y年%m月%d日') as createTime,
+			a.modifyUser,
+			a.modifyTime,
+			endTime,
+			startTime,
+			backMusic,
+			backMusicSwith,
+			finishBackground 	,
+			respondentsParentId,
+			questionnaireType,
+			bootomType
+		from 
+			tb_questionnaire a
+		where 
+			a.questionnaireId = #{questionnaireId} 
+			and status=1
+	</select>
+	
+	<!-- 批量删除 -->
+	<!-- <delete id="deleteAll" parameterType="String">
+		delete from tb_questionnaire
+		where 
+			questionnaireId in
+		<foreach item="item" index="index" collection="array" open="(" separator="," close=")">
+                 #{item}
+		</foreach>
+	</delete> -->
+	<update id="updateAll" parameterType="String">
+		update  tb_questionnaire set status=0
+		where 
+			questionnaireId in
+		<foreach item="item" index="index" collection="array" open="(" separator="," close=")">
+                 #{item}
+		</foreach>
+	</update>
+	
+	<delete id="deletePicture"  parameterType="pd">
+		delete from tb_file_details  where  ownershipMasterId=#{questionnaireId} and fileId=#{fileId}
+	</delete>
+	<update id="updatePicture"  parameterType="Questionnaire">
+		update tb_questionnaire set 
+				<if test="logoImgId !=null  ">
+					logoImgId =	#{logoImgId},
+				</if>
+				<if test="backgroundImgId != null ">
+					backgroundImgId = #{backgroundImgId},
+				</if>
+				modifyTime= #{modifyTime},
+				modifyUser=#{modifyUser}
+				where questionnaireId = #{questionnaireId}
+				
+	</update>
+	
+	<select id="findListIsExistChild" parameterType="pd" resultType="pd">
+		select questionnaireId from tb_questions tq 
+		<where >
+			status=1
+			<if test=" questionnaireIds != null and questionnaireIds != '' ">
+			 and 	${questionnaireIds}
+			</if>
+		</where>
+		union
+		select questionnaireId from tb_questionnaire_results tqr 
+		<where >
+			status=1
+			<if test=" questionnaireIds != null and questionnaireIds != '' ">
+				and ${questionnaireIds}
+			</if>
+		</where>
+		UNION
+		select questionnaireId from tb_questions_header tqh 
+		<where >
+			status=1
+			<if test=" questionnaireIds != null and questionnaireIds != '' ">
+				and ${questionnaireIds}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 权限下可查问卷id集合String -->
+	<select id="findQuestionnaireListStr" parameterType="pd" resultType="java.lang.String">
+		select
+			a.questionnaireId
+		from 
+			tb_questionnaire a
+			where status=1 and questionnaireType='2' 
+			<if test="ROLE_ID != null and ROLE_ID != ''">
+			and a.ROLE_ID in  
+			<foreach collection="ROLE_ID" item="ROLE_ID" index="index" open="(" close=")" separator=",">  
+	            '${ROLE_ID}'  
+	        </foreach>
+		        <if test="CREATE_USER != null and CREATE_USER != ''">
+						or a.CREATE_USER = #{CREATE_USER} 
+				</if>
+			</if>
+			<if test="ROLE_ID == null">
+				and a.CREATE_USER = #{CREATE_USER} 
+			</if>
+	</select>
+</mapper>

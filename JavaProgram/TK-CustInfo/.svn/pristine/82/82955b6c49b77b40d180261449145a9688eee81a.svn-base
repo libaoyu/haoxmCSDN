@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="RecordMapper">
+
+	<resultMap type="RecordConfig" id="RecordConfigMap">
+		<id column="CONFIGURE_ID" property="configureId"/>
+		<result column="FIELD_NAME" property="fieldName"/>
+		<result column="LABEL" property="label"/>
+		<result column="HOSIPITAL_ID" property="hosipitalId"/>
+		<result column="INTERFACE_TYPE" property="interType"/>
+		<result column="IS_SHOW" property="isShow"/>
+		<result column="SHOW_TYPE" property="showType"/>
+		<result column="FIELD_ORDER" property="fieldOrder"/>
+	</resultMap>
+	
+	<!-- 列表 -->
+	<select id="datalistPage" parameterType="page" resultType="pd">
+		select
+			CONFIGURE_ID,
+			FIELD_NAME,
+			LABEL,
+			HOSIPITAL_ID,
+			INTERFACE_TYPE,
+			IS_SHOW,
+			SHOW_TYPE,
+			FIELD_ORDER
+		from 
+			tb_section_configure	
+		where 1=1 
+		<if test="pd.hosipitalId!=null and pd.hosipitalId!=''">  
+		    and HOSIPITAL_ID = #{pd.hosipitalId}  
+		</if>
+		<if test="pd.interType!=null and pd.interType!=''">  
+		    and INTERFACE_TYPE = #{pd.interType}  
+		</if>
+		<if test="pd.isShow!=null and pd.isShow!=''">  
+		    and IS_SHOW = #{pd.isShow}  
+		</if>
+		<if test="pd.showType!=null and pd.showType!=''">  
+		    and find_in_set(#{pd.showType},SHOW_TYPE) 
+		</if>
+			order by FIELD_ORDER asc
+	</select>
+	
+	<!-- 查询所有的字段名称 -->
+	<select id="configColumn" resultType="String">
+		SELECT DISTINCT
+			COLUMN_NAME
+		FROM
+			information_schema. COLUMNS
+		WHERE
+			table_name = 'tb_section_base'
+	</select>
+	
+	<!-- 根据医院ID查询已存在的字段配置 -->
+	<select id="getColumn" parameterType="pd" resultType="String">
+		SELECT
+			FIELD_NAME
+		FROM
+			tb_section_configure
+		WHERE 1=1 
+		<if test="hosipitalId!=null and hosipitalId!=''">  
+		    and HOSIPITAL_ID = #{hosipitalId}  
+		</if>
+		<if test="interType!=null and interType!=''">  
+		    and INTERFACE_TYPE = #{interType}  
+		</if>
+	</select>
+	
+	<!-- 字段提升顺序 -->
+	<update id="configUpOrder" parameterType="pd">
+		update  tb_section_configure
+			set 
+				FIELD_ORDER = #{fieldId}+1
+			where 
+				HOSIPITAL_ID = #{hosipitalId}
+			and 
+				FIELD_ORDER = #{fieldId}
+			
+	</update>
+	<update id="configUp" parameterType="pd">
+		update  tb_section_configure
+			set 
+				FIELD_ORDER = #{fieldId}
+			where
+				CONFIGURE_ID = #{configId}	
+	</update>
+	
+	<!-- 字段降低顺序 -->
+	<update id="configDownOrder" parameterType="pd">
+		update  tb_section_configure
+			set 
+				FIELD_ORDER = #{fieldId}
+			where 
+				HOSIPITAL_ID = #{hosipitalId}
+			and 
+				FIELD_ORDER = #{fieldId}+1
+	</update>
+	<update id="configDown" parameterType="pd">
+		update  tb_section_configure
+			set 
+				FIELD_ORDER = #{fieldId}+1
+			where
+				CONFIGURE_ID = #{configId}	
+	</update>
+	
+	<!-- 根据id查询单个实体 -->
+	<select id="getInfoById" parameterType="pd" resultMap="RecordConfigMap">
+		select
+			CONFIGURE_ID,
+			FIELD_NAME,
+			LABEL,
+			HOSIPITAL_ID,
+			IS_SHOW,
+			SHOW_TYPE,
+			FIELD_ORDER
+		from 
+			tb_section_configure	
+		where 1=1 
+			and CONFIGURE_ID = #{configId}
+	</select>
+	
+	<!-- 根据id修改单条记录 -->
+	<delete id="update" parameterType="pd">
+		update  tb_section_configure
+		set LABEL = #{label},
+		IS_SHOW = #{isShow},
+		SHOW_TYPE = #{showType}		
+		where 
+			CONFIGURE_ID = #{configureId}
+	</delete>
+	
+	<!-- 添加 -->
+	<insert id="save" parameterType="pd">
+		insert into tb_section_configure
+			(FIELD_NAME,
+			LABEL,
+			HOSIPITAL_ID,
+			INTERFACE_TYPE,
+			IS_SHOW,
+			SHOW_TYPE,
+			FIELD_ORDER)
+		values(#{fieldName},#{label},#{hosipitalId},#{interType},#{isShow},#{showType},#{fieldOrder})
+	</insert>
+	
+	<!-- 修改状态是否显示在页面 -->
+	<update id="updateStatus" parameterType="pd">
+		update  tb_section_configure
+			set 
+				IS_SHOW = #{isShow}
+			where
+				CONFIGURE_ID = #{configId}	
+	</update>
+</mapper>

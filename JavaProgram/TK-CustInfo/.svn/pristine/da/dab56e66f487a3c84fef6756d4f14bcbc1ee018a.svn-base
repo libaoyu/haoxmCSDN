@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="QuestionsHeaderMapper">
+	 
+	<resultMap type="QuestionsHeader" id="QuestionsHeaderResultMap">
+		<id column="header_id" property="headerId"/>
+		<result column="batch_id" property="batchId"/>
+		<result column="questionnaireId" property="questionnaireId"/>
+		<result column="title_name" property="titleName"/>
+		<result column="title_value" property="titleValue"/>
+		<result column="create_user" property="createUser"/>
+		<result column="create_time" property="creatTime"/>
+		<result column="respondentCode" property="respondentCode"/>
+		<result column="remarks" property="remarks"/>
+		
+	</resultMap>
+	<!-- 新增-->
+	<insert id="save" parameterType="QuestionsHeader">
+		insert into tb_questions_header(
+			header_id,	
+			batch_id, 
+			questionnaireId,
+			title_name,	
+			title_value,	
+			create_user,	
+			create_time,
+			remarks
+		) values (
+			#{headerId},	
+			#{batchId}, 
+			#{questionnaireId},
+			#{titleName},	
+			#{titleValue},	
+			#{createUser},	
+			#{creatTime},
+			#{remarks}
+		)
+	</insert>
+	<!-- 批量插入数据 -->
+	<insert id="insertAll"  useGeneratedKeys="true" parameterType="java.util.List">  
+	<![CDATA[	
+	    insert into tb_questions_header(
+			header_id,	
+			batch_id, 
+			questionnaireId,
+			title_name,	
+			title_value,	
+			create_user,	
+			create_time,
+			respondentCode,
+			column1,
+			remarks
+		) values
+		]]>
+		<foreach collection="list" item="item" index="index" separator=",">
+			 (
+				#{item.headerId},	
+				#{item.batchId}, 
+				#{item.questionnaireId},
+				#{item.titleName},	
+				#{item.titleValue},	
+				#{item.createUser},	
+				#{item.creatTime},
+				#{item.respondentCode},
+				#{item.column1},
+				#{item.remarks}
+			)
+		</foreach>
+	</insert>
+	<!-- 删除-->
+	<delete id="delete" parameterType="pd">
+		delete from tb_questions_header
+		where 
+			header_id = #{headerId}
+	</delete>
+	<!-- 修改 -->
+	<update id="edit" parameterType="pd">
+		update  tb_questions_header
+			set 
+				questionnaireId=#{questionnaireId},
+				title_name=#{titleName},	
+				title_value=#{titleValue},	
+				create_user=#{createUser},	
+				create_time=#{creatTime}
+			where 
+				header_id =#{headerId}
+	</update>
+	<!-- 通过ID获取数据 -->
+	<select id="findById" parameterType="pd" resultType="pd">
+		select 
+			questionId,	 
+			header_id,	
+			batch_id, 
+			questionnaireId,
+			title_name,	
+			title_value,	
+			create_user,	
+			create_time
+		from 
+			tb_questions_header
+		where 
+			header_id =#{headerId}
+	</select>
+	<!-- 获取列表的标题 -->
+	<select id="findTitleByQuestionsnaireId" parameterType="pd" resultType="pd">
+		select c.* from  (
+			select b.questionId,b.title,b.classification,CONCAT((select a.questionCode from tb_questions a where a.questionId=b.parentId),CONVERT(sort USING utf8))code,
+			b.questionnaireId,b.sort  from tb_questions b
+			 where questionnaireId=#{questionnaireId}
+			 <if test="levelStr != null and levelStr!='' ">
+			 	 and ${levelStr}
+			 </if>
+			 <!-- 去掉              问题所有的分割线的题型          -->
+			 	and b.types !='T10' and b.types!='T12' and b.types!='T15'
+			 and classification !='L1' and b.status=1 )c ORDER BY c.classification,c.code, c.sort
+	</select>
+	
+	<select id="listQuestionsHeader" parameterType="pd" resultMap="QuestionsHeaderResultMap">
+		select 
+			header_id,	
+			respondentCode,
+			batch_id, 
+			questionnaireId,
+			title_name,	
+			title_value,	
+			create_user,	
+			create_time
+		from 
+			tb_questions_header
+		where 
+			questionnaireId=#{questionnaireId}
+			and title_name=#{questionId} and batch_id =#{batchId}  limit 0,1
+	</select>
+	<!-- 根据批次号分组。 -->
+	<select id="datalistPage" parameterType="page" resultType="pd">
+		<!--两张表合并为一张表    
+		select a.batch_id, (select replace((strip_tags(tb.title)),'&amp;nbsp;','') title  from  tb_questionnaire tb where a.questionnaireId=tb.questionnaireId) title  from tb_questions_header a where  status=1
+		<if test="pd.questionnaireId !=null and pd.questionnaireId != ''">
+		 and a.questionnaireId=#{pd.questionnaireId}
+		</if>
+		
+		<if test="pd.title!=null and pd.title != ''">
+			 and a.title_value like  CONCAT('%','${pd.title}','%') 
+		</if>
+		<if test="pd.respondentCodeStr != null and pd.respondentCodeStr!='' ">
+			and  ${pd.respondentCodeStr}
+		</if>
+		<if test="pd.startTimeStrHeader != null and pd.startTimeStrHeader !='' ">
+			and  ${pd.startTimeStrHeader}
+		</if>
+		 GROUP BY a.batch_id
+		 union -->
+		 select a.batch_id,
+		 	(select replace((strip_tags(tb.title)),'&amp;nbsp;','') title  from  tb_questionnaire tb where a.questionnaireId=tb.questionnaireId) title ,
+		 	(select tb.respondentsParentId   from  tb_questionnaire tb where a.questionnaireId=tb.questionnaireId) respondentsParentId  ,
+		 a.visitCode
+		  from tb_questionnaire_results  a where  status=1
+		<if test="pd.questionnaireId !=null and pd.questionnaireId != ''">
+		 and a.questionnaireId=#{pd.questionnaireId}
+		</if>
+		
+		<if test="pd.title!=null and pd.title != ''">
+			 and a.answerResult like  CONCAT('%','${pd.title}','%') 
+		</if>
+		<if test="pd.respondentCodeStr != null and pd.respondentCodeStr!='' ">
+			and  ${pd.respondentCodeStr}
+		</if>
+		<if test="pd.startTimeStrRe != null and pd.startTimeStrRe !='' ">
+			and  ${pd.startTimeStrRe}
+		</if>
+		 GROUP BY a.batch_id ,a.visitCode
+	</select>
+	
+	<!-- 到处部分也 -->
+	<select id="listDataForExprot" parameterType="pd" resultType="pd">
+		<!-- select a.batch_id, (select replace((strip_tags(tb.title)),'&amp;nbsp;','') title  from  tb_questionnaire tb where a.questionnaireId=tb.questionnaireId) title  from tb_questions_header a where  status=1
+		<if test="questionnaireId !=null and questionnaireId != ''">
+		 and a.questionnaireId=#{questionnaireId}
+		</if>
+		
+		<if test="title!=null and title != ''">
+			 and a.title_value like  CONCAT('%','${title}','%') 
+		</if>
+		<if test="respondentCodeStr != null and respondentCodeStr!='' ">
+			and  ${respondentCodeStr}
+				
+		</if>
+		<if test="listQuestionResultId != null and listQuestionResultId !='' ">
+			and   ${listQuestionResultId}
+				
+		</if>
+		<if test="startTimeStrHeader != null and startTimeStrHeader !='' ">
+			and  ${startTimeStrHeader}
+		</if>
+		 GROUP BY a.batch_id
+		 union -->
+		 select a.batch_id, (select replace((strip_tags(tb.title)),'&amp;nbsp;','') title 
+		  from  tb_questionnaire tb where a.questionnaireId=tb.questionnaireId) title,
+		  (select tb.respondentsParentId   from  tb_questionnaire tb where a.questionnaireId=tb.questionnaireId) respondentsParentId ,a.visitCode
+		   from tb_questionnaire_results  a where  status=1
+		<if test="questionnaireId !=null and questionnaireId != ''">
+		 and a.questionnaireId=#{questionnaireId}
+		</if>
+		
+		<if test="title!=null and title != ''">
+			 and a.answerResult like  CONCAT('%','${title}','%') 
+		</if>
+		<if test="respondentCodeStr != null and respondentCodeStr!='' ">
+			and  ${respondentCodeStr}
+				
+		</if>
+		<if test="listQuestionResultId != null and listQuestionResultId !='' ">
+			and  ${listQuestionResultId}
+		</if>
+		<if test="startTimeStrRe != null and startTimeStrRe !='' ">
+			and  ${startTimeStrRe}
+		</if>
+		 GROUP BY a.batch_id,a.visitCode
+	</select>
+	
+	<!-- 优化方案for   byxiaoding -->
+	<select id="listQuestionsResultForNew" parameterType="pd" resultType="pd">
+		
+SELECT
+	c.*,
+	<!-- COALESCE((select CASE WHEN th.remarks is null THEN th.title_value 
+			ELSE concat('[',th.title_value,']','[',th.remarks,']') end as answerResult  from  tb_questions_header th 
+				where  th.title_name=c.questionId and th.batch_id=#{batchId} limit 1) , -->
+	(select CASE WHEN th.remarks is null THEN th.answerResult
+		ELSE concat('[',th.answerResult,']','[',th.remarks,']') end as answerResult   from  tb_questionnaire_results th 
+				where  th.questionId=c.questionId and th.batch_id=#{batchId} limit 1)  answerResult,
+	<!-- COALESCE((select th.create_time  from  tb_questions_header th 
+				where  th.title_name=c.questionId and th.batch_id=#{batchId} limit 1) , -->
+	(select th.createTime  from  tb_questionnaire_results th 
+				where  th.questionId=c.questionId and th.batch_id=#{batchId} limit 1)  create_time,
+	<!-- COALESCE((select th.respondentCode  from  tb_questions_header th 
+				where  th.title_name=c.questionId and th.batch_id=#{batchId} limit 1) , -->
+	(select th.respondentCode  from  tb_questionnaire_results th 
+				where  th.questionId=c.questionId and th.batch_id=#{batchId} limit 1) respondentCode
+FROM
+	(
+		SELECT
+			b.questionId,
+			replace((strip_tags(b.title)),'&amp;nbsp;','') title ,
+			b.classification,
+			CONCAT((SELECT a.questionCode FROM tb_questions a WHERE a.questionId = b.parentId ), CONVERT (sort USING utf8) ) CODE,
+			b.questionnaireId,b.sort 
+		FROM
+			tb_questions b
+		WHERE
+			questionnaireId = #{questionnaireId}
+			 <if test="levelStr != null and levelStr!='' ">
+			 	 and ${levelStr}
+			 </if>
+			 and b.types !='T10' and b.types!='T12' and b.types!='T15'
+		AND classification != 'L1' and b.status=1
+	) c
+ORDER BY
+	c.classification,
+	c. CODE,c.sort
+	</select>
+	<select id="findCoutQuestioneResult" parameterType="pd" resultType="pd">
+		select questionId from tb_questionnaire_results tqr
+		<where>
+			status = 1
+			<if test="questionResultId != null and questionResultId != ''">
+				and ${questionResultId}
+			</if>
+		</where>
+		UNION
+		select title_name questionId from tb_questions_header tqh 
+		<where>
+		   status = 1
+			<if test=" titleName != null and titleName !=''">
+			  and	${titleName}
+			</if>
+		</where>
+	</select>
+	
+	<select id="finParentIdByQuestionsId" parameterType="pd" resultType="pd">
+		select questionId,tq.parentId parentId from tb_questions tq 
+		<where>
+			status= 1
+			<if test=" parentId !=null and parentId != ''">
+				and ${parentId}
+			</if>
+		</where> 
+	</select>
+	<update id="updateStatusForQuestionsHeader" parameterType="pd" >
+		update tb_questions_header set status=0 where ${batch_id}
+	</update>
+	<update id="updateStatusForQuestionsResult" parameterType="pd" >
+		update tb_questionnaire_results set status=0 where ${batch_id}
+	</update>
+	
+	
+	<select id="findCountHeaderResult" parameterType="pd" resultType="pd">
+		select count(1) as sum,title_value as opt
+		from tb_questions_header 
+		where title_name=#{questionId} and status=1
+		GROUP BY title_value
+	</select>
+	
+	
+	<!-- 星级评定问题查询 -->
+	<select id="findQuestionlistPage" parameterType="page" resultType="pd">
+		select 
+			questionId,	 
+			questionnaireId,
+			parentId,
+			questionCode,	
+			replace((strip_tags(title)),'&amp;nbsp;','') title,	
+			level,
+			classification,	
+			types,	
+			scaleType,
+			scaleRange,
+			questionData,
+			score,
+			sort,
+			mustFlag,
+			description,
+			validState,
+			createUser,
+			createTime
+ 		from tb_questions 
+		where 
+		`status`='1' 
+		and classification in ('L0','L2') and types in ('T9','T11') 
+		and questionnaireId in
+		<foreach collection="pd.questionnaireList" item="item" open="(" separator="," close=")">
+			'${item.questionnaireId}'
+		</foreach>
+		ORDER BY questionnaireId,sort
+	</select>	
+	<!-- listQuestionsResultAllByQuestionnaireId -->
+	<select id="listQuestionsResultAllByQuestionnaireId" parameterType="page" resultType="pd">
+		select replace((strip_tags((select tt.title from tb_questionnaire tt where tt.questionnaireId=tq.questionnaireId))),'&amp;nbsp;','') title,
+	(select count(questionid) from tb_questions tqs where questionnaireId = #{questionnaireId} and tqs.classification='L0'  and tqs.types !='T10' and tqs.types!='T12' and tqs.types!='T15' and tqs.status=1)countL0,
+(select count(questionid) from tb_questions tqs where questionnaireId = #{questionnaireId} and classification='L2'  and tqs.types !='T10' and tqs.types!='T12' and tqs.types!='T15' and tqs.status=1)countL2,
+		tq.* from tb_questionnaire_results tq where questionnaireId=#{questionnaireId};
+	</select>
+	
+</mapper> 

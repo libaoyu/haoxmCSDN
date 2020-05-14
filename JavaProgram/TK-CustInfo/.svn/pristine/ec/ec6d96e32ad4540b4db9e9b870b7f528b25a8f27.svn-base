@@ -1,0 +1,433 @@
+package com.fh.service.questionnaire;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.session.Session;
+import org.apache.shiro.subject.Subject;
+import org.springframework.stereotype.Service;
+
+import com.fh.dao.DaoSupport;
+import com.fh.entity.Page;
+import com.fh.entity.questionnaire.FileDetails;
+import com.fh.entity.system.Questionnaire;
+import com.fh.entity.system.Questions;
+import com.fh.entity.system.User;
+import com.fh.util.Const;
+import com.fh.util.ConversionUtil;
+import com.fh.util.FileUtil;
+import com.fh.util.Jurisdiction;
+import com.fh.util.PageData;
+import com.fh.util.QRcode;
+import com.fh.util.ShortUrl;
+import com.fh.util.Tools;
+import com.fh.util.UuidUtil;
+
+
+@Service("questionnaireService")
+public class QuestionnaireService {
+
+	@Resource(name = "daoSupport")
+	private DaoSupport dao;
+	
+	@Resource(name = "fileDetailsService")
+	private FileDetailsService fileDetailsService;
+	@Resource(name="questionsService")
+	private QuestionsService questionsService;
+	
+	/*
+	* 新增
+	*/
+	public void save(PageData pd)throws Exception{
+		dao.save("QuestionnaireMapper.save", pd);
+		boolean  flag= QRcode.encode(pd.getString("questionUrl")+"?pageId="+pd.getString("questionnaireId"),pd.getString("secCodePath"));
+		if( !flag ){
+			throw new RuntimeException("二维码创建失败");
+		}
+	}
+	
+	/*
+	* 新增
+	*/
+	public void save(Questionnaire questionnaire,PageData pd)throws Exception{
+		for (FileDetails detail:questionnaire.getFileDetails()) {
+			dao.save("FileDetailsMapper.save", detail);
+		}
+		User user = Jurisdiction.getLoginUser();
+ 		String department_id = user.getDEPARTMENT_ID();
+ 		questionnaire.setDepartment_id(department_id);
+ 		questionnaire.setCreate_user(user.getUSER_ID());
+		dao.save("QuestionnaireMapper.save", questionnaire);
+		//保存二维码到数据库				开始
+		String level=pd.getString("level");
+		boolean isSuccess=true;
+		List<FileDetails> list=new ArrayList<FileDetails>();
+		if(level!=null&&!level.isEmpty()){
+			if(level.indexOf(",")>-1){
+				String[] levels=level.split(",");
+				for (int i = 0; i < levels.length&&isSuccess; i++) {
+					String fileId=UuidUtil.get32UUID();
+					boolean  flag= QRcode.encode(questionnaire.getQuestionUrl()+"?id="+pd.getString("questionnaireId")+"&level="+levels[i],Const.FILEPATHFILE+fileId+".jpg");
+					if(flag){
+						String url=questionnaire.getQuestionUrl()+"?id="+pd.getString("questionnaireId")+"&level="+levels[i];
+						// addby shanghz 生成短链接码
+						String shortUrl = ShortUrl.shortUrl(url);
+						questionnaire.setRespondents(levels[i]);
+						FileDetails detail=uploadImg(questionnaire,fileId,url,shortUrl);
+						if(detail!=null){
+							list.add(detail);
+						}
+					}else{
+						isSuccess=false;
+					}
+				}
+			}else{
+				String fileId=UuidUtil.get32UUID();
+				String url=questionnaire.getQuestionUrl()+"?id="+pd.getString("questionnaireId")+"&level="+pd.getString("level");
+				// addby shanghz 生成短链接码
+				String shortUrl = ShortUrl.shortUrl(url);
+				boolean  flag= QRcode.encode(questionnaire.getQuestionUrl()+"?id="+pd.getString("questionnaireId")+"&level="+pd.getString("level"),Const.FILEPATHFILE+fileId+".jpg");
+				if(flag){ 
+					questionnaire.setRespondents(level);
+					FileDetails detail=uploadImg(questionnaire,fileId,url,shortUrl);
+					if(detail!=null){
+						list.add(detail);
+					}
+				}else{
+					isSuccess=false;
+				}
+			}
+		}
+		if( !isSuccess ){
+			throw new RuntimeException("二维码创建失败");
+		}else{
+			if(list!=null &&list.size()>0){
+				dao.save("FileDetailsMapper.saveList", list);
+			}
+		}
+	}
+	/*
+	* 删除
+	*/
+	/*public void delete(PageData pd)throws Exception{
+		dao.delete("QuestionnaireMapper.delete", pd);
+	}*/
+	public void updateStatus(PageData pd)throws Exception{
+		dao.update("QuestionnaireMapper.updateQuestionnaire", pd);
+	}
+	/*
+	* 修改
+	*/
+	public void edit(Questionnaire questionnaire,PageData pd)throws Exception{
+		for (FileDetails detail:questionnaire.getFileDetails()) {
+			pd.put("fileId", detail.getFileId());
+			FileDetails file=(FileDetails)dao.findForObject("FileDetailsMapper.getEntityById", pd);
+			//待优化zxq
+			if(file==null){
+				if(Const.FILE_CATEGORY_LOGO.equals(detail.getCategory())){
+					detail.setFileId(questionnaire.getLogoImgId());
+				}else if(Const.FILE_CATEGORY_BG.equals(detail.getCategory())){
+					detail.setFileId(questionnaire.getBackgroundImgId());
+				}
+				dao.save("FileDetailsMapper.save", detail);
+			}else if(file !=null){
+				file.setContent(detail.getContent());
+				file.setDescription(detail.getDescription());
+				file.setFileName(detail.getFileName());
+				file.setFileTitle(detail.getFileTitle());
+				file.setFilePath(detail.getFilePath());
+				file.setModifyTime(Tools.date2Str(new Date()));
+				file.setModifyUser(detail.getModifyUser());
+				file.setSpecification(detail.getSpecification());
+				dao.update("FileDetailsMapper.edit", file);
+			}
+		}
+		dao.update("QuestionnaireMapper.edit", questionnaire);
+		pd.put("questionnaireId", questionnaire.getQuestionnaireId());
+		pd.put("category", "QR");
+		dao.delete("FileDetailsMapper.deleteByMasterId", pd);
+		String level=pd.getString("level");
+		boolean isSuccess=true;
+		List<FileDetails> list=new ArrayList<FileDetails>();
+		if(level!=null&&!level.isEmpty()){
+			if(level.indexOf(",")>-1){
+				String[] levels=level.split(",");
+				for (int i = 0; i < levels.length&&isSuccess; i++) {
+					String fileId=UuidUtil.get32UUID();
+					String url=questionnaire.getQuestionUrl()+"?id="+pd.getString("questionnaireId")+"&level="+levels[i];
+					// addby shanghz 生成短链接码
+					String shortUrl = ShortUrl.shortUrl(url);
+					boolean  flag= QRcode.encode(questionnaire.getQuestionUrl()+"?id="+pd.getString("questionnaireId")+"&level="+levels[i],Const.FILEPATHFILE+fileId+".jpg");
+					if(flag){
+						questionnaire.setRespondents(levels[i]);
+						FileDetails detail=uploadImg(questionnaire,fileId,url,shortUrl);
+						if(detail!=null){
+							list.add(detail);
+						}
+					}else{
+						isSuccess=false;
+					}
+				}
+			}else{
+				String fileId=UuidUtil.get32UUID();
+				String url=questionnaire.getQuestionUrl()+"?id="+pd.getString("questionnaireId")+"&level="+pd.getString("level");
+				// addby shanghz 生成短链接码
+				String shortUrl = ShortUrl.shortUrl(url);
+				boolean  flag= QRcode.encode(questionnaire.getQuestionUrl()+"?id="+pd.getString("questionnaireId")+"&level="+pd.getString("level"),Const.FILEPATHFILE+fileId+".jpg");
+				if(flag){ 
+					questionnaire.setRespondents(level);
+					FileDetails detail=uploadImg(questionnaire,fileId,url,shortUrl);
+					
+					if(detail!=null){
+						list.add(detail);
+					}
+				}else{
+					isSuccess=false;
+				}
+			}
+		}
+		if( !isSuccess ){
+			throw new RuntimeException("二维码创建失败");
+		}else{
+			if(list!=null &&list.size()>0){
+				dao.save("FileDetailsMapper.saveList", list);
+			}
+		}
+//		boolean  flag= QRcode.encode(pd.getString("PAGEADDRESS")+"?pageId="+pd.getString("QUESTIONPAGE_ID"),pd.getString("SECONDCODE"));
+//		if( !flag ){
+//			throw new RuntimeException("二维码创建失败");
+//		}
+	}
+	
+	/*
+	*列表:获取有效问卷列表
+	*/
+	public List<PageData> list(Page page)throws Exception{
+		return (List<PageData>)dao.findForList("QuestionnaireMapper.datalistPage", page);
+	}
+	/*
+	 * 选择列表
+	 */
+	public List<PageData> checkList(Page page)throws Exception{
+		return (List<PageData>)dao.findForList("QuestionnaireMapper.checkList", page);
+	}
+	/*
+	*列表(全部)
+	*/
+	public List<PageData> listAll(PageData pd)throws Exception{
+		return (List<PageData>)dao.findForList("QuestionPageMapper.listAll", pd);
+	}
+	
+	/*
+	* 通过id获取数据
+	*/
+	public PageData findById(PageData pd)throws Exception{
+		return (PageData)dao.findForObject("QuestionnaireMapper.findById", pd);
+	}
+	public PageData findByIdUser(PageData pd)throws Exception{
+		return (PageData)dao.findForObject("QuestionnaireMapper.findByUserId", pd);
+	}
+	/*
+	* 批量删除
+	*/
+	/*public void deleteAll(String[] ArrayDATA_IDS)throws Exception{
+		dao.delete("QuestionnaireMapper.deleteAll", ArrayDATA_IDS);
+	}*/
+	public void updateAll(String[] ArrayDATA_IDS)throws Exception{
+		dao.update("QuestionnaireMapper.updateAll", ArrayDATA_IDS);
+	}
+	
+	/**************************
+	 * 问卷实体查询列表
+	 * @author zhangxq
+	 * @throws Exception 
+	 * @dateTime：
+	 */
+	public List<Questionnaire> findDataList(Page pd) throws Exception{
+		return (List<Questionnaire>)dao.findForList("QuestionnaireMapper.entityDataList", pd);
+	}
+	/**
+	 * 问卷单个实体查询
+	 * @param pd
+	 * @return
+	 * @throws Exception
+	 * @author zhangxq
+	 */
+	public Questionnaire getEntityById(PageData pd) throws Exception{
+		return (Questionnaire)dao.findForObject("QuestionnaireMapper.entityFindDataById", pd);
+	}
+	
+	/**
+	 * 问卷列表查询选项(所有有效问卷名称、ID)
+	 * @param pd
+	 * @return
+	 * @throws Exception
+	 */
+	public List<Questionnaire> findQuestionnaireList(PageData pd) throws Exception{
+		return (List<Questionnaire>)dao.findForList("QuestionnaireMapper.findEntityDataAll", pd);
+	}
+	/**
+	 * 提取公用方法
+	 * by xiaoding
+	 */
+	public FileDetails uploadImg(Questionnaire questionnaire,String fileId,String enCodePath,String shortUrl){
+		
+		String path=QRcode.path;
+		File file=new File(path);
+		FileDetails detail=new FileDetails();
+		if(file!=null){
+			detail=new FileDetails();
+			detail.setFileId(fileId);
+	        detail.setCreateTime(Tools.date2Str(new Date()));
+	        detail.setOwnershipMasterId(questionnaire.getQuestionnaireId());
+	        try {
+				detail.setContent(FileUtil.getContent(path));
+				//增加调查对象类型
+				String respondentsParentId=questionnaire.getRespondentsParentId();
+				Map<String,String> map=ConversionUtil.getStaffLevelByParentId(respondentsParentId);
+				String level=questionnaire.getRespondents();
+				String levelName=map.get(level);
+				detail.setFileTitle(levelName);
+		        detail.setFileName(file.getName());
+		        detail.setFileExtension(".jpg");
+		       // detail.setFilePath(path);
+		        detail.setCategory("QR");
+		        detail.setEnCodePath(enCodePath);
+		        detail.setShortUrl(shortUrl);
+		        return detail;
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	       
+		}
+		return null;
+	}
+	/*
+	* 删除
+	*/
+	public void deletePicture(PageData pd,Questionnaire questionnaire)throws Exception{
+		dao.delete("QuestionnaireMapper.deletePicture", pd);
+		dao.update("QuestionnaireMapper.updatePicture", questionnaire);
+	}
+	/**
+	 * 
+	 * @param pd
+	 * @throws Exception
+	 * xiaoding
+	 */
+	public List<PageData> findListIsExistChild(PageData pd)throws Exception{
+		String questionnaireId=pd.getString("questionnaireId");
+		if(!Tools.isEmpty(questionnaireId)){
+			pd.put("questionnaireIds", "  questionnaireId  ='"+questionnaireId+"'");
+		}else{
+			String DATA_IDS = pd.getString("DATA_IDS");
+			DATA_IDS=DATA_IDS.replace(",", "','");
+			pd.put("questionnaireIds", " questionnaireId in  ('"+DATA_IDS+"') ");
+		}
+		return (List<PageData>)dao.findForList("QuestionnaireMapper.findListIsExistChild", pd);
+	}
+	/**
+	 * 复制问卷
+	 * @param pd
+	 * @throws Exception
+	 */
+	public void saveCopyQuestionList(PageData pd) throws Exception{
+		Subject currentUser = SecurityUtils.getSubject();  
+		Session session = currentUser.getSession();
+		User user = (User)session.getAttribute(Const.SESSION_USER);
+		String DATA_IDS = pd.getString("DATA_IDS");
+		String Data_Ids[] = DATA_IDS.split(",");
+		for (int i = 0; i < Data_Ids.length; i++) {
+			String id = Data_Ids[i];
+			String questionnaireIdOld = "";
+			PageData pdOldParam = new PageData();
+			pdOldParam.put("questionnaireId", id);
+			//查询要复制的问卷
+			Questionnaire questionOld = getEntityById(pdOldParam);
+			//组装新数据start
+			//临时保存old问卷id用于查询下属问题
+			questionnaireIdOld = questionOld.getQuestionnaireId();
+			questionOld.setTitle(questionOld.getTitle()+"(复制)");
+			questionOld.setQuestionnaireId(UuidUtil.get32UUID());
+			questionOld.setCreateTime(Tools.date2Str(new Date()));
+			questionOld.setCreateUser(user.getUSER_ID());
+			String logoImgIdOld = questionOld.getLogoImgId();
+			String backgrouodImdOld = questionOld.getBackgroundImgId();
+			List<FileDetails> fileList = new ArrayList<FileDetails>();
+			pdOldParam.put("fileId", logoImgIdOld);
+			FileDetails filedataLogo = fileDetailsService.getEntityById(pdOldParam);
+			if(filedataLogo != null){
+				filedataLogo.setFileId(UuidUtil.get32UUID());
+				filedataLogo.setCreateTime(Tools.date2Str(new Date()));
+				filedataLogo.setCreateUser(user.getUSER_ID());
+				fileList.add(filedataLogo);
+				questionOld.setLogoImgId(filedataLogo.getFileId());
+			}
+			pdOldParam.put("fileId", backgrouodImdOld);
+			FileDetails filedataBack = fileDetailsService.getEntityById(pdOldParam);
+			if(filedataBack != null){
+				filedataBack.setFileId(UuidUtil.get32UUID());
+				filedataBack.setCreateTime(Tools.date2Str(new Date()));
+				filedataBack.setCreateUser(user.getUSER_ID());
+				fileList.add(filedataBack);
+				questionOld.setBackgroundImgId(filedataBack.getFileId());
+			}
+			questionOld.setFileDetails(fileList);
+			
+			pd.put("level", questionOld.getRespondents());
+			pd.put("questionnaireId", questionOld.getQuestionnaireId());
+			//保存
+			save(questionOld, pd);
+			
+			//复制问卷问题开始
+			PageData pdOneList = new PageData();
+			pdOneList.put("questionnaireId", questionnaireIdOld);
+			pdOneList.put("classifications", "  classification in  ('L1','L0') ");
+			//一级列表
+			List<Questions> oneList = questionsService.findCopyQuestion(pdOneList);
+			pdOneList.put("classifications", "  classification in  ('L2') ");
+			List<Questions> twoList = questionsService.findCopyQuestion(pdOneList);
+			//重新组装old数据
+			for (Questions questions : oneList) {
+				String questionId = UuidUtil.get32UUID();
+				for (Questions q : twoList) {
+					if(questions.getQuestionId().equals(q.getParentId())){
+						q.setQuestionnaireId(questionOld.getQuestionnaireId());
+						q.setParentId(questionId);
+						q.setQuestionId(UuidUtil.get32UUID());
+						q.setCreateTime(Tools.date2Str(new Date()));
+					}
+				}
+				questions.setQuestionId(questionId);
+				questions.setQuestionnaireId(questionOld.getQuestionnaireId());
+				questions.setCreateTime(Tools.date2Str(new Date()));
+			}
+			//批量插入复制问题
+			if(oneList != null && oneList.size()>0){
+				dao.save("QuestionsMapper.saveList", oneList);
+			}
+			if(twoList != null && twoList.size()>0){
+				dao.save("QuestionsMapper.saveList", twoList);
+			}
+		}
+	}
+	/**
+	 * 权限下可查问卷id
+	 * @param pd
+	 * @return
+	 * @throws Exception
+	 */
+	public List<String> findQuestionnaireListStr(PageData pd) throws Exception{
+		return (List<String>)dao.findForList("QuestionnaireMapper.findQuestionnaireListStr", pd);
+	}
+	
+}
+

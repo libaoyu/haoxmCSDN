@@ -1,0 +1,195 @@
+/* reset */
+body,h1,h2,h3,h4,h5,h6,p,dl,dd,ul,ol,pre,form,input,textarea,th,td,select{margin:0;padding:0;text-align: left;}
+body,input{	
+	font-size:0.16rem; color: #363636;
+}
+body,h1,h2,h3,h4,h5,h6,p,dl,dd,ul,ol,th,td,pre,form,button,input,strong,span,em,select,textarea{	
+	font-family:'PingFangSC','helvetica neue','hiragino sans gb','arial','microsoft yahei ui','microsoft yahei','simsun','sans-serif' !important;
+}
+html,body{height: 100%;width:100% ;}
+em{font-style:normal}
+li{list-style:none}
+a{text-decoration:none; -webkit-tap-highlight-color: transparent;}
+img{border:none; vertical-align:top;}
+table{border-collapse:collapse;}
+textarea{ resize:none;overflow:auto;}
+.clear{zoom:1;}
+.clear:after{ content:''; display:block; clear:both;}
+input{font-size:0.14rem}
+/*此为基础样式*/
+html{
+   	font-size:100px;	
+}
+
+.clc{
+    clear: both;
+    overflow: auto;
+}
+.topNav{
+	width: 100%;
+	height: 48px;
+	text-align: center;
+	line-height: 48px;
+	color: #fff;
+	background: #00cc99;
+	font-size: 0.18rem;
+	}
+.contentAll{
+	width: 100%;
+	height: 100%;
+	position: relative;
+}
+.titleLine{
+	height:0.17rem;
+	width: 5px;
+	background: #00cc99;
+	display: inline-block;
+}
+.titleC{
+	font-size: 0.17rem;
+	float: left;
+	margin:12px 7px 7px 14px ;
+	line-height: 0.17rem;
+}
+.doctorInfor{
+	box-sizing: border-box;
+	padding: 0px 9px ;
+
+}
+.doctorInforContent{
+	width: 100%;
+	height: auto;
+	border: solid 1px #898989;
+	border-radius: 12px;
+	position: relative;
+}
+.doctorImg{
+	display: inline-block;
+	position: absolute;
+	top:0px;
+	left: 0px;
+}
+.doctorImg img{
+	width: 80px;
+	height: 80px;
+	border-radius: 50%;
+	float: left;
+	margin:16px 16px;
+}
+.doctorRightInfor{
+	box-sizing: border-box;
+	width: 100%;
+	height: auto;
+	padding-left: 112px;
+}
+.doctorRightInfor p{
+	font-size: 0.15rem;
+	line-height: 30px;
+}
+.doctorRightInfor p:nth-child(1){
+	margin-top:8.5px
+}
+.doctorRightInfor span{
+	color: #898989;
+}
+.doctorName{
+	color: #ff9900 !important;
+}
+/*-----请对医生进行评价---------------*/
+.evaluateContent{
+	width: 100%;
+	height: auto;
+	border-top: solid 1px #898998;
+	overflow: hidden;
+}
+.evaluateContent  div{
+	width: 100%;
+	height: 34px;
+}
+.evaluateContent  p{
+	color: #898989;
+	font-size: 0.16rem;
+}
+
+.fl{
+	float: left;
+}
+.evaluateContent img{
+	height: 14px;
+	width: auto;
+}
+.serviceAttitude{
+	margin-top: 10px;
+}
+.evaluateContent .one{
+	margin-right: 26px;
+	margin-left: 14px;
+}
+.evaluateContent .two span{
+	margin-right: 18px;
+}
+.evaluateContent .evaluate{
+	margin-left: 2px;
+	font-size: 0.14rem;
+	color: #ff7200;
+}
+.range{
+	margin-top:70px;
+	margin-bottom: 34px;
+	margin-left: 30px;
+}
+.doctorCommend{
+	position: relative;
+}
+.advise{
+	padding: 0px 14px;
+	position: relative;
+	margin-top: 12px;
+	position: absolute;
+}
+.advise textarea{
+	width:90%;/*自动适应父布局宽度*/  
+ 	overflow:auto;  
+ 	word-break:break-all;  
+ 	position: absolute;
+	left:50%;
+	top: 44px;
+	margin-left: -45%;
+}
+.submitBtn{
+	 background: #399fd0;
+     font-size: 20px;
+     padding: 5px;
+     text-align: center;
+     display:block;
+     border-radius: 20px;
+     width: 30%;
+     margin:50px auto 60px;
+}
+.submitBtn:hover{
+	border: solid 1px transparent;
+}
+.lineX{
+	margin-top: 12px;
+	text-align: center;
+	vertical-align:middle;  
+	width: 100%;
+	height: 10px;
+	border-bottom: 1px dashed #cfcfcf;
+}
+.lineAcive{
+	margin-top: 12px;
+	text-align: center;
+	vertical-align:middle;  
+	width: 100%;
+	height: 10px;
+	border-bottom: 1px solid  #cfcfcf;
+}
+.lineX span{
+	text-align: center;
+	position: relative;
+	top: -8px;
+	background: #fff;
+	padding: 0 12px;
+	width: 20%;
+}

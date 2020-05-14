@@ -1,0 +1,376 @@
+package com.fh.controller.system.roleTree;
+
+import java.io.PrintWriter;
+import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import net.sf.json.JSONArray;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.fh.controller.base.BaseController;
+import com.fh.entity.Page;
+import com.fh.entity.system.Menu;
+import com.fh.entity.system.Roles;
+import com.fh.service.system.menu.MenuManager;
+import com.fh.service.system.role.RoleTreeManager;
+import com.fh.service.system.user.UserManager;
+import com.fh.util.AppUtil;
+import com.fh.util.Jurisdiction;
+import com.fh.util.PageData;
+import com.fh.util.RightsHelper;
+import com.fh.util.Tools;
+/** 
+ * 类名称：RoleController 角色权限管理
+ * 创建人：FH Q313596790
+ * 修改时间：2015年11月6日
+ * @version
+ */
+@Controller
+@RequestMapping(value="/roleTree")
+public class RoleTreeController extends BaseController {
+	
+	String menuUrl = "roleTree.do"; //菜单地址(权限用)
+	@Resource(name="roleTreeService")
+	private RoleTreeManager roleTreeService;
+	@Resource(name="userService")
+	private UserManager userService;
+	@Resource(name="menuService")
+	private MenuManager menuService;
+	
+	/** 进入权限首页
+	 * @param 
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/listAll")
+	public ModelAndView listAll(Model model,String ROLE_ID)throws Exception{
+		ModelAndView mv = this.getModelAndView();
+		PageData pd = new PageData();
+		pd = this.getPageData();
+		try{
+			JSONArray arr = JSONArray.fromObject(roleTreeService.listAllRolesByPId("0"));
+			String json = arr.toString();
+			json = json.replaceAll("ROLE_ID", "id").replaceAll("PARENT_ID", "pId").replaceAll("ROLE_NAME", "name").replaceAll("subRoles", "nodes").replaceAll("hasDepartment", "checked").replaceAll("treeurl", "url");
+			model.addAttribute("zTreeNodes", json);
+			mv.addObject("ROLE_ID",ROLE_ID);
+			mv.addObject("pd", pd);	
+			mv.setViewName("system/role/role_tree");
+		} catch(Exception e){
+			logger.error(e.toString(), e);
+		}
+		return mv;
+	}
+	
+	/**列表
+	 * @param page
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/list")
+	public ModelAndView list(Page page) throws Exception{
+		logBefore(logger, Jurisdiction.getUsername()+"列表roles");
+		ModelAndView mv = this.getModelAndView();
+		PageData pd = new PageData();
+		pd = this.getPageData();
+		String keywords = pd.getString("keywords");					//检索条件
+		if(null != keywords && !"".equals(keywords)){
+			pd.put("keywords", keywords.trim());
+		}
+		String ROLE_ID = null == pd.get("ROLE_ID")?"":pd.get("ROLE_ID").toString();
+		if(null != pd.get("id") && !"".equals(pd.get("id").toString())){
+			ROLE_ID = pd.get("id").toString();
+		}
+		pd.put("ROLE_ID", ROLE_ID);					//上级ID
+		page.setPd(pd);
+		List<PageData>	varList = roleTreeService.list(page);	//列出Dictionaries列表
+		mv.addObject("pd", roleTreeService.findObjectById(pd));		//传入上级所有信息
+		mv.addObject("ROLE_ID", ROLE_ID);			//上级ID
+		mv.setViewName("system/role/role_tree_list");
+		mv.addObject("varList", varList);
+		mv.addObject("QX",Jurisdiction.getHC());				//按钮权限
+		return mv;
+	}
+	
+	/**删除角色
+	 * @param ROLE_ID
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/delete")
+	@ResponseBody
+	public Object deleteRole(@RequestParam String ROLE_ID)throws Exception{
+		if(!Jurisdiction.buttonJurisdiction(menuUrl, "del")){return null;} //校验权限
+		logBefore(logger, Jurisdiction.getUsername()+"删除角色");
+		Map<String,String> map = new HashMap<String,String>();
+		PageData pd = new PageData();
+		String errInfo = "";
+		try{
+			//pd.put("ROLE_ID", ROLE_ID);
+			List<Roles> roleList_z = roleTreeService.listAllRolesByPId(ROLE_ID);		//列出此部门的所有下级
+			if(roleList_z.size() > 0){
+				errInfo = "false";											//下级有数据时，删除失败
+			}else{
+				List<PageData> userlist = userService.listAllUserByRoldId(pd);			//此角色下的用户
+				//List<PageData> appuserlist = appuserService.listAllAppuserByRorlid(pd);	//此角色下的会员
+				if(userlist.size() > 0){						//此角色已被使用就不能删除
+					errInfo = "false2";
+				}else{
+				roleTreeService.deleteRoleById(ROLE_ID);	//执行删除
+				//FHLOG.save(Jurisdiction.getUsername(), "删除角色ID为:"+ROLE_ID);
+				errInfo = "success";
+				}
+			}
+		} catch(Exception e){
+			logger.error(e.toString(), e);
+		}
+		map.put("result", errInfo);
+		return AppUtil.returnObject(new PageData(), map);
+	}
+	
+	/**请求编辑
+	 * @param ROLE_ID
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/toEdit")
+	public ModelAndView toEdit( String ROLE_ID )throws Exception{
+		ModelAndView mv = this.getModelAndView();
+		PageData pd = new PageData();
+		try{
+			pd = this.getPageData();
+			pd.put("ROLE_ID", ROLE_ID);
+			pd = roleTreeService.findObjectById(pd);
+			mv.addObject("msg", "edit");
+			mv.addObject("pd", pd);
+			mv.setViewName("system/role/role_tree_edit");
+		} catch(Exception e){
+			logger.error(e.toString(), e);
+		}
+		return mv;
+	}
+	
+	/**保存修改
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/edit")
+	public ModelAndView edit()throws Exception{
+		if(!Jurisdiction.buttonJurisdiction(menuUrl, "edit")){return null;} //校验权限
+		logBefore(logger, Jurisdiction.getUsername()+"修改角色");
+		ModelAndView mv = this.getModelAndView();
+		PageData pd = new PageData();
+		try{
+			pd = this.getPageData();
+			roleTreeService.edit(pd);
+			//FHLOG.save(Jurisdiction.getUsername(), "修改角色:"+pd.getString("ROLE_NAME"));
+			mv.addObject("msg","success");
+		} catch(Exception e){
+			logger.error(e.toString(), e);
+			mv.addObject("msg","failed");
+		}
+		mv.setViewName("save_result");
+		return mv;
+	}
+	
+	/**去新增页面
+	 * @param
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/goAdd")
+	public ModelAndView goAdd()throws Exception{
+		ModelAndView mv = this.getModelAndView();
+		PageData pd = new PageData();
+		pd = this.getPageData();
+		String ROLE_ID = null == pd.get("ROLE_ID")?"":pd.get("ROLE_ID").toString();
+		pd.put("ROLE_ID", ROLE_ID);					//上级ID
+		mv.addObject("pds",roleTreeService.findObjectById(pd));		//传入上级所有信息
+		mv.addObject("ROLE_ID", ROLE_ID);			//传入ID，作为子级ID用
+		mv.setViewName("system/role/role_tree_add");
+		mv.addObject("msg", "save");
+		return mv;
+	}	
+	
+	/**保存
+	 * @param
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/save")
+	public ModelAndView save() throws Exception{
+		logBefore(logger, Jurisdiction.getUsername()+"新增角色");
+		if(!Jurisdiction.buttonJurisdiction(menuUrl, "add")){return null;} //校验权限
+		ModelAndView mv = this.getModelAndView();
+		PageData pd = new PageData();
+		pd = this.getPageData();
+		pd.put("ROLE_ID", this.get32UUID());	//主键
+		roleTreeService.save(pd);
+		mv.addObject("msg","success");
+		mv.setViewName("save_result");
+		return mv;
+	}
+	
+	/**
+	 * 显示菜单列表ztree(菜单授权菜单)
+	 * @param model
+	 * @return
+	 */
+	@RequestMapping(value="/menuqx")
+	public ModelAndView listAllMenu(Model model,String ROLE_ID)throws Exception{
+		ModelAndView mv = this.getModelAndView();
+		
+		try{
+			Roles role = roleTreeService.getRoleById(ROLE_ID);
+			/*if("1".equals(ROLE_ID)) {
+				role = roleTreeService.getRoleById(ROLE_ID);
+			}else {
+				Roles roles = roleTreeService.getRoleById(ROLE_ID);			//根据角色ID获取角色对象
+				// 取出父级角色ID
+				String parent_ID = roles.getPARENT_ID();
+				role = roleTreeService.getRoleById(parent_ID);
+			}*/
+			
+			String roleRights = role.getRIGHTS();					//取出本角色菜单权限
+			List<Menu> menuList = menuService.listAllMenuQx("0");	//获取所有菜单
+			menuList = this.readMenu(menuList, roleRights);			//根据角色权限处理菜单权限状态(递归处理)
+			JSONArray arr = JSONArray.fromObject(menuList);
+			String json = arr.toString();
+			json = json.replaceAll("MENU_ID", "id").replaceAll("PARENT_ID", "pId").replaceAll("MENU_NAME", "name").replaceAll("subMenu", "nodes").replaceAll("hasMenu", "checked");
+			model.addAttribute("zTreeNodes", json);
+			mv.addObject("ROLE_ID",ROLE_ID);
+			mv.setViewName("system/role/menuqx_new");
+		} catch(Exception e){
+			logger.error(e.toString(), e);
+		}
+		return mv;
+	}
+	
+	/**根据角色权限处理权限状态(递归处理)
+	 * @param menuList：传入的总菜单
+	 * @param roleRights：加密的权限字符串
+	 * @return
+	 */
+	public List<Menu> readMenu(List<Menu> menuList,String roleRights){
+		for(int i=0;i<menuList.size();i++){
+			menuList.get(i).setHasMenu(RightsHelper.testRights(roleRights, menuList.get(i).getMENU_ID()));
+			// 父级无此菜单权限，子级就不显示此菜单的复选框
+			//menuList.get(i).setNocheck(!(RightsHelper.testRights(roleRights, menuList.get(i).getMENU_ID())));
+			this.readMenu(menuList.get(i).getSubMenu(), roleRights);					//是：继续排查其子菜单
+		}
+		return menuList;
+	}
+	
+	/**请求角色按钮授权页面(增删改查)
+	 * @param ROLE_ID： 角色ID
+	 * @param msg： 区分增删改查
+	 * @param model
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/b4Button")
+	public ModelAndView b4Button(@RequestParam String ROLE_ID,@RequestParam String msg,Model model)throws Exception{
+		ModelAndView mv = this.getModelAndView();
+		try{
+			List<Menu> menuList = menuService.listAllMenuQx("0"); //获取所有菜单
+			Roles role = roleTreeService.getRoleById(ROLE_ID);		  //根据角色ID获取角色对象
+			String roleRights = "";
+			if("add_qx".equals(msg)){
+				roleRights = role.getADD_QX();	//新增权限
+			}else if("del_qx".equals(msg)){
+				roleRights = role.getDEL_QX();	//删除权限
+			}else if("edit_qx".equals(msg)){
+				roleRights = role.getEDIT_QX();	//修改权限
+			}else if("cha_qx".equals(msg)){
+				roleRights = role.getCHA_QX();	//查看权限
+			}
+			menuList = this.readMenu(menuList, roleRights);		//根据角色权限处理菜单权限状态(递归处理)
+			JSONArray arr = JSONArray.fromObject(menuList);
+			String json = arr.toString();
+			json = json.replaceAll("MENU_ID", "id").replaceAll("PARENT_ID", "pId").replaceAll("MENU_NAME", "name").replaceAll("subMenu", "nodes").replaceAll("hasMenu", "checked");
+			model.addAttribute("zTreeNodes", json);
+			mv.addObject("ROLE_ID",ROLE_ID);
+			mv.addObject("msg", msg);
+		} catch(Exception e){
+			logger.error(e.toString(), e);
+		}
+		mv.setViewName("system/role/b4Button_new");
+		return mv;
+	}
+	
+	/**保存角色菜单权限
+	 * @param ROLE_ID 角色ID
+	 * @param menuIds 菜单ID集合
+	 * @param out
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/saveMenuqx")
+	public void saveMenuqx(@RequestParam String ROLE_ID,@RequestParam String menuIds,PrintWriter out)throws Exception{
+		if(!Jurisdiction.buttonJurisdiction(menuUrl, "edit")){} //校验权限
+		logBefore(logger, Jurisdiction.getUsername()+"修改菜单权限");
+		//FHLOG.save(Jurisdiction.getUsername(), "修改角色菜单权限，角色ID为:"+ROLE_ID);
+		PageData pd = new PageData();
+		try{
+			if(null != menuIds && !"".equals(menuIds.trim())){
+				BigInteger rights = RightsHelper.sumRights(Tools.str2StrArray(menuIds));//用菜单ID做权处理
+				Roles role = roleTreeService.getRoleById(ROLE_ID);	//通过id获取角色对象
+				role.setRIGHTS(rights.toString());
+				roleTreeService.updateRoleRights(role);				//更新当前角色菜单权限
+				pd.put("rights",rights.toString());
+			}else{
+				Roles role = new Roles();
+				role.setRIGHTS("");
+				role.setROLE_ID(ROLE_ID);
+				roleTreeService.updateRoleRights(role);				//更新当前角色菜单权限(没有任何勾选)
+				pd.put("rights","");
+			}
+				pd.put("ROLE_ID", ROLE_ID);
+				if(!"1".equals(ROLE_ID)){						//当修改admin权限时,不修改其它角色权限
+					roleTreeService.setAllRights(pd);				//更新此角色所有子角色的菜单权限
+				}
+			out.write("success");
+			out.close();
+		} catch(Exception e){
+			logger.error(e.toString(), e);
+		}
+	}
+	
+	/**
+	 * 保存角色按钮权限
+	 */
+	/**
+	 * @param ROLE_ID
+	 * @param menuIds
+	 * @param msg
+	 * @param out
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/saveB4Button")
+	public void saveB4Button(@RequestParam String ROLE_ID,@RequestParam String menuIds,@RequestParam String msg,PrintWriter out)throws Exception{
+		if(!Jurisdiction.buttonJurisdiction(menuUrl, "edit")){} //校验权限
+		logBefore(logger, Jurisdiction.getUsername()+"修改"+msg+"权限");
+		//FHLOG.save(Jurisdiction.getUsername(), "修改"+msg+"权限，角色ID为:"+ROLE_ID);
+		PageData pd = new PageData();
+		pd = this.getPageData();
+		try{
+			if(null != menuIds && !"".equals(menuIds.trim())){
+				BigInteger rights = RightsHelper.sumRights(Tools.str2StrArray(menuIds));
+				pd.put("value",rights.toString());
+			}else{
+				pd.put("value","");
+			}
+			pd.put("ROLE_ID", ROLE_ID);
+			roleTreeService.saveB4Button(msg,pd);
+			out.write("success");
+			out.close();
+		} catch(Exception e){
+			logger.error(e.toString(), e);
+		}
+	}
+}

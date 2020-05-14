@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="QuestionPageMapper">
+	
+	
+	<!-- 新增-->
+	<insert id="save" parameterType="pd">
+		insert into TB_QUESTIONPAGE(
+			PAGENAME,	
+			CREATETIME,	
+			PAGESTATUS,	
+			SECONDCODE,	
+			PAGEADDRESS,	
+			PAGEDATA,	
+			PAGEDATAS,	
+			QUESTIONPAGE_ID,
+			CREATE_USER,
+			ROLE_ID
+		) values (
+			#{PAGENAME},	
+			#{CREATETIME},	
+			#{PAGESTATUS},	
+			#{SECONDCODE},	
+			#{PAGEADDRESS},	
+			#{PAGEDATA},	
+			#{PAGEDATAS},	
+			#{QUESTIONPAGE_ID},
+			#{CREATE_USER},
+			#{ROLE_ID}
+		)
+	</insert>
+	
+	
+	<!-- 删除-->
+	<delete id="delete" parameterType="pd">
+		delete from TB_QUESTIONPAGE
+		where 
+			QUESTIONPAGE_ID = #{QUESTIONPAGE_ID}
+	</delete>
+	
+	
+	<!-- 修改 -->
+	<update id="edit" parameterType="pd">
+		update  TB_QUESTIONPAGE
+			set 
+				PAGENAME = #{PAGENAME},
+				PAGESTATUS = #{PAGESTATUS},
+				SECONDCODE = #{SECONDCODE},
+				PAGEADDRESS = #{PAGEADDRESS},
+				PAGEDATA = #{PAGEDATA},
+				PAGEDATAS = #{PAGEDATAS},
+			QUESTIONPAGE_ID = QUESTIONPAGE_ID
+			where 
+				QUESTIONPAGE_ID = #{QUESTIONPAGE_ID}
+	</update>
+	
+	
+	<!-- 通过ID获取数据 -->
+	<select id="findById" parameterType="pd" resultType="pd">
+		select 
+			PAGENAME,	
+			CREATETIME,	
+			PAGESTATUS,	
+			SECONDCODE,	
+			PAGEADDRESS,	
+			PAGEDATA,	
+			PAGEDATAS,	
+			QUESTIONPAGE_ID
+		from 
+			TB_QUESTIONPAGE
+		where 
+			QUESTIONPAGE_ID = #{QUESTIONPAGE_ID}
+	</select>
+	
+	<!-- 用户访问问卷获取问卷数据 -->
+	<select id="findByIdUser" parameterType="pd" resultType="pd">
+		select 
+			PAGENAME,	
+			PAGESTATUS,	
+			SECONDCODE,	
+			PAGEDATAS,					
+			QUESTIONPAGE_ID
+		from 
+			TB_QUESTIONPAGE
+		where 
+			QUESTIONPAGE_ID = #{pageId}
+	</select>
+	
+	
+	<!-- 列表 -->
+	<select id="datalistPage" parameterType="page" resultType="pd">
+		select
+				a.PAGENAME,	
+				a.CREATETIME,	
+				a.PAGESTATUS,	
+				a.SECONDCODE,	
+				a.PAGEADDRESS,	
+				a.PAGEDATA,	
+				a.PAGEDATAS,	
+				a.QUESTIONPAGE_ID,
+				a.ROLE_ID
+		from 
+				TB_QUESTIONPAGE a
+		where 1=1
+		<if test="pd.ROLE_ID != null and pd.ROLE_ID != ''">
+			and a.ROLE_ID in  
+			<foreach collection="pd.ROLE_ID" item="ROLE_ID" index="index" open="(" close=")" separator=",">  
+	            '${ROLE_ID}'  
+	        </foreach>
+		</if>
+		<if test="pd.CREATE_USER != null and pd.CREATE_USER != ''">
+			or a.CREATE_USER = #{pd.CREATE_USER} 
+		</if>
+	</select>
+	
+	<select id="checkList" parameterType="page" resultType="pd">
+		select
+				a.PAGENAME,		
+				a.QUESTIONPAGE_ID
+		from 
+				TB_QUESTIONPAGE a
+	</select>
+	
+	<!-- 列表(全部) -->
+	<select id="listAll" parameterType="pd" resultType="pd">
+		select
+				a.PAGENAME,	
+				a.CREATETIME,	
+				a.PAGESTATUS,	
+				a.SECONDCODE,	
+				a.PAGEADDRESS,	
+				a.PAGEDATA,	
+				a.PAGEDATAS,	
+				a.QUESTIONPAGE_ID
+		from 
+				TB_QUESTIONPAGE a
+	</select>
+	
+	<!-- 批量删除 -->
+	<delete id="deleteAll" parameterType="String">
+		delete from TB_QUESTIONPAGE
+		where 
+			QUESTIONPAGE_ID in
+		<foreach item="item" index="index" collection="array" open="(" separator="," close=")">
+                 #{item}
+		</foreach>
+	</delete>
+	
+</mapper>

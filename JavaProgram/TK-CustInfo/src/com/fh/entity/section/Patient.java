@@ -1,0 +1,183 @@
+package com.fh.entity.section;
+
+/** 
+ * 类名称：RecordController
+ * 创建人：shanghaizhao 
+ * 创建时间：2017-11-06
+ * 患者基本信息类
+ */
+public class Patient {
+	
+	private String recordId;
+	private String visitCode;//访问标识
+	private String hosipitalCode;//医院编号
+	private String hosipitalName;//医院名称
+	private String visitType;//门诊类型
+	private String sectionName;//科室名称
+	private String sectionCode;//科室编号
+	private String empCode;//医生编号
+	private String empName;//医生姓名
+	private String doctorType;//医生职称
+	private String patientId;//患者Id
+	private String patientName;//患者姓名
+	private String sex;//患者性别
+	private String phoneNumber;//患者电话
+	private String visitDate;//诊疗时间
+	private String times;//就诊次数
+	private String experienceType;//体检类型
+	private String nurseName;//房间号
+	/******燕园康复医院问诊数据******/
+	private String outHospitalDate;//出院时间
+	private String bed;//床位
+	private String buildingNum;//楼栋号
+	private String rootNum;//房间号
+	private String createTime;//创建时间
+	private String modifyTime;//修改时间
+	
+	
+	public String getCreateTime() {
+		return createTime;
+	}
+	public void setCreateTime(String createTime) {
+		this.createTime = createTime;
+	}
+	public String getModifyTime() {
+		return modifyTime;
+	}
+	public void setModifyTime(String modifyTime) {
+		this.modifyTime = modifyTime;
+	}
+	public String getNurseName() {
+		return nurseName;
+	}
+	public void setNurseName(String nurseName) {
+		this.nurseName = nurseName;
+	}
+	public String getOutHospitalDate() {
+		return outHospitalDate;
+	}
+	public void setOutHospitalDate(String outHospitalDate) {
+		this.outHospitalDate = outHospitalDate;
+	}
+	public String getBed() {
+		return bed;
+	}
+	public void setBed(String bed) {
+		this.bed = bed;
+	}
+	public String getBuildingNum() {
+		return buildingNum;
+	}
+	public void setBuildingNum(String buildingNum) {
+		this.buildingNum = buildingNum;
+	}
+	public String getRootNum() {
+		return rootNum;
+	}
+	public void setRootNum(String rootNum) {
+		this.rootNum = rootNum;
+	}
+	public String getRecordId() {
+		return recordId;
+	}
+	public void setRecordId(String recordId) {
+		this.recordId = recordId;
+	}
+	public String getVisitCode() {
+		return visitCode;
+	}
+	public void setVisitCode(String visitCode) {
+		this.visitCode = visitCode;
+	}
+	public String getHosipitalCode() {
+		return hosipitalCode;
+	}
+	public void setHosipitalCode(String hosipitalCode) {
+		this.hosipitalCode = hosipitalCode;
+	}
+	public String getHosipitalName() {
+		return hosipitalName;
+	}
+	public void setHosipitalName(String hosipitalName) {
+		this.hosipitalName = hosipitalName;
+	}
+	public String getVisitType() {
+		return visitType;
+	}
+	public void setVisitType(String visitType) {
+		this.visitType = visitType;
+	}
+	public String getSectionName() {
+		return sectionName;
+	}
+	public void setSectionName(String sectionName) {
+		this.sectionName = sectionName;
+	}
+	public String getSectionCode() {
+		return sectionCode;
+	}
+	public void setSectionCode(String sectionCode) {
+		this.sectionCode = sectionCode;
+	}
+	public String getEmpCode() {
+		return empCode;
+	}
+	public void setEmpCode(String empCode) {
+		this.empCode = empCode;
+	}
+	public String getEmpName() {
+		return empName;
+	}
+	public void setEmpName(String empName) {
+		this.empName = empName;
+	}
+	public String getDoctorType() {
+		return doctorType;
+	}
+	public void setDoctorType(String doctorType) {
+		this.doctorType = doctorType;
+	}
+	public String getPatientId() {
+		return patientId;
+	}
+	public void setPatientId(String patientId) {
+		this.patientId = patientId;
+	}
+	public String getPatientName() {
+		return patientName;
+	}
+	public void setPatientName(String patientName) {
+		this.patientName = patientName;
+	}
+	public String getSex() {
+		return sex;
+	}
+	public void setSex(String sex) {
+		this.sex = sex;
+	}
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
+	public String getVisitDate() {
+		return visitDate;
+	}
+	public void setVisitDate(String visitDate) {
+		this.visitDate = visitDate;
+	}
+	public String getTimes() {
+		return times;
+	}
+	public void setTimes(String times) {
+		this.times = times;
+	}
+	public String getExperienceType() {
+		return experienceType;
+	}
+	public void setExperienceType(String experienceType) {
+		this.experienceType = experienceType;
+	}
+	
+}

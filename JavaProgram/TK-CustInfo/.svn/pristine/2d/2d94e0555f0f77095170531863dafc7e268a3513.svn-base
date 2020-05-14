@@ -1,0 +1,243 @@
+package com.fh.controller.record;
+
+import java.io.PrintWriter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.TreeMap;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.shiro.session.Session;
+import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.fh.controller.base.BaseController;
+import com.fh.entity.Page;
+import com.fh.entity.section.RecordConfig;
+import com.fh.entity.system.User;
+import com.fh.service.record.RecordService;
+import com.fh.service.record.SectionBaseService;
+import com.fh.util.Const;
+import com.fh.util.ConversionUtil;
+import com.fh.util.Jurisdiction;
+import com.fh.util.PageData;
+import com.fh.util.Tools;
+
+/** 
+ * 类名称：RecordConfController
+ * 创建人：shanghaizhao 
+ * 创建时间：2017-12-07
+ */
+@Controller
+@RequestMapping(value="/recConf")
+public class RecordConfController extends BaseController {
+	@Resource(name="recordService")
+	private RecordService recordService;
+	
+	@Resource(name="sectionBaseService")
+	private SectionBaseService sectionBaseService;
+	
+	/**
+	 * 问诊数据名称配置列表 
+	 */
+	@RequestMapping(value="/configure")
+	public ModelAndView configure(Page page){
+		ModelAndView mv = this.getModelAndView();
+		PageData pd = new PageData();
+		pd = this.getPageData();
+		// 根据登录用户查询所属医院的编号
+//		pd.put("hosipitalId", "tk001");
+		// 若接口类型参数为空，则默认添加该医院下第一个接口编号
+		getUserHosiptalBySession(mv,pd);
+		if(Tools.isEmpty(pd.getString("interType"))){
+			// 暂以数据字典类中燕园为例
+			pd.put("interType", ConversionUtil.getInterName().firstKey());
+		}
+		String hosipitalId=pd.getString("hosipitalId");
+		String interType=pd.getString("interType");
+		mv.addObject("interType", interType);
+		mv.addObject("hosipitalId", hosipitalId);
+		page.setPd(pd);
+		try {
+			List<PageData> varList = recordService.configList(page);
+			for (PageData detail : varList) {
+				detail.put("HOSIPITAL_NAME", ConversionUtil.getHosName().get(detail.get("HOSIPITAL_ID")));
+			}
+			mv.addObject("csize", varList.size());
+			mv.addObject("varList", varList);
+			//mv.addObject("interMap", ConversionUtil.getInterName());
+			//问卷
+			
+			mv.setViewName("record/configure_List");
+			mv.addObject("pd", pd);
+			mv.addObject("QX",Jurisdiction.getHC());	//按钮权限
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return mv;
+	}
+	
+	
+	/**去新增页面
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/goAdd")
+	public ModelAndView goAdd()throws Exception{
+		ModelAndView mv = this.getModelAndView();
+		PageData pd = new PageData();
+		pd = this.getPageData();
+		List<String> list = recordService.configColumn();
+		// 去除已经存在的配置项，使在新增的时候只可选择没有添加过的字段
+		//pd.put("hosipitalId", "tk001");
+		List<String> column = recordService.getColumn(pd);
+		List<String> colist = new ArrayList<String>();
+		for(String i:list){
+			if(!column.contains(i)){
+				colist.add(i);
+			}
+		}
+		getUserHosiptalBySession(mv,pd);
+		mv.addObject("fieldOrder", pd.get("fieldOrder"));
+		mv.setViewName("record/configure_add");
+		//mv.addObject("interMap", ConversionUtil.getInterName());
+		mv.addObject("colist", colist);
+		mv.addObject("msg", "toSave");
+		mv.addObject("pd", pd);
+		return mv;
+	}
+	
+	/**去编辑页面
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/goEdit")
+	public ModelAndView goEdit()throws Exception{
+		ModelAndView mv = this.getModelAndView();
+		PageData pd = new PageData();
+		pd = this.getPageData();
+		RecordConfig record = recordService.getEntityById(pd);
+		
+		mv.setViewName("record/configure_edit");
+		mv.addObject("record", record);
+		mv.addObject("msg", "toSave");
+		mv.addObject("pd", pd);
+		return mv;
+	}
+	
+	/**保存
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/toSave")
+	public ModelAndView toSave()throws Exception{
+		ModelAndView mv = this.getModelAndView();
+		PageData pd = new PageData();
+		pd = this.getPageData();
+		if(pd.get("configureId") == null) {
+			recordService.toSave(pd);
+			mv.addObject("msg","success");
+		}else {
+			recordService.toUpdate(pd);
+			mv.addObject("msg","success");
+		}
+		mv.setViewName("save_result");
+		return mv;
+	}
+	
+	/**提升顺序
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/goUpOrder")
+	public void goUpOrder(HttpServletRequest request,PrintWriter out)throws Exception{
+		PageData pd = new PageData();
+		pd = this.getPageData();
+		int num = recordService.upOrder(pd);
+		if(num==1) {
+			out.write("success");
+		}else {
+			out.write("exist");
+		}
+		out.close();
+	}
+
+	/**降低顺序
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/goDownOrder")
+	public void goDownOrder(HttpServletRequest request,PrintWriter out)throws Exception{
+		PageData pd = new PageData();
+		pd = this.getPageData();
+		int num = recordService.downOrder(pd);
+		if(num==1) {
+			out.write("success");
+		}else {
+			out.write("exist");
+		}
+		out.close();
+	}
+	
+	
+	/***
+	 * 修改显示状态
+	 */
+	@RequestMapping(value="/updateStatus")
+	public void updateStatus(PrintWriter out) throws Exception{
+		PageData pd = new PageData();
+		pd = this.getPageData();
+		if("1".equals(pd.get("isShow"))) {
+			pd.put("isShow", "2");
+		}else {
+			pd.put("isShow", "1");
+		}
+		int num = recordService.updateStatus(pd);
+		if(num==1) {
+			out.write("success");
+		}else {
+			out.write("exist");
+		}
+		out.close();
+	}
+	
+	@InitBinder
+	public void initBinder(WebDataBinder binder){
+		DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+		binder.registerCustomEditor(Date.class, new CustomDateEditor(format,true));
+	}
+	
+	/**
+	 * 
+	 * 
+	 *2017年12月27日
+	 * xiaoding
+	 */
+	private void getUserHosiptalBySession(ModelAndView mv,PageData pd){
+		Session session = Jurisdiction.getSession();
+		User user = (User)session.getAttribute(Const.SESSION_USERROL);		
+		String path=user.getDepartment().getPATH();
+		String level=user.getDepartment().getLEVE();
+		if(!Tools.isEmpty(path)&&!Tools.isEmpty(level)){
+			Integer levelInt=Integer.parseInt(level);
+			if(path.indexOf(Const.BEIJING_YANYUAN_KANGFU_CODE_HOSPITAL)>-1){
+				mv.addObject("interMap",ConversionUtil.getInterName());
+				pd.put("hosipitalId", Const.YANYUAN_HOSPITALID);
+			}else if(path.indexOf(Const.TAIKANG_XIANLIN_GULOU_HOSPITAL_CODE)>-1){
+				mv.addObject("interMap", ConversionUtil.getXLInterName());
+				pd.put("hosipitalId", Const.XIANLIN_HOSPITALID);
+			}else if(levelInt<2 ){
+				mv.addObject("hospitalCodeStr", "hospitalCodeStr");//显示两家医院
+				mv.addObject("getHosName", ConversionUtil.getHosName());
+			}
+		}
+	}
+}

@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="QuestionnaireResultsMapper">
+	 <cache type="org.mybatis.caches.ehcache.LoggingEhcache"/>
+	<resultMap type="QuestionnaireResults" id="QuestionnaireResultsResultMap">
+		<id column="questionResultId" property="questionResultId"/>
+		<result column="questionnaireId" property="questionnaireId"/>
+		<result column="questionId" property="questionId"/>
+		<result column="batch_id" property="batchId"/>
+		<result column="types" property="types"/>
+		
+		<result column="score" property="score"/>
+		<result column="answerResult" property="answerResult"/>
+		
+		<result column="terminalIP" property="terminalIP"/>
+		<result column="mac" property="mac"/>
+		
+		<result column="modifyUser" property="modifyUser"/>
+		<result column="modifyTime" property="modifyTime"/>
+		
+		<result column="createUser" property="createUser"/>
+		<result column="creatTime" property="creatTime"/>
+		<result column="respondentCode" property="respondentCode"/>
+		<result column="remarks" property="remarks"/>
+		
+		<result column="visit_code" property="visitCode"/>
+		<result column="hosipitalCode" property="hosipitalCode"/>
+		
+	</resultMap>
+	<!-- 新增-->
+	<insert id="save" parameterType="QuestionnaireResults">
+		insert into tb_questionnaire_results(
+			questionResultId,	
+			batch_id, 
+			questionnaireId,
+			questionId,
+			types,	
+			score,	
+			answerResult,	
+			terminalIP,
+			mac,
+			createUser,
+			createTime,
+			modifyUser,
+			modifyTime
+		) values (
+			#{questionResultId},	
+			#{batchId}, 
+			#{questionnaireId},
+			#{questionId},
+			#{types},	
+			#{score},	
+			#{answerResult},	
+			#{terminalIP},
+			#{mac},
+			#{createUser},
+			#{createTime},
+			#{modifyUser},
+			#{modifyTime}
+		)
+	</insert>
+	<!-- 批量插入数据 -->
+	<insert id="insertAll"  useGeneratedKeys="true" parameterType="java.util.List">
+	<![CDATA[	  
+		insert into tb_questionnaire_results(
+			questionResultId,	
+			batch_id, 
+			questionnaireId,
+			questionId,
+			types,	
+			score,	
+			answerResult,	
+			terminalIP,
+			mac,
+			createUser,
+			createTime,
+			respondentCode,
+			modifyTime,
+			column1,
+			remarks,
+			hosipitalCode,
+			visit_code
+		) values
+		]]>
+		<foreach collection="list" item="item" index="index" separator=",">
+			 (
+				#{item.questionResultId},	
+				#{item.batchId}, 
+				#{item.questionnaireId},
+				#{item.questionId},
+				#{item.types},	
+				#{item.score},	
+				#{item.answerResult},	
+				#{item.terminalIP},
+				#{item.mac},
+				#{item.createUser},
+				#{item.createTime},
+				#{item.respondentCode},
+				#{item.modifyTime},
+				#{item.column1},
+				#{item.remarks},
+				#{item.hosipitalCode},
+				#{item.visitCode}
+			)
+		</foreach>
+	</insert>
+	<select id="listQuestionsResult" resultMap="QuestionnaireResultsResultMap" parameterType="pd">
+		select 
+			questionResultId,	
+			batch_id, 
+			questionnaireId,
+			questionId,
+			types,	
+			score,	
+			answerResult,	
+			terminalIP,
+			mac,
+			createUser,
+			createTime,
+			modifyTime,
+			respondentCode,
+			(select tb.respondentsParentId   from  tb_questionnaire tb where questionnaireId=tb.questionnaireId limit 1) respondentsParentId 
+		from tb_questionnaire_results  where questionnaireId=#{questionnaireId}
+			and questionId=#{questionId} and  batch_id =#{batchId} limit 0,1
+			
+	</select>
+	
+	<!--查询有结果的问卷-->
+	<select id="findResultQuestionnaireId" parameterType="pd" resultType="java.lang.String">
+		select DISTINCT(questionnaireId) 
+		from tb_questionnaire_results 
+		where hosipitalCode = #{HOSIPITAL_CODE} 
+		and visit_code in 
+		(
+		select 
+		VISIT_CODE 
+		from tb_section_base 
+		where 
+		HOSIPITAL_CODE=#{HOSIPITAL_CODE}
+		<if test="SECTION_CODE !=null and SECTION_CODE !=''">
+		and SECTION_CODE=#{SECTION_CODE}
+		</if>
+		)
+		 and status=1
+	</select>
+	
+	<select id="findCountResult" parameterType="pd" resultType="pd">
+		select 
+		count(1) as sum,
+		answerResult as opt 
+		from tb_questionnaire_results 
+		where 
+		questionId =#{questionId} and answerResult!='' and status=1
+		GROUP BY answerResult
+	
+	</select>
+	
+	<select id="finCountResultT2" parameterType="pd" resultType="java.lang.Long">
+		select count(1) as sum 
+		from tb_questionnaire_results 
+		where  questionId=#{questionId} and answerResult LIKE CONCAT(CONCAT('%',#{answerResult}),'%') and status=1
+		
+	</select>
+	<select id="findCountT2Sum" parameterType="pd" resultType="java.lang.Long">
+		select count(1) as sum 
+		from tb_questionnaire_results 
+		where  questionId=#{questionId} and status=1
+	</select>
+	
+	<!-- 问卷一级问题满意度-->
+	<select id="findCountResultStatL1" parameterType="pd" resultType="pd">
+		select count(1) as sum, answerResult as opt from tb_questionnaire_results 
+		where 
+		questionId in(select questionId from TB_QUESTIONS where parentId =#{questionId} 
+		and types ='T0' and `status`=1) 
+		<if test="lastLoginStart !=null and lastLoginStart != '' ">
+			and createTime &gt;=#{lastLoginStart}
+		</if>	 
+		<if test="lastLoginEnd !=null and lastLoginEnd != '' ">
+			and createTime &lt;=#{lastLoginEnd}
+		</if>
+		GROUP BY answerResult;
+	</select>
+	<!-- 问卷问题满意度 -->
+	<select id="findCountResultStatL2" parameterType="pd" resultType="pd">
+		select count(1) as sum, answerResult as opt 
+		from tb_questionnaire_results 
+		where questionId =#{questionId} 
+		and answerResult !=''
+		<if test="lastLoginStart !=null and lastLoginStart != '' ">
+			and Date(createTime) &gt;=#{lastLoginStart}
+		</if>	 
+		<if test="lastLoginEnd !=null and lastLoginEnd != '' ">
+			and Date(createTime) &lt;=#{lastLoginEnd}
+		</if>
+		and `status`=1
+		GROUP BY answerResult;
+	</select>
+	<!-- 问卷综合满意度 -->
+	<select id="findCountResultStat" parameterType="pd" resultType="pd">
+		select count(1) as sum, answerResult as opt
+		from tb_questionnaire_results 
+		where questionnaireId =#{questionnaireId}
+		<if test="lastLoginStart !=null and lastLoginStart != '' ">
+			and createTime &gt;=#{lastLoginStart}
+		</if>	 
+		<if test="lastLoginEnd !=null and lastLoginEnd != '' ">
+			and createTime &lt;=#{lastLoginEnd}
+		</if>
+		and types ='T0' and `status`=1 GROUP BY answerResult;
+	</select>
+	
+	
+	<!-- 星级评定饼图查询 -->
+	<select id="findBtResult" parameterType="pd" resultType="pd">
+		select answerResult,count(1) as sum 
+		from tb_questionnaire_results 
+		where questionId=#{questionId} 
+		and `status`='1' and answerResult !='' 
+		GROUP BY answerResult
+	</select>
+	<!-- 星级评定折线图查询 -->
+	<select id="commonSql" parameterType="java.lang.String" resultType="pd">
+		${_parameter}
+	</select>
+	
+	
+	
+	
+</mapper>

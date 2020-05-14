@@ -1,0 +1,88 @@
+##用于备份、还原数据库、在线编辑 SQL
+
+# 是否远程备份数据库（例如tomcat和数据库不在同一个服务器中） yes or no , DBSeverport远程服务器备份程序端口
+remoteDB=no
+DBSeverport=6666
+
+####################################
+# 数据库类型
+dbtype=mysql
+# 数据库地址
+dbAddress=localhost
+#端口
+dbport=3306
+# 数据库名称
+databaseName=fhadmin
+# 数据库用户名
+username=root
+# 数据库密码
+password=root
+# mysqldump 路径 Linux
+#dbpath = /usr/bin/
+# 备份文件存放位置 Linux
+#sqlFilePath =/mysql_backup/
+# mysqldump 路径 Windows
+dbpath = E\://mysoft//mysql5.6//MySQL Server 5.6//bin//
+# 备份文件存放位置 Windows
+sqlFilePath =e\:/mysql_backup/
+####################################
+
+
+####################################
+# 数据库类型
+#dbtype=oracle
+# 数据库地址
+#dbAddress=192.168.1.102
+#端口
+#dbport=1521
+# 数据库用户名
+#username=C##FHADMIN
+# 数据库名称
+#databaseName=orcl
+# 数据库密码
+#password = root
+# 备份文件存放位置 Linux
+#sqlFilePath =/mysql_backup/
+# 备份文件存放位置 Windows
+#sqlFilePath =E\://oracle_backup//
+####################################
+
+
+####################################
+# 数据库类型
+#dbtype=sqlserver
+# 数据库地址
+#dbAddress=192.168.1.102
+#端口
+#dbport=1433
+# 数据库的用户
+#username = sa
+# 数据库名称
+#databaseName=fhadmin
+# 数据库密码
+#password = root
+# 备份文件存放位置  (只有Windows）确保此路径存在，否则备份失败
+#sqlFilePath =E\:/sqlserverBackup/
+####################################
+## 仙林鼓楼医院生产环境His接口地址
+xl_his_dev = http://218.94.72.190:48080/customerWebservice.asmx
+
+## 仙林鼓楼医院新His接口地址
+xl_his_url = http://218.94.72.190:58082/Service.asmx
+
+## 燕园康复医院问诊数据接口token
+req_token=cf94a9e9-f4ac-4af5-a545-689bbcaf3564
+## 燕园康复医院查询住院信息接口 
+url_inHosptal = http://10.130.209.158:8002/hdrapp/starRating/getInHospitalData/
+## 燕园康复医院查询护理业态信息接口 
+url_careForm = http://10.130.209.158:8002/hdrapp/starRating/getCareFormatData/
+## 燕园康复医院查询体检信息接口 
+url_physical = http://10.130.209.158:8002/hdrapp/starRating/getPhysicalData/
+## 燕园康复医院查询门诊(就诊)信息接口 
+url_encounter = http://10.130.209.158:8002/hdrapp/starRating/getEncounterData/
+
+## 华为接口属性请求基地址、用户名、密码
+serverRoot = 
+hwUserName =
+hwPassWord =
+

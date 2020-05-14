@@ -1,0 +1,629 @@
+package com.fh.controller.questionnaire;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.fh.controller.base.BaseController;
+import com.fh.entity.Page;
+import com.fh.entity.system.Questionnaire;
+import com.fh.entity.system.Questions;
+import com.fh.entity.system.User;
+import com.fh.service.fhoa.department.DepartmentManager;
+import com.fh.service.questionnaire.QuestionnaireResultsService;
+import com.fh.service.questionnaire.QuestionnaireService;
+import com.fh.service.questionnaire.QuestionsHeaderService;
+import com.fh.service.questionnaire.QuestionsService;
+import com.fh.service.record.SectionBaseService;
+import com.fh.util.Const;
+import com.fh.util.ConversionUtil;
+import com.fh.util.DateUtil;
+import com.fh.util.Jurisdiction;
+import com.fh.util.PageData;
+import com.fh.util.Tools;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
+/**
+ * QuestionStaticController
+ * 
+ * @author yaoning 
+ * 创建时间：2017-08-01
+ */
+
+@Controller
+@RequestMapping(value = "/questionStatic")
+public class QuestionStaticController extends BaseController {
+	
+	String menuUrl = "questionStatic/starRat.do";
+	
+	@Resource(name = "questionnaireService")
+	private QuestionnaireService questionnaireService;
+	@Resource(name = "questionsService")
+	private QuestionsService questionsService;
+	@Resource(name = "questionsHeaderService")
+	private QuestionsHeaderService questionsHeaderService;
+	@Resource(name = "sectionBaseService")
+	private SectionBaseService sectionBaseService;
+	@Resource(name="questionnaireResultsService")
+	private QuestionnaireResultsService questionnaireResultsService;
+	@Resource(name="departmentService")
+	private DepartmentManager departmentService;
+	/**
+	 * 去统计图表页面
+	 * 
+	 * @return
+	 */
+	@RequestMapping(value = "/goStatisChart")
+	public ModelAndView goStatisticsChart() {
+		ModelAndView mv = this.getModelAndView();
+		PageData pd = new PageData();
+		List<Questionnaire> list = new ArrayList<Questionnaire>();
+		try {
+			list = questionnaireService.findQuestionnaireList(pd);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		mv.addObject("pageList", list);
+		mv.setViewName("questionnaire/questionStatisChart");
+		return mv;
+	}
+
+	@RequestMapping(value = "/goStatissticsData")
+	public ModelAndView goStatissticsData(Page page) {
+		logBefore(logger, "列表Questions");
+		ModelAndView mv = this.getModelAndView();
+		PageData pd = new PageData();
+		try {
+			pd = this.getPageData();
+			String startTime = pd.getString("lastLoginStart");
+			String endTime = pd.getString("lastLoginEnd");
+			page.setPd(pd);
+			List<Questions> parentList = questionsService.oneStatislist(page);
+			List<Questions> childList = questionsService.childList(pd);
+			// 查询结果百分比
+			pd.put("tx", "qb");
+			PageData qb = questionnaireResultsService.findCountResultStatL1(pd);
+			for (int i = 0; i < parentList.size(); i++) {
+				Questions entity = parentList.get(i);
+				// 问卷调查对象调整--------------开始
+				String respondentsStr = entity.getLevel();
+				StringBuffer respondentsName = new StringBuffer();
+				if (respondentsStr != null && respondentsStr != "") {
+					Map<String, String> map = ConversionUtil.getStaffLevel();
+					if (respondentsStr.indexOf(",") > -1) {
+						String[] respondentsArr = respondentsStr.split(",");
+						for (int j = 0; j < respondentsArr.length; j++) {
+							if (j == 0) {
+								respondentsName.append(map.get(respondentsArr[j]));
+							} else {
+								respondentsName.append("," + map.get(respondentsArr[j]));
+							}
+						}
+					} else {
+						respondentsName.append(map.get(respondentsStr));
+					}
+					parentList.get(i).setLevel(respondentsName.toString());
+				}
+				// 一级类目满意度计算
+				if ("L1".equals(entity.getClassification())) {
+					PageData entitypd = new PageData();
+					entitypd.put("questionId", entity.getQuestionId());
+					entitypd.put("tx", "L1");
+					entitypd.put("lastLoginStart", startTime);
+					entitypd.put("lastLoginEnd", endTime);
+					// 查询结果百分比
+					PageData pdf = questionnaireResultsService.findCountResultStatL1(entitypd);
+					if (!Tools.isEmpty(pdf.getString("fm"))) {
+						entity.setQuestionYx(pdf.getString("yxyb"));
+						entity.setQuestionWx(pdf.getString("wxyb"));
+						entity.setSatisfaction(pdf.getString("bfb"));
+						entity.setQuestionFm(pdf.getString("fm"));
+						entity.setQuestionFz(pdf.getString("fz"));
+					}
+
+				}
+				// 获取对应二级列表
+				List<Questions> toParent = new ArrayList<Questions>();
+				for (Questions questions : childList) {
+					if (entity.getQuestionId().equals(questions.getParentId())) {
+						if ("T0".equals(questions.getTypes())) {
+							PageData entitypd = new PageData();
+							entitypd.put("questionId", questions.getQuestionId());
+							entitypd.put("tx", "L2");
+							entitypd.put("lastLoginStart", startTime);
+							entitypd.put("lastLoginEnd", endTime);
+							// 查询结果百分比
+							PageData pdf = questionnaireResultsService.findCountResultStatL1(entitypd);
+							questions.setQuestionYx(pdf.getString("yxyb"));
+							questions.setQuestionWx(pdf.getString("wxyb"));
+							questions.setSatisfaction(pdf.getString("bfb"));
+							questions.setQuestionFm(pdf.getString("fm"));
+							questions.setQuestionFz(pdf.getString("fz"));
+						}
+						if ("T4".equals(questions.getTypes())) {
+							PageData entitypd = new PageData();
+							entitypd.put("questionId", questions.getQuestionId());
+							entitypd.put("lastLoginStart", startTime);
+							entitypd.put("lastLoginEnd", endTime);
+							PageData pdf = questionnaireResultsService.findCountResultStatT4(entitypd);
+							questions.setSatisfaction(pdf.getString("bfb"));
+							questions.setQuestionFm(pdf.getString("fm"));
+							questions.setQuestionFz(pdf.getString("fz"));
+						}
+						toParent.add(questions);
+					}
+				}
+				if (toParent.size() > 0) {
+					entity.setSUBQUESTIONS(toParent);
+				}
+
+			}
+			this.getUserHC(pd, departmentService);
+			pd.put("questionnaireType", "common_questionnaire");
+			List<Questionnaire> questionnaireList = questionnaireService.findQuestionnaireList(pd); // 列出Question列表
+			mv.addObject("questionnaireList", questionnaireList);// 所属问卷
+			mv.setViewName("questionnaire/questionSatisData");
+			mv.addObject("varList", parentList);
+			mv.addObject("pd", pd);
+			mv.addObject("qb", qb);
+			mv.addObject(Const.SESSION_QX, Jurisdiction.getHC()); // 按钮权限
+		} catch (Exception e) {
+			logger.error(e.toString(), e);
+		}
+		return mv;
+	}
+
+	/**
+	 * 统计图表数据组装
+	 * 
+	 * @param page
+	 * @return
+	 */
+	@RequestMapping(value = "/chartList")
+	public ModelAndView list(Page page) {
+		ModelAndView mv = this.getModelAndView();
+		List<Questionnaire> wjlist = new ArrayList<Questionnaire>();
+		PageData pd = null;
+		pd = this.getPageData();
+		page.setPd(pd);
+		try {
+			this.getUserHC(pd, departmentService);
+			pd.put("questionnaireType", "common_questionnaire");
+			wjlist = questionnaireService.findQuestionnaireList(pd);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		// 查询问卷下属问题
+		try {
+			// 判断是否存在结果
+			// List<PageData>
+			// listQuestionResult=questionsHeaderService.findCoutQuestioneResult(pd);
+			List<PageData> pdList = questionsService.findByStatIdlist(page);
+			if (pdList != null) {
+				// 循环问题查找答案
+
+				for (PageData pageData : pdList) {
+					// 组装饼图数据
+					List<PageData> bt = new ArrayList<PageData>();
+					String[] btData = null;
+					// 组装柱状图数据
+					String[] xData = null;
+					String[] yData = null;
+
+					// 组装返回结果
+					List<PageData> result = new ArrayList<PageData>();
+					// 总数量
+					Long count = 0L;
+
+					List<PageData> resultList = new ArrayList<PageData>();
+//					if ("L0".equals(pageData.get("classification"))) {
+//						// 查询卷头问题
+//						resultList = questionsHeaderService.findCountHeaderResult(pageData);
+//					} else {
+						// 复选题
+						if ("T2".equals(pageData.get("types"))) {
+							// 获取复选题选项
+							String questionData = pageData.getString("questionData");// T3选项
+							JSONArray json = JSONArray.fromObject(questionData);
+							resultList = questionnaireResultsService.findCountResultT2(pageData, json);
+							// T2类型结果总数
+							count = questionnaireResultsService.findCountT2Sum(pageData);
+
+						} else {
+							resultList = questionnaireResultsService.findCountResult(pageData);
+						}
+//					}
+					if (!"T2".equals(pageData.get("types"))) {
+						for (PageData pageData2 : resultList) {
+							Long s = (Long) pageData2.get("sum");
+							count = count + s;
+						}
+					}
+					if (count == 0) {
+						pageData.put("isChart", false);
+					} else {
+						pageData.put("isChart", true);
+					}
+					if (count != 0) {
+						for (PageData pageData2 : resultList) {
+							Long s = (Long) pageData2.get("sum");
+							BigDecimal sum = new BigDecimal(s);
+							BigDecimal bfb = sum.divide(new BigDecimal(count), 4, RoundingMode.HALF_DOWN)
+									.multiply(new BigDecimal(100)).stripTrailingZeros();
+							if (bfb.compareTo(BigDecimal.ZERO) != 0) {
+								pageData2.put("bfb", bfb);
+							}
+						}
+					}
+					// 默认题型计算
+					if ("T0".equals(pageData.get("types"))) {
+						// 组装前台展示数据
+						Map<String, String> map = ConversionUtil.getDefaultOption();// T0选项
+						// 初始化各图表
+						btData = new String[map.size()];
+						xData = new String[map.size()];
+						yData = new String[map.size()];
+						Set<String> set = map.keySet();
+						int i = 0;
+						for (String str : set) {
+							PageData btpd2 = new PageData();
+							btpd2.put("name", map.get(str));
+							btpd2.put("value", 0);
+							btData[i] = map.get(str);
+							xData[i] = map.get(str);
+							PageData respd = new PageData();
+							respd.put("opt", map.get(str));
+							for (PageData pd2 : resultList) {
+								if (str.equals(pd2.getString("opt"))) {
+									respd.put("sum", pd2.get("sum"));
+									respd.put("bfb", pd2.get("bfb"));
+									btpd2.put("value", pd2.get("sum"));
+									yData[i] = String.valueOf((Long) pd2.get("sum"));
+									break;
+								}
+							}
+							result.add(respd);
+							bt.add(btpd2);
+							i++;
+						}
+
+					}
+
+					// 单选题型或复选
+					if ("T1".equals(pageData.get("types")) || "T2".equals(pageData.get("types"))
+							|| "T4".equals(pageData.get("types"))) {
+						// 获取前台选项组装数据
+						String questionData = pageData.getString("questionData");// T1选项
+						JSONArray json = JSONArray.fromObject(questionData);
+						// 初始化各图表
+						btData = new String[json.size()];
+						xData = new String[json.size()];
+						yData = new String[json.size()];
+
+						for (int i = 0; i < json.size(); i++) {
+							JSONObject j = json.getJSONObject(i);
+							PageData pd2 = new PageData();
+							pd2.put("opt", j.getString("key"));
+							PageData btpd2 = new PageData();
+							btpd2.put("name", j.getString("key"));
+							btData[i] = j.getString("key");
+							xData[i] = j.getString("key");
+							for (PageData pageData2 : resultList) {
+								if (j.getString("value").equals(pageData2.get("opt"))) {
+									pd2.put("sum", pageData2.get("sum"));
+									pd2.put("bfb", pageData2.get("bfb"));
+									yData[i] = String.valueOf((Long) pageData2.get("sum"));
+									btpd2.put("value", pageData2.get("sum"));
+								}
+
+							}
+							result.add(pd2);
+							bt.add(btpd2);
+						}
+					}
+					// 下拉
+					if ("T3".equals(pageData.get("types"))) {
+						// 获取前台选项组装数据
+						String questionData = pageData.getString("questionData");// T3选项
+						JSONArray json = JSONArray.fromObject(questionData);
+						// 初始化各图表
+						btData = new String[json.size() - 1];
+						xData = new String[json.size() - 1];
+						yData = new String[json.size() - 1];
+						for (int i = 1; i < json.size(); i++) {
+							JSONObject j = json.getJSONObject(i);
+							PageData pd2 = new PageData();
+							PageData btpd2 = new PageData();
+							pd2.put("opt", j.getString("key"));
+							btpd2.put("name", j.getString("key"));
+							btData[i - 1] = j.getString("key");
+							xData[i - 1] = j.getString("key");
+							for (PageData pageData2 : resultList) {
+								if (j.getString("value").equals(pageData2.get("opt"))) {
+									pd2.put("sum", pageData2.get("sum"));
+									pd2.put("bfb", pageData2.get("bfb"));
+									yData[i - 1] = String.valueOf((Long) pageData2.get("sum"));
+									btpd2.put("value", pageData2.get("sum"));
+								}
+							}
+							result.add(pd2);
+							bt.add(btpd2);
+						}
+					}
+					pageData.put("btData", btData);
+					pageData.put("bt", bt);
+					pageData.put("xData", xData);
+					pageData.put("yData", yData);
+
+					PageData respd = new PageData();
+					respd.put("opt", "有效填写量");
+					respd.put("sum", count);
+					result.add(respd);
+					pageData.put("resultList", result);
+				}
+			}
+			mv.addObject("pdList", pdList);
+			JSONArray json = JSONArray.fromObject(pdList);
+			mv.addObject("pdListJson", json.toString());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		mv.addObject("pd", pd);
+		mv.addObject("pageList", wjlist);
+		mv.addObject("page", page);
+		mv.setViewName("questionnaire/questionStatisChart");
+		return mv;
+
+	}
+
+	/**
+	 * 
+	 * 星级评定统计图表
+	 * 
+	 * 
+	 */
+	@RequestMapping(value="/starRat")
+	public ModelAndView getStarRat(Page page) {
+		if(!Jurisdiction.buttonJurisdiction(menuUrl, "cha")){return null;} //校验权限
+		PageData pd = new PageData();
+		ModelAndView mv = this.getModelAndView();
+		try {
+			pd = this.getPageData();
+			Long startTime = System.currentTimeMillis();
+			String DEPARTMENT_ID = pd.getString("DEPARTMENT_IDQ");
+			JSONArray questionStr = null;
+			if(Tools.notEmpty(DEPARTMENT_ID)){
+				//权限组装条件-------start
+				User user = Jurisdiction.getLoginUser();
+				String CREATE_USER = user.getUSER_ID();
+				String USER_DEPARTMENT_ID = user.getDEPARTMENT_ID();
+				List<PageData> zrolePdList = new ArrayList<PageData>();
+				List<PageData> departmentList = departmentService.listAllDepartmentToSelect(DEPARTMENT_ID,zrolePdList);//列出所有部门下属所有(下拉框)
+				ArrayList<String> arr = new ArrayList<String>();
+				for (PageData department : departmentList) {
+					arr.add(department.getString("id"));
+				}
+				if(USER_DEPARTMENT_ID.equals(DEPARTMENT_ID)){ //如果传入部门id为本人则加入create_user  否则加入传入部门id
+					pd.put("CREATE_USER", CREATE_USER);
+				}else{
+					arr.add(DEPARTMENT_ID);
+				}
+				if(arr.size()==0){
+					arr = null;
+				}
+				pd.put("DEPARTMENT_ID", arr);
+				pd.put("questionnaireType", "star_level_questionnaire");
+				//权限组装条件-------end
+				List<Questionnaire> questionnaireList = questionnaireService.findQuestionnaireList(pd); // 查询列出问卷列表
+				if(questionnaireList != null && questionnaireList.size()>0){   
+					if(Tools.isEmpty(pd.getString("questionnaireId"))){    //判断传入问卷id，否则查所有
+						pd.put("questionnaireList",questionnaireList);
+					}else{
+						List<Questionnaire> list = new ArrayList<Questionnaire>();
+						Questionnaire q = new Questionnaire();
+						q.setQuestionnaireId(pd.getString("questionnaireId"));
+						list.add(q);
+						pd.put("questionnaireList",list );
+					}
+					page.setPd(pd);
+					List<PageData> questionList = questionsHeaderService.findQuestion(page);//分页查询问题
+					if (questionList != null) {
+						// 循环问题查询答案
+						SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+						int isFinance = Integer.valueOf(pd.getString("isFinance")); //是否财务月
+						int kd =  Integer.valueOf(pd.getString("kd"));  //统计刻度
+						String lastLoginStart = "";
+						String lastLoginEnd = "";
+						if(isFinance == 0){  //财务月
+							Date startBT = new Date();
+							Date endBt = new Date();
+							if (!Tools.isEmpty(pd.getString("btEndTime"))) {
+								SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM");
+								endBt = sdf1.parse(pd.getString("btEndTime"));
+							}
+							Calendar calendarL = Calendar.getInstance();
+							calendarL.setTime(endBt);
+							calendarL.add(Calendar.MONDAY, -1);
+							calendarL.set(Calendar.DAY_OF_MONTH, 26);
+							startBT = calendarL.getTime();
+							calendarL.setTime(endBt);
+							calendarL.set(Calendar.DAY_OF_MONTH, 25);
+							endBt = calendarL.getTime();
+							lastLoginStart = sdf.format(startBT);
+							lastLoginEnd = sdf.format(endBt);
+						}else{ //非财务月
+							lastLoginStart = pd.getString("zxStartTime");
+							lastLoginEnd = pd.getString("zxEndTime");
+							Date endZX= sdf.parse(lastLoginEnd);//结束时间
+							Date startZX= sdf.parse(lastLoginStart);// 开始时间
+							int day = DateUtil.differentDaysByMillisecond(startZX, endZX)+1;
+							mv.addObject("notFinanceDay",day);
+						}
+						Long startTime1 = System.currentTimeMillis();
+						for (PageData pdret : questionList) {
+							// 组装饼图数据---------start
+							pdret.put("lastLoginStart",lastLoginStart);
+							pdret.put("lastLoginEnd", lastLoginEnd);
+							//查询出题目答案数量、并组装饼图数据
+							questionnaireResultsService.findStarBt(pdret);
+							// 组装饼图数据---------end
+							//折线图数据组装---------------------start
+							Date endZX= sdf.parse(lastLoginEnd);//结束时间
+							Date startZX= sdf.parse(lastLoginStart);// 开始时间
+							Map<String, String[]> mapZX = questionnaireResultsService.findStarZX(isFinance,kd,pdret.getString("questionId"),startZX,endZX);
+							pdret.put("xData", mapZX.get("x"));
+							pdret.put("yData", mapZX.get("y"));
+						}
+						
+						mv.addObject("questionList", questionList);//饼图、折线图数据集合
+						questionStr = JSONArray.fromObject(questionList);
+						mv.addObject("questionnaireList", questionnaireList);// 所有问卷
+						Long endTime1 = System.currentTimeMillis();
+						System.out.println("for循环时间："+(endTime1-startTime1));
+					}
+					
+				}
+			}
+			mv.addObject("questionStr",null == questionStr?"":questionStr.toString());//饼图、折线图数据json
+			// 获取当前登录用户的角色ID
+			User user = Jurisdiction.getLoginUser();
+			String DEPARTMENT_IDS = user.getDEPARTMENT_ID();
+			List<PageData> zrolePdList = new ArrayList<PageData>();
+			List<PageData> departmentList = departmentService.listAllDepartmentToSelect(DEPARTMENT_IDS,zrolePdList);
+			
+			if(!"0".equals(DEPARTMENT_IDS)){  //部门下拉框+自己部门
+				PageData pdf = new PageData();
+				pdf.put("DEPARTMENT_ID", DEPARTMENT_IDS);
+				PageData pdfEntity= departmentService.findById(pdf);
+				PageData p = new PageData();
+				p.put("id", pdfEntity.getString("DEPARTMENT_ID"));
+				p.put("parentId", pdfEntity.getString("PARENT_ID"));
+				p.put("name", pdfEntity.getString("NAME"));
+				p.put("icon", "static/images/user.gif");
+				departmentList.add(p);
+//				if(Tools.isEmpty(pd.getString("DEPARTMENT_NAME"))){
+//					pd.put("DEPARTMENT_NAME", pdfEntity.getString("NAME"));
+//				}
+			}
+//			if(Tools.isEmpty(DEPARTMENT_ID)){
+//				pd.put("DEPARTMENT_IDQ", DEPARTMENT_ID);
+//			}
+			pd.put("DEPARTMENT_IDQ", DEPARTMENT_ID);
+			JSONArray arr = JSONArray.fromObject(departmentList);
+			mv.addObject("zTreeNodes", (null == arr ?"":arr.toString()));
+			mv.addObject("kdList",ConversionUtil.getKDType()); //刻度列表
+			mv.addObject("kd",pd.getString("kd")); //当前刻度
+			mv.addObject("page ",page);
+			mv.addObject("pd",pd);
+			mv.setViewName("questionnaire/questionStarLeve");
+			mv.addObject(Const.SESSION_QX, Jurisdiction.getHC()); // 按钮权限
+			Long endTime = System.currentTimeMillis();
+			System.out.println("请求时间："+(endTime-startTime));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return mv;
+	}
+
+	@RequestMapping(value="/findQuestionList")
+	@ResponseBody
+	public PageData findQuestionList(){
+		PageData pd = new PageData();
+		try {
+			pd = this.getPageData();
+			String DEPARTMENT_ID = pd.getString("DEPARTMENT_ID");
+			User user = Jurisdiction.getLoginUser();
+			String CREATE_USER = user.getUSER_ID();
+			String USER_DEPARTMENT_ID = user.getDEPARTMENT_ID();
+			List<PageData> zrolePdList = new ArrayList<PageData>();
+			List<PageData> departmentList = departmentService.listAllDepartmentToSelect(DEPARTMENT_ID,zrolePdList);//列出所有系统用户部门(下拉框)
+			ArrayList<String> arr = new ArrayList<String>();
+			for (PageData department : departmentList) {
+				arr.add(department.getString("id"));
+			}
+			if(USER_DEPARTMENT_ID.equals(DEPARTMENT_ID)){
+				pd.put("CREATE_USER", CREATE_USER);
+			}else{
+				arr.add(DEPARTMENT_ID);
+			}
+			if(arr.size()==0){
+				arr = null;
+			}
+			pd.put("DEPARTMENT_ID", arr);
+			pd.put("questionnaireType", "star_level_questionnaire");
+			List<Questionnaire> questionnaireList = questionnaireService.findQuestionnaireList(pd); // 列出Question列表
+			pd.put("questionnaireList", questionnaireList);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return pd;
+	}
+	
+	/**
+	 * 单题饼图统计
+	 * @return
+	 */
+	@RequestMapping(value="/findBtData")
+	@ResponseBody
+	public PageData findBtData(){
+		PageData pd = new PageData();
+		try {
+			pd = this.getPageData();
+			int isFinance = Integer.valueOf(pd.getString("isFinance")); //是否财务月
+			String lastLoginStart = "";
+			String lastLoginEnd = "";
+			Date startBT = new Date();
+			Date endBt = new Date();
+			SimpleDateFormat sdf = new SimpleDateFormat("yy-MM");
+			if(isFinance == 0){  //财务月
+				endBt = sdf.parse(pd.getString("btEndTime"));
+				Calendar calendarL = Calendar.getInstance();
+				calendarL.setTime(endBt);
+				calendarL.add(Calendar.MONDAY, -1);
+				calendarL.set(Calendar.DAY_OF_MONTH, 26);
+				startBT = calendarL.getTime();
+				calendarL.setTime(endBt);
+				calendarL.set(Calendar.DAY_OF_MONTH, 26);
+				endBt = calendarL.getTime();
+				lastLoginStart = DateUtil.formatDate(startBT);
+				lastLoginEnd = DateUtil.formatDate(endBt);
+			}else{ //非财务月
+				sdf = new SimpleDateFormat("yy-MM-dd");
+				String endTime = pd.getString("btEndTime");
+				endTime = endTime.split("至")[0];
+				endBt = sdf.parse(endTime);
+				lastLoginStart = pd.getString("zxStartTime");
+				lastLoginEnd = pd.getString("zxEndTime");
+				long day = DateUtil.getDaySub(lastLoginStart, lastLoginEnd);
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTime(endBt);
+				calendar.add(Calendar.DAY_OF_MONTH, (int)day);
+				lastLoginEnd = DateUtil.formatDate(calendar.getTime());
+				lastLoginStart = DateUtil.formatDate(endBt);
+			}
+			pd.put("lastLoginStart",lastLoginStart);
+			pd.put("lastLoginEnd", lastLoginEnd);
+			questionnaireResultsService.findStarBt(pd);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return pd;
+	}
+	
+}

@@ -1,0 +1,92 @@
+package com.fh.service.questionnaire;
+
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+
+import com.fh.dao.DaoSupport;
+import com.fh.entity.Page;
+import com.fh.util.PageData;
+
+
+@Service("questionService")
+public class QuestionService {
+
+	@Resource(name = "daoSupport")
+	private DaoSupport dao;
+	
+	/*
+	* 新增
+	*/
+	public void save(PageData pd)throws Exception{
+		dao.save("QuestionMapper.save", pd);
+	}
+	
+	/*
+	* 删除
+	*/
+	public void delete(PageData pd)throws Exception{
+		dao.delete("QuestionMapper.delete", pd);
+	}
+	
+	/*
+	* 修改
+	*/
+	public void edit(PageData pd)throws Exception{
+		dao.update("QuestionMapper.edit", pd);
+	}
+	
+	/*
+	*列表
+	*/
+	/*public List<Question> list(Page page)throws Exception{
+		return (List<Question>)dao.findForList("QuestionMapper.datalistPage", page);
+	}
+	public List<Question> childList(PageData pd)throws Exception{
+		return (List<Question>)dao.findForList("QuestionMapper.childList", pd);
+	}*/
+	/*
+	*列表(全部)
+	*/
+	public List<PageData> listAll(PageData pd)throws Exception{
+		return (List<PageData>)dao.findForList("QuestionMapper.listAll", pd);
+	}
+	
+	/*
+	* 通过id获取数据
+	*/
+	public PageData findById(PageData pd)throws Exception{
+		return (PageData)dao.findForObject("QuestionMapper.findById", pd);
+	}
+	
+	/*
+	* 通过id获取数据
+	*/
+	public List<PageData> findByFlag(PageData pd)throws Exception{
+		return (List<PageData>)dao.findForList("QuestionMapper.findByFlag", pd);
+	}
+	
+	/*
+	* 通过pageid获取数据
+	*/
+	public List<PageData> findByPageId(PageData pd)throws Exception{
+		return (List<PageData>)dao.findForList("QuestionMapper.findByPageId", pd);
+	}
+	/*
+	 * 用户访问问卷列表
+	 */
+	public List<PageData> findByPageIdUser(PageData pd)throws Exception{
+		return (List<PageData>)dao.findForList("QuestionMapper.findByPageIdUser", pd);
+	}
+	
+	/*
+	* 批量删除
+	*/
+	public void deleteAll(String[] ArrayDATA_IDS)throws Exception{
+		dao.delete("QuestionMapper.deleteAll", ArrayDATA_IDS);
+	}
+	
+}
+

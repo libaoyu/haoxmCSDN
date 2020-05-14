@@ -1,0 +1,409 @@
+package com.fh.util;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.SortedMap;
+import java.util.TreeMap;
+/**
+ * 数据字典工具类
+ * @author zhangxq
+ *
+ */
+public class ConversionUtil {
+	/**
+	 * 问题类型：题库题型
+	 * @return
+	 */
+	public static TreeMap<String,String> getQuestionType(String type) {
+		TreeMap<String,String> map=new TreeMap<String, String>();
+		if(Tools.isEmpty(type)||Const.OPTION_ALL.equals(type)||Const.LEVEL_TWO.equals(type)){
+			map.put("T1","单选题");
+			map.put("T2","复选题");
+			map.put("T3","下拉题");
+			map.put("T4","量表题");
+			map.put("T5","单行文本");
+			map.put("T6","多行文本");
+			map.put("T7","日历");
+			map.put("T8","联动题");
+//			新增星级评定问题             题型                   开始
+			map.put("T9","星级评定");
+			map.put("T10","分割线");
+			map.put("T11","意向");
+			map.put("T12","问诊信息");
+//			新增星级评定问题             题型                   结束
+			map.put("T0","*默认题*");
+		}if(Const.LEVEL_ZERO.equals(type)){
+			map.put("T1","单选题");
+			map.put("T3","下拉题");
+			map.put("T5","单行文本");
+			map.put("T6","多行文本");
+			map.put("T7","日历");
+			map.put("T8","联动题");
+//			新增星级评定问题             题型                   开始
+			map.put("T9","星级评定");
+			map.put("T10","分割线");
+			map.put("T11","意向");
+			map.put("T12","问诊信息");
+//			新增星级评定问题             题型                   结束
+		}
+		return map;
+	}
+	/**
+	 * 量表类型：scaleType
+	 * @return
+	 */
+	public static TreeMap<String,String> getScaleType() {
+		TreeMap<String,String> map=new TreeMap<String, String>();
+		map.put("ST1","满意度");
+		map.put("ST2","认同度");
+		map.put("ST3","重要度");
+		map.put("ST4","愿意度");
+		map.put("ST5","符合度");
+		map.put("ST0","-评分题-");
+		return map;
+	}
+	/**
+	 * 问卷：调查对象_员工级别
+	 * @return
+	 */
+	public static Map<String,String> getStaffLevel() {
+		TreeMap<String,String> map=new TreeMap<String, String>();
+		map.put("SL1","普通员工");
+		map.put("SL2","行政经理");
+		map.put("SL3","门诊");
+		map.put("SL4","住院");
+		map.put("SL5","独立生活区");
+		map.put("SL6","护理区");
+		return map;
+	}
+	/**
+	 * 发布状态
+	 * @return
+	 */
+	public static Map<String,String> getReleaseStatus() {
+		TreeMap<String,String> map=new TreeMap<String, String>();
+		map.put("0","未发布");
+		map.put("1","回收中");
+		map.put("2","回收完成");
+		/*map.put("3","历史问卷");*/
+		return map;
+	}
+	/**
+	 * 数据状态
+	 * 0:无效;1:有效;
+	 * @return
+	 */
+	public static Map<String,String> getStatus(){
+		TreeMap<String,String> map=new TreeMap<String, String>();
+		map.put("1","有效");
+		map.put("0","无效");
+		return map;
+	}
+	
+	/**
+	 * 问题分类
+	 * 0:卷头问题，1:一级分类，2:二级分类
+	 * @return
+	 * @author zhangxq
+	 */
+	public static Map<String,String> getClassification(){
+		TreeMap<String,String> map=new TreeMap<String, String>();
+		map.put("L0","被访者信息");
+		map.put("L1","题目分类");
+		map.put("L2","问卷题目");
+		return map;
+	}
+	
+	
+
+	/**
+	 * 默认配置项
+	 * 5分、4分、3分、2分、1分、0：不适用
+	 * @return
+	 */
+	public static Map<String,String> getDefaultOption(){
+		TreeMap<String,String> map=new TreeMap<String, String>();
+		map.put("5","5分");
+		map.put("4","4分");
+		map.put("3","3分");
+		map.put("2","2分");
+		map.put("1","1分");
+		map.put("0","不适用");
+		return map;
+	}
+	/**
+	 * 获取默认英文(字母)字符编码
+	 * @return
+	 */
+	public static Map<String,String> getDefaultQuestionCode(){
+		TreeMap<String,String> map=new TreeMap<String, String>();
+		/**
+		map.put("1","A");	
+		map.put("2","B");	
+		map.put("3","C");	
+		map.put("4","D");	
+		map.put("5","E");	
+		map.put("6","F");	
+		map.put("7","G");	
+		map.put("8","H");	
+		map.put("9","I");	
+		map.put("10","J");
+		map.put("11","K");
+		map.put("12","L");
+		map.put("13","M");
+		map.put("14","N");
+		map.put("15","O");
+		map.put("16","P");
+		map.put("17","Q");
+		map.put("18","R");
+		map.put("19","S");
+		map.put("20","T");
+		map.put("21","U");
+		map.put("22","V");
+		map.put("23","W");
+		map.put("24","X");
+		map.put("25","Y");
+		map.put("26","Z");
+		*/
+		
+		map.put("","=空=");
+		map.put("A","A");
+		map.put("B","B");
+		map.put("C","C");
+		map.put("D","D");
+		map.put("E","E");
+		map.put("F","F");
+		map.put("G","G");
+		map.put("H","H");
+		map.put("I","I");
+		map.put("J","J");
+		map.put("K","K");
+		map.put("L","L");
+		map.put("M","M");
+		map.put("N","N");
+		map.put("O","O");
+		map.put("P","P");
+		map.put("Q","Q");
+		map.put("R","R");
+		map.put("S","S");
+		map.put("T","T");
+		map.put("U","U");
+		map.put("V","V");
+		map.put("W","W");
+		map.put("X","X");
+		map.put("Y","Y");
+		map.put("Z","Z");
+		return map;
+	}
+	
+	/**
+	 * 根据日期的时分秒加上后面的四位随机数生成              当前问卷的批次号
+	 * by xiaoding
+	 * @return
+	 */
+	 public static String getBatchByRandom(String batchName) {  
+	        SimpleDateFormat simpleDateFormat;  
+	        simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");  
+	        Date date = new Date();  
+	        String str = simpleDateFormat.format(date);  
+	        Random random = new Random();  
+	        int rannum = (int) (random.nextDouble() * (9999 - 1000 + 1)) + 1000;// 获取5位随机数  
+	        return batchName+str+rannum ;// 当前时间  
+	    } 
+	 /**
+	  * 获取默认列名
+	  * byxiaoding
+	  * @return
+	  */
+	public static List<String> getDefaultColumnName(){
+		List<String> list=new ArrayList<String>();
+		list.add("问卷名称");
+		list.add("姓名");
+		list.add("电话");
+		list.add("所属部门");
+		list.add("公司名称");
+		list.add("A");
+		list.add("B");
+		list.add("C");
+		list.add("D");
+		list.add("E");
+		list.add("F");
+		return list;
+	}
+	/**
+	 * 附件业务类型定义
+	 * C1：logo、C2：背景图片、C3：其它
+	 */
+	public static Map<String,String> getAccessoryFileType(){
+		Map<String,String> map=new HashMap<String, String>();
+		map.put("C1", "尺寸要求高宽40 x 203");//logo
+		map.put("C2", "尺寸要求高宽1169 x 640");//背景图片
+		map.put("QR", "系统生成二维码图片");//二维码图片
+		map.put("其它", "");//背景图片
+		return map;
+	}
+	
+	
+	/**
+	 * 星级评价常规项
+	 * 根据门诊类型，常规项的内容不同
+	 * @param level 是否大于三星 ;type住院类型
+	 * @return
+	 * @author shanghz
+	 */
+	public static Map<String,String> getCommonEval(String level,String type){
+		SortedMap<String,String> map=new TreeMap<String, String>();
+		if(Const.VISIT_TYPE_THREE.equals(level)){
+			map.put("E9","语言通俗易懂");
+			map.put("EA","尊重隐私");
+			map.put("EB","诊断和治疗解决了问题");
+			// 若是住院病患，增加以下选项
+			if(Const.VISIT_TYPE_ZY.equals(type)){
+				map.put("EC", "态度和蔼");
+				map.put("ED", "及时处理病情变化");
+			}else if(Const.VISIT_TYPE_MZ.equals(type)){
+				map.put("EE", "礼貌热情");
+			}else{
+				map.put("EC", "态度和蔼");
+				map.put("ED", "及时处理病情变化");
+				map.put("EE", "礼貌热情");
+			}
+			
+		}else{
+			map.put("E1","听不懂医生的解释");
+			map.put("E2","态度冷漠");
+			map.put("E3","诊断和治疗未解决问题");
+			map.put("E4","不尊重隐私");
+			// 若是住院病患，增加以下选项
+			if(Const.VISIT_TYPE_ZY.equals(type)){
+				map.put("E5","饭菜口味不好");
+				map.put("E6","未及时处理病情变化");
+				map.put("E7", "配套设施不全");
+				map.put("E8", "送餐不及时");
+			}
+		}
+		//map.put("ED", "其他(请留言)");
+		return map;
+	}
+	/**
+	 * 问卷一级分类题目
+	 * @return
+	 */
+	public static List<String> getQuestionCode(){
+		String[] code = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R" ,"S", "T", "U", "V", "W", "X", "Y", "Z"};		
+		List<String> list = new ArrayList<String>();
+		for (int i = 0; i < code.length; i++) {
+			list.add(code[i]);
+		}
+		return list;
+	}
+	/**
+	 * 获取日历类型的格式
+	 * @return
+	 * xiaoding
+	 */
+	public static  TreeMap<String,String> getScaleTypeForT7(){
+		TreeMap<String,String> map=new TreeMap<String, String>();
+		map.put("ST6","YYYY-MM-DD");
+		map.put("ST7","YYYY-MM-DD hh:mm:ss");
+		return map;
+	}
+	/**
+	 * 获取复选框的格式，横排还是竖排
+	 * @return
+	 * xiaoding
+	 */
+	public static  TreeMap<String,String> getScaleTypeForT2(){
+		TreeMap<String,String> map=new TreeMap<String, String>();
+		map.put("ST8","横排");
+		map.put("ST9","竖排");
+		return map;
+	}
+	/**
+	 * 星级评定刻度
+	 * @return
+	 */
+	public static List<String> getKDType(){
+		List<String> list = new ArrayList<String>();
+		list.add("12");
+		list.add("11");
+		list.add("10");
+		list.add("9");
+		list.add("8");
+		list.add("7");
+		list.add("6");
+		list.add("5");
+		list.add("4");
+		list.add("3");
+		list.add("2");
+		list.add("1");
+		return list;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 *2017年10月31日
+	 * xiaoding
+	 */
+	public static TreeMap<String,String> getQuestionnaireType(){
+		TreeMap<String,String> map=new TreeMap<String, String>();
+		
+		map.put("ebd6dd9b05834dd3b774dc99b05298d9","写字楼");
+		map.put("abc6dd9b05834dd3b774dc99b05298d9","医院");
+		/*map.put("请选择","请选择");*/
+		return map;
+	}
+	/**
+	 * 
+	 * @return
+	 *2017年10月31日
+	 * xiaoding
+	 */
+	public static Map<String,String> getStaffLevelByParentId(String parentId) {
+		TreeMap<String,String> map=new TreeMap<String, String>();
+		if("ebd6dd9b05834dd3b774dc99b05298d9".equals(parentId)){
+			map.put("SL1","普通员工");
+			map.put("SL2","行政经理");
+			map.put("SL3","门诊");
+			map.put("SL4","住院");
+			map.put("SL5","独立生活区");
+			map.put("SL6","护理区");
+		}else if("abc6dd9b05834dd3b774dc99b05298d9".equals(parentId)){
+			map.put("hospital1","门诊");
+			map.put("hospital2","住院");
+			map.put("hospital3","体检");
+			map.put("hospital4","护理业态");
+		}
+		return map;
+	}
+	/**
+	 * 获取问卷信息的排列方式
+	 * @return
+	 *2017年11月10日
+	 * xiaoding
+	 */
+	public static Map<String,String>getInquiryInformationArray(){
+		TreeMap<String,String> map=new TreeMap<String, String>();
+		map.put("ArrTop", "上头像");
+		map.put("ArrLeft", "左头像");
+		return map;
+	}
+	/**
+	 * 获取分割线题型的类型（实现    and   虚线）
+	 * @return
+	 *2017年11月20日
+	 * xiaoding
+	 */
+	public static Map<String,String> getCutoffRule(){
+		TreeMap<String,String> map=new TreeMap<String, String>();
+		map.put("activeLine", "实线");
+		map.put("dashed", "虚线");//
+		return map;
+	}
+}

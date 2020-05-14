@@ -1,0 +1,329 @@
+package com.fh.entity.system;
+
+import java.io.Serializable;
+import java.util.List;
+/**
+ * 
+* 类名称：Menu.java
+* 类描述： 
+* @author FH
+* 作者单位： 
+* 联系方式：
+* 创建时间：2017年4月11日
+* @version 1.0
+ */
+public class Questions implements Serializable{
+	/**
+	 *2017年11月13日
+	 * xiaoding
+	 */
+	private static final long serialVersionUID = 1L;
+	private String questionId; 
+	private String questionnaireId;
+	private String questionnaireTitle;//非持久化字段：问卷标题名称
+	private String parentId;
+	private String questionCode;
+	private String title;	
+	private String classify;	
+	private String level;
+	private String classification;
+	private String types;	
+	private String scaleType;
+	private Integer scaleRange;
+	private String questionData;
+	private Integer score;
+	private Integer sort;
+	private Integer mustFlag=0;
+	private Integer isRemarks=0;//0表示没有1表示存在
+	private String description;
+	private Integer validState;
+	private String createUser;
+	private String createTime;
+	private String modifyUser;
+	private String modifyTime;
+	private List<Questions> SUBQUESTIONS;
+	private String questionLevel;
+	private String questionYx;
+	private String questionWx;
+	private String satisfaction;
+	private String questionFm;
+	private String questionFz;
+	
+	private String formatData;
+	private String typeSetting;
+	private String linkageId;
+	//联动名称
+	private String linkageName;
+	//问诊信息排列问题
+	private String inquiryInformation;
+	
+	
+	
+	public String getInquiryInformation() {
+		return inquiryInformation;
+	}
+	public void setInquiryInformation(String inquiryInformation) {
+		this.inquiryInformation = inquiryInformation;
+	}
+	public String getLinkageName() {
+		return linkageName;
+	}
+	public void setLinkageName(String linkageName) {
+		this.linkageName = linkageName;
+	}
+	public String getLinkageId() {
+		return linkageId;
+	}
+	public void setLinkageId(String linkageId) {
+		this.linkageId = linkageId;
+	}
+	public String getFormatData() {
+		return formatData;
+	}
+	public void setFormatData(String formatData) {
+		this.formatData = formatData;
+	}
+	public String getTypeSetting() {
+		return typeSetting;
+	}
+	public void setTypeSetting(String typeSetting) {
+		this.typeSetting = typeSetting;
+	}
+	public Integer getIsRemarks() {
+		return isRemarks;
+	}
+	public void setIsRemarks(Integer isRemarks) {
+		this.isRemarks = isRemarks;
+	}
+	
+	
+	
+	public String getQuestionYx() {
+		return questionYx;
+	}
+	public void setQuestionYx(String questionYx) {
+		this.questionYx = questionYx;
+	}
+	public String getQuestionWx() {
+		return questionWx;
+	}
+	public void setQuestionWx(String questionWx) {
+		this.questionWx = questionWx;
+	}
+	public String getSatisfaction() {
+		return satisfaction;
+	}
+	public void setSatisfaction(String satisfaction) {
+		this.satisfaction = satisfaction;
+	}
+	public String getQuestionFm() {
+		return questionFm;
+	}
+	public void setQuestionFm(String questionFm) {
+		this.questionFm = questionFm;
+	}
+	public String getQuestionFz() {
+		return questionFz;
+	}
+	public void setQuestionFz(String questionFz) {
+		this.questionFz = questionFz;
+	}
+	public String getQuestionLevel() {
+		return questionLevel;
+	}
+	public void setQuestionLevel(String questionLevel) {
+		this.questionLevel = questionLevel;
+	}
+	/*
+	 * 自定义数据项：问题选项代码
+	 * 非持久化字段
+	 * 附加字段
+	 */
+	private String questionData_code;
+	/*
+	 * 自定义数据项：问题选项名称
+	 * 非持久化字段
+	 * 附加字段
+	 */
+	private String questionData_name;
+	
+	private List<MapEntity> questionDataMap;
+	
+	public List<MapEntity> getQuestionDataMap() {
+		return questionDataMap;
+	}
+	public void setQuestionDataMap(List<MapEntity> questionDataMap) {
+		this.questionDataMap = questionDataMap;
+	}
+	public String getQuestionId() {
+		return questionId;
+	}
+	public void setQuestionId(String questionId) {
+		this.questionId = questionId;
+	}
+	public String getQuestionnaireId() {
+		return questionnaireId;
+	}
+	public void setQuestionnaireId(String questionnaireId) {
+		this.questionnaireId = questionnaireId;
+	}
+	
+	
+	public String getQuestionnaireTitle() {
+		return questionnaireTitle;
+	}
+	public void setQuestionnaireTitle(String questionnaireTitle) {
+		this.questionnaireTitle = questionnaireTitle;
+	}
+	public String getParentId() {
+		return parentId;
+	}
+	public void setParentId(String parentId) {
+		this.parentId = parentId;
+	}
+	public String getQuestionCode() {
+		return questionCode;
+	}
+	public void setQuestionCode(String questionCode) {
+		this.questionCode = questionCode;
+	}
+	public String getTitle() {
+		return title;
+	}
+	public void setTitle(String title) {
+		this.title = title;
+	}
+	public String getClassify() {
+		return classify;
+	}
+	public void setClassify(String classify) {
+		this.classify = classify;
+	}
+	public String getLevel() {
+		return level;
+	}
+	public void setLevel(String level) {
+		this.level = level;
+	}
+	public String getTypes() {
+		return types;
+	}
+	public void setTypes(String types) {
+		this.types = types;
+	}
+	public String getClassification() {
+		return classification;
+	}
+	public void setClassification(String classification) {
+		this.classification = classification;
+	}
+	public String getScaleType() {
+		return scaleType;
+	}
+	public void setScaleType(String scaleType) {
+		this.scaleType = scaleType;
+	}
+	public Integer getScaleRange() {
+		return scaleRange;
+	}
+	public void setScaleRange(Integer scaleRange) {
+		this.scaleRange = scaleRange;
+	}
+	public String getQuestionData() {
+		return questionData;
+	}
+	public void setQuestionData(String questionData) {
+		this.questionData = questionData;
+	}
+	public Integer getScore() {
+		return score;
+	}
+	public void setScore(Integer score) {
+		this.score = score;
+	}
+	public Integer getSort() {
+		return sort;
+	}
+	public void setSort(Integer sort) {
+		this.sort = sort;
+	}
+	public Integer getMustFlag() {
+		return mustFlag;
+	}
+	public void setMustFlag(Integer mustFlag) {
+		this.mustFlag = mustFlag;
+	}
+	public String getDescription() {
+		return description;
+	}
+	public void setDescription(String description) {
+		this.description = description;
+	}
+	public Integer getValidState() {
+		return validState;
+	}
+	public void setValidState(Integer validState) {
+		this.validState = validState;
+	}
+	public String getCreateUser() {
+		return createUser;
+	}
+	public void setCreateUser(String createUser) {
+		this.createUser = createUser;
+	}
+	public String getCreateTime() {
+		return createTime;
+	}
+	public void setCreateTime(String createTime) {
+		this.createTime = createTime;
+	}
+	
+	public String getModifyUser() {
+		return modifyUser;
+	}
+	public void setModifyUser(String modifyUser) {
+		this.modifyUser = modifyUser;
+	}
+	public String getModifyTime() {
+		return modifyTime;
+	}
+	public void setModifyTime(String modifyTime) {
+		this.modifyTime = modifyTime;
+	}
+	public List<Questions> getSUBQUESTIONS() {
+		return SUBQUESTIONS;
+	}
+	public void setSUBQUESTIONS(List<Questions> sUBQUESTIONS) {
+		SUBQUESTIONS = sUBQUESTIONS;
+	}
+	public String getQuestionData_code() {
+		return questionData_code;
+	}
+	public void setQuestionData_code(String questionData_code) {
+		this.questionData_code = questionData_code;
+	}
+	public String getQuestionData_name() {
+		return questionData_name;
+	}
+	public void setQuestionData_name(String questionData_name) {
+		this.questionData_name = questionData_name;
+	}
+	@Override
+	public String toString() {
+		return "Questions [questionId=" + questionId + ", questionnaireId="
+				+ questionnaireId + ", parentId=" + parentId
+				+ ", questionCode=" + questionCode + ", title=" + title
+				+ ", level=" + level + ", classification=" + classification
+				+ ", types=" + types + ", scaleType=" + scaleType
+				+ ", scaleRange=" + scaleRange + ", score=" + score + ", sort=" + sort
+				+ ", mustFlag=" + mustFlag + ", description=" + description
+				+ ", validState=" + validState + ", createUser=" + createUser
+				+ ", createTime=" + createTime + ", modifyUser=" + modifyUser
+				+ ", modifyTime=" + modifyTime + ", questionData_code="
+				+ questionData_code + ", questionData_name="
+				+ questionData_name + "]";
+	}
+	
+	
+	
+}

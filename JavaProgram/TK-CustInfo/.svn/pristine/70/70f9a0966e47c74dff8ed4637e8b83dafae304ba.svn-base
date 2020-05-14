@@ -1,0 +1,60 @@
+(function(){
+
+    var moreInfo = document.querySelector("#moreInfo"),
+        optionList = document.querySelector("#optionList"),
+        icon = document.querySelector('.options_split i'),
+        optionItem = document.querySelector('.option_item'),
+        optionCreate = document.querySelector('#optionCreate'),
+        optionUl = document.querySelector("#optionUl");
+    
+    var span = moreInfo.children[0];
+    var flag = false;
+    var isShowSelect = false;
+    moreInfo.onclick = function () {
+        if (span.innerHTML === '展开高级设置') {
+            flag = true;
+            optionList.style.display = "block";
+            span.innerHTML = "收起高级设置";
+            icon.style.transform = "rotate(0deg)";
+        } else {
+            span.innerHTML = "展开高级设置";
+            optionList.style.display = "none";
+            icon.style.transform = "rotate(180deg)";
+        }
+    }
+    optionCreate.onclick = function () {
+    	if (flag) {//alert('111');
+    		var sl = $("#optionUl li").length;
+            var newLi = optionItem.cloneNode(true);
+            $(newLi).find("input").each(function(){
+            	$(this).val('');
+            });
+            $(newLi).find("input:first").attr("id","questionData_code_id_"+sl+"_1");
+    		$(newLi).find("input:last").attr("id","questionData_code_id_"+sl+"_2");
+    		$(newLi).find("div").attr("id","questionlistdiv_"+sl);
+    		$(newLi).find("input[type=hidden]").attr("id","questionsList_"+sl);
+    		$(newLi).find("select").attr("id","MySelectBox1_"+sl);
+    		$(newLi).find("button:last").remove();
+            //自动赋值
+            $(newLi).find("input:first").on('input',function(e){  
+      	      $(this).nextAll("input").val($(this).val()); 
+      	    });
+            optionUl.appendChild(newLi).querySelector('.title_Code').focus();
+            $("#MySelectBox1_"+sl).multiselect({
+    			noneSelectedText: "请选择", 
+    			checkAllText: "全选", 
+    			uncheckAllText: '全不选', 
+    			selectedList: 10, 
+    		}); 
+        }
+    }
+
+    optionUl.onclick = function(e){
+        var e = e || window.event;
+        var tar = e.target || e.srcElement;
+        
+        if( tar.nodeName.toLowerCase() === 'a' ){
+            this.removeChild(tar.parentNode);
+        }
+    } 
+})()

@@ -1,0 +1,92 @@
+package com.fh.service.record;
+
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+
+import com.fh.dao.DaoSupport;
+import com.fh.entity.Page;
+import com.fh.entity.section.RecordConfig;
+import com.fh.util.PageData;
+
+/** 
+ * 类名称：RecordController
+ * 创建人：shanghaizhao 
+ * 创建时间：2017-11-06
+ */
+@Service("recordService")
+public class RecordService {
+
+	@Resource(name = "daoSupport")
+	private DaoSupport dao;
+	
+	/*
+	* 获取字段配置列表数据
+	*/
+	@SuppressWarnings("unchecked")
+	public List<PageData> configList(Page page) throws Exception{
+		return (List<PageData>) dao.findForList("RecordMapper.datalistPage", page);
+	}
+	
+	 /*
+	 * 查询数据库所有字段名
+	 */
+	@SuppressWarnings("unchecked")
+	public List<String> configColumn() throws Exception{
+		return (List<String>) dao.findForList("RecordMapper.configColumn", "");
+	}
+	 
+	 /*
+	 * 查询数据库所有字段名
+	 */
+	@SuppressWarnings("unchecked")
+	public List<String> getColumn(PageData pd) throws Exception{
+		return (List<String>) dao.findForList("RecordMapper.getColumn", pd);
+	}
+		 
+	/*
+	 * 提升顺序
+	 */
+	public int upOrder(PageData pd) throws Exception{
+		dao.update("RecordMapper.configUpOrder", pd);
+		return (Integer) dao.update("RecordMapper.configUp", pd);
+	}
+	
+	/*
+	 * 降低顺序
+	 */
+	public int downOrder(PageData pd) throws Exception{
+		dao.update("RecordMapper.configDownOrder", pd);
+		return (Integer) dao.update("RecordMapper.configDown", pd);
+	}
+	
+	/*
+	 * 根据id查询单个配置类实体
+	 */
+	public RecordConfig getEntityById(PageData pd) throws Exception{
+		return (RecordConfig)dao.findForObject("RecordMapper.getInfoById", pd);
+	}
+	
+	/*
+	 * 保存
+	 */
+	public void toSave(PageData pd) throws Exception{
+		dao.save("RecordMapper.save", pd);
+	}
+	
+	/*
+	 * 修改
+	 */
+	public void toUpdate(PageData pd) throws Exception{
+		dao.update("RecordMapper.update", pd);
+	}
+	
+	/*
+	 * 修改是否显示
+	 */
+	public int updateStatus(PageData pd) throws Exception{
+		return (Integer) dao.update("RecordMapper.updateStatus", pd);
+	}
+}

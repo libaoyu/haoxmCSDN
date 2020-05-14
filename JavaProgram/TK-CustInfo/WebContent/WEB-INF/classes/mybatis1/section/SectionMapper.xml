@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="SectionMapper">
+
+	<resultMap type="PatientInfo" id="PatientInfoMap">
+		<id column="RECORD_ID" property="recordId"/>
+		<result column="VISIT_TYPE" property="visitType"/>
+		<result column="VISIT_DATE" property="visitDate"/>
+		<result column="PATIENT_ID" property="patientId"/>
+		<result column="PATIENT_NAME" property="patientName"/>
+		<result column="SEX" property="sex"/>
+		<result column="PHONE_NUMBER" property="phoneNumber"/>
+		<result column="TIMES" property="times"/>
+		<result column="EMP_CODE" property="empCode"/>
+		<result column="EMP_NAME" property="empName"/>
+		<result column="SECTION_CODE" property="sectionCode"/>
+		<result column="SECTION_NAME" property="sectionName"/>
+		<result column="DOCTORTYPE" property="doctortype"/>
+		<!-- 后期业务扩展需要 -->
+		<result column="CREATE_USER" property="createUser"/>
+		<result column="CREATE_TIME" property="createTime"/>
+		<result column="MODIFY_USER" property="modifyUser"/>
+		<result column="MODIFY_TIME" property="modifyTime"/>
+		<result column="BATCH_NUM" property="batchNum"/>
+	</resultMap>
+	
+	<!-- 通过ID获取数据 -->
+	<select id="findById" parameterType="pd" resultType="pd">
+		select 
+			RECORD_ID,
+			STR_INDEX,
+			VISIT_TYPE,	
+			VISIT_DATE,	
+			PATIENT_ID,
+			PATIENT_NAME,	
+			SEX,
+			PHONE_NUMBER,
+			TIMES,	
+			EMP_CODE,	
+			EMP_NAME,	
+			SECTION_CODE,	
+			SECTION_NAME,
+			DOCTORTYPE,
+			LEVEL,
+			COMMON_EVAL,
+			EVALUATE,
+			CREATE_USER,
+			CREATE_TIME,
+			MODIFY_USER,
+			MODIFY_TIME,
+			BATCH_NUM
+		from 
+			SECTION_RECORD
+		where 
+			STR_INDEX = #{strIndex}
+	</select>
+	
+	<!-- 新增-->
+	<insert id="save" parameterType="PatientInfo">
+		insert into section_record(
+			RECORD_ID,
+			STR_INDEX,
+			VISIT_TYPE,	
+			VISIT_DATE,	
+			PATIENT_ID,
+			PATIENT_NAME,	
+			SEX,
+			PHONE_NUMBER,
+			TIMES,	
+			EMP_CODE,	
+			EMP_NAME,	
+			SECTION_CODE,	
+			SECTION_NAME,
+			DOCTORTYPE,
+			CREATE_USER,
+			CREATE_TIME,
+			BATCH_NUM
+		) values (
+			#{recordId},
+			#{strIndex},
+			#{visitType},
+			#{visitDate},
+			#{patientId},
+			#{patientName},
+			#{sex},
+			#{phoneNumber},
+			#{times},
+			#{empCode},
+			#{empName},
+			#{sectionCode},
+			#{sectionName},
+			#{doctortype},
+			#{createUser},
+			#{createTime},
+			#{batchNum}
+		)
+	</insert>
+	
+	<!-- 列表 -->
+	<select id="datalistPage" parameterType="page" resultType="pd">
+		select
+			RECORD_ID,
+			STR_INDEX,
+			VISIT_TYPE,	
+			VISIT_DATE,	
+			PATIENT_ID,
+			PATIENT_NAME,	
+			SEX,
+			PHONE_NUMBER,
+			TIMES,	
+			EMP_CODE,	
+			EMP_NAME,	
+			SECTION_CODE,	
+			SECTION_NAME,
+			DOCTORTYPE,
+			LEVEL,
+			COMMON_EVAL,
+			EVALUATE,
+			CREATE_USER,
+			CREATE_TIME,
+			MODIFY_USER,
+			MODIFY_TIME,
+			BATCH_NUM	
+		from 
+			section_record	
+		where 1=1 
+		<if test="pd.title !=null and pd.title != '' ">
+			and PATIENT_NAME like CONCAT('%','${pd.title}','%') or EMP_NAME like CONCAT('%','${pd.title}','%')
+		</if>
+		<if test="pd.lastLoginStart !=null and pd.lastLoginStart != '' ">
+			and VISIT_DATE &gt;=#{pd.lastLoginStart}
+		</if>	 
+		<if test="pd.lastLoginEnd !=null and pd.lastLoginEnd != '' ">
+			and VISIT_DATE &lt;=#{pd.lastLoginEnd}
+		</if>
+			order by CREATE_TIME desc
+	</select>
+	
+	<!-- 列表(全部) -->
+	<select id="listAll" parameterType="pd" resultType="pd">
+		select
+			a.RECORD_ID,
+			a.STR_INDEX,
+			a.VISIT_TYPE,	
+			a.VISIT_DATE,	
+			a.PATIENT_ID,
+			a.PATIENT_NAME,	
+			a.SEX,
+			a.PHONE_NUMBER,
+			a.TIMES,	
+			a.EMP_CODE,	
+			a.EMP_NAME,	
+			a.SECTION_CODE,	
+			a.SECTION_NAME,
+			a.DOCTORTYPE,
+			a.LEVEL,
+			a.COMMON_EVAL,
+			a.EVALUATE,
+			a.CREATE_USER,
+			a.CREATE_TIME,
+			a.MODIFY_USER,
+			a.MODIFY_TIME,
+			a.BATCH_NUM
+		from 
+			section_record a
+		order by a.CREATE_TIME desc
+	</select>
+	
+	<!-- 修改 -->
+	<update id="edit" parameterType="pd">
+		update  section_record
+			set 
+				LEVEL = #{level},
+				EVALUATE = #{evaluate},
+				COMMON_EVAL = #{commonEval},
+				MODIFY_TIME=#{modifyTime}
+			where 
+				RECORD_ID = #{recordId}
+	</update>
+	
+	<!-- 删除-->
+	<delete id="delete" parameterType="pd">
+		delete from section_record
+		where 
+			RECORD_ID = #{RECORD_ID}
+	</delete>
+	
+	<!-- 批量删除 -->
+	<delete id="deleteAll" parameterType="String">
+		delete from section_record
+		where 
+			RECORD_ID in
+		<foreach item="item" index="index" collection="array" open="(" separator="," close=")">
+                 #{item}
+		</foreach>
+	</delete>
+</mapper>

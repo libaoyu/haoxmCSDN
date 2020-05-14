@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="FileDetailsMapper">
+	
+	<resultMap type="FileDetails" id="FileDetailsResultMap">
+		<id column="fileId" property="fileId"/>
+		<result column="ownershipMasterId" property="ownershipMasterId"/>
+		<result column="category" property="category"/>
+		<result column="fileTitle" property="fileTitle"/>
+		<result column="fileName" property="fileName"/>
+		<result column="fileExtension" property="fileExtension"/>
+		<result column="specification" property="specification"/>
+		<result column="filePath" property="filePath"/>
+		<result column="content" property="content" jdbcType="BLOB"/>
+		<result column="description" property="description"/>
+		<result column="createUser" property="createUser"/>
+		<result column="createTime" property="createTime"/>
+		<result column="modifyUser" property="modifyUser"/>
+		<result column="modifyTime" property="modifyTime"/> 
+		<result column="enCodePath" property="enCodePath"/>
+	</resultMap>
+	
+	
+	
+	<!-- 新增-->
+	<insert id="save" parameterType="FileDetails">
+		insert into TB_FILE_DETAILS(
+			   fileId,       
+			   ownershipMasterId,
+			   category,
+			   fileTitle,
+			   fileName,   
+			   fileExtension,
+			   specification,
+			   filePath, 
+			   content,    
+			   description,  
+			   createTime,   
+			   createUser
+		) values (
+			   #{fileId},       
+			   #{ownershipMasterId},
+			   #{category},
+			   #{fileTitle},
+			   #{fileName},   
+			   #{fileExtension},
+			   #{specification},
+			   #{filePath}, 
+			   #{content,jdbcType=BLOB},     
+			   #{description}, 
+			   #{createTime},   
+			   #{createUser}
+		)
+	</insert>
+	<insert id="saveList" parameterType="FileDetails">
+	<![CDATA[	insert into TB_FILE_DETAILS(
+			   fileId,       
+			   ownershipMasterId,
+			   category,
+			   fileTitle,
+			   fileName,   
+			   fileExtension,
+			   specification,
+			   filePath, 
+			   content,    
+			   description,  
+			   createTime,   
+			   createUser,
+			   enCodePath,
+			   shortUrl
+		) values
+		]]>
+		<foreach collection="list" item="item" index="index" separator=",">
+		 (
+			   #{item.fileId},       
+			   #{item.ownershipMasterId},
+			   #{item.category},
+			   #{item.fileTitle},
+			   #{item.fileName},   
+			   #{item.fileExtension},
+			   #{item.specification},
+			   #{item.filePath}, 
+			   #{item.content,jdbcType=BLOB},     
+			   #{item.description}, 
+			   #{item.createTime},   
+			   #{item.createUser},
+			   #{item.enCodePath},
+			   #{item.shortUrl}
+		)
+		</foreach>
+	</insert>
+	
+	
+	<!-- 删除-->
+	<delete id="deleteById" parameterType="pd">
+		delete from TB_FILE_DETAILS
+		where 
+			fileId = #{fileId}
+	</delete>
+	
+	
+	<!-- 修改 -->
+	<update id="edit" parameterType="FileDetails">
+		update  TB_FILE_DETAILS
+			set 
+				  ownershipMasterId = #{ownershipMasterId},
+				  category = #{category},
+				  fileTitle = #{fileTitle},
+				  fileName = #{fileName},   
+				  fileExtension = #{fileExtension},
+				  specification = #{specification},
+				  filePath = #{filePath}, 
+				  content = #{content,jdbcType=BLOB},     
+				  description = #{description}, 
+				  modifyTime = #{modifyTime},   
+				  modifyUser = #{modifyUser}
+			where 
+				fileId = #{fileId}
+	</update>
+	
+	
+	<!-- 通过ID获取数据 -->
+	<select id="findById" parameterType="pd" resultType="pd">
+		select 
+		   fileId,       
+		   ownershipMasterId,
+		   category,
+		   fileName,   
+		   fileExtension,
+		   specification,
+		   filePath,   
+		   content,  
+		   description,  
+		   createTime,   
+		   createUser
+		from 
+			TB_FILE_DETAILS
+		where 
+			fileId = #{fileId}
+	</select>
+	<!-- 获取单个实体 -->
+	<select id="getEntityById" parameterType="pd" resultMap="FileDetailsResultMap">
+		select 
+		   fileId,       
+		   ownershipMasterId,
+		   category,
+		   fileName,   
+		   fileExtension,
+		   specification,
+		   filePath,   
+		   content,  
+		   description,  
+		   createTime,   
+		   createUser
+		from 
+			TB_FILE_DETAILS
+		where 
+			fileId = #{fileId}
+	</select>
+	
+	<select id="getEntityByIds" parameterType="pd" resultMap="FileDetailsResultMap">
+		select 
+		   fileId,       
+		   ownershipMasterId,
+		   category,
+		   fileName,   
+		   fileExtension,
+		   specification,
+		   filePath,   
+		   content,  
+		   description,  
+		   createTime,   
+		   createUser
+		from 
+			TB_FILE_DETAILS
+		where 
+			fileId in ${fileIds}
+	</select>
+	<!-- 列表 -->
+	<select id="datalistPage" parameterType="page" resultType="pd">
+		select
+			   a.fileId,       
+			   a.ownershipMasterId,
+			   a.category,
+			   a.fileTitle,
+			   a.fileName,   
+			   a.fileExtension,
+			   a.specification,
+			   a.filePath,
+			   a.content,     
+			   a.description,  
+			   a.createTime,   
+			   a.createUser
+		from 
+				TB_FILE_DETAILS a
+	</select>
+	
+	<!-- 列表(全部) -->
+	<select id="listAll" parameterType="pd" resultType="pd">
+		select
+			   a.fileId,       
+			   a.ownershipMasterId,
+			   a.category,
+			   a.fileTitle,
+			   a.fileName,   
+			   a.fileExtension,
+			   a.specification,
+			   a.filePath,
+			   a.content,     
+			   a.description,  
+			   a.createTime,   
+			   a.createUser
+		from 
+				TB_FILE_DETAILS a
+	</select>
+	
+		<!-- 列表(全部) -->
+	<select id="listByMasterId" parameterType="pd" resultMap="FileDetailsResultMap">
+		select
+			   a.fileId,       
+			   a.ownershipMasterId,
+			   a.category,
+			   a.enCodePath,
+			   a.fileTitle,
+			   a.fileName,   
+			   a.fileExtension,
+			   a.specification,
+			   a.filePath,
+			   a.content,     
+			   a.description,  
+			   a.createTime,   
+			   a.createUser
+		from 
+				TB_FILE_DETAILS a
+		where
+				ownershipMasterId = #{ownershipMasterId}
+				and category=#{category}
+	</select>
+	<!-- 获取 实体列表集合 -->
+	<select id="findListByMasterId" parameterType="pd" resultMap="FileDetailsResultMap">
+		select 
+		   fileId,       
+		   ownershipMasterId,
+		   category,
+		   fileName,   
+		   fileExtension,
+		   specification,
+		   filePath,   
+		   content,  
+		   description,  
+		   createTime,   
+		   createUser
+		from 
+			TB_FILE_DETAILS
+		where 
+			ownershipMasterId = #{ownershipMasterId}
+	</select>
+	<!-- 批量删除 -->
+	<delete id="deleteByMasterId" parameterType="String">
+		delete from TB_FILE_DETAILS
+		where 
+			ownershipMasterId = #{questionnaireId}
+			and category=#{category}
+	</delete>
+	<!-- 根据问卷id合问卷级别获取相应的二维码 -->
+	<select id="getFileByQIDAndLevel" parameterType="pd" resultMap="FileDetailsResultMap">
+		select 
+		   fileId,       
+		   ownershipMasterId,
+		   category,
+		   fileName,   
+		   fileExtension,
+		   specification,
+		   filePath,   
+		   content,  
+		   fileTitle,
+		   description,  
+		   date_format(createTime,'%Y-%m-%d') as createTime,
+		   createUser,
+		   enCodePath,
+		   shortUrl
+		from 
+			TB_FILE_DETAILS
+		where 
+			ownershipMasterId = #{questionnaireId}
+			and fileTitle=#{level}
+			and category='QR'
+	</select>
+	
+	<!-- 通过短链接码获取长连接url -->
+	<!-- 通过ID获取数据 -->
+	<select id="findByShortUrl" parameterType="pd" resultType="pd">
+		select 
+		   fileId,       
+		   ownershipMasterId,
+		   category,
+		   fileName,   
+		   fileExtension,
+		   specification,
+		   filePath,   
+		   content,  
+		   description,  
+		   createTime,   
+		   createUser,
+		   enCodePath
+		from 
+			TB_FILE_DETAILS
+		where 
+			shortUrl = #{shortUrl}
+	</select>
+</mapper>

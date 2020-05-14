@@ -1,0 +1,250 @@
+package com.fh.controller.enabler;
+
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.sun.org.apache.xml.internal.security.utils.Base64;
+
+import org.apache.commons.io.IOUtils;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.fh.service.enabler.VoiceService;
+import com.fh.util.AppUtil;
+import com.fh.util.DateUtil;
+import com.fh.util.DbFH;
+import com.fh.util.LogUtil;
+import com.fh.util.Logger;
+import com.fh.util.PageData;
+import com.fh.util.Tools;
+import com.fh.util.UuidUtil;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
+/**
+ * 华为小号平台话单推送接口
+ * @author shanghaizhao
+ * @date 2018-01-03
+ */
+@Controller
+@RequestMapping(value ="/enabler")
+public class VoiceController {
+	
+	@Resource(name="voiceService")
+	private VoiceService voiceService;
+	
+	protected static Logger logger = Logger.getLogger(VoiceController.class);
+	
+	@RequestMapping(value = {"/voice/notifyCallEvent/v1"}, method = {RequestMethod.POST})
+    public void v1(HttpServletRequest request,HttpServletResponse response) throws Exception {
+		
+        // 获取请求体
+        byte[] body = readBody(request);
+        // 将请求体转成String格式
+        String requestBody = new String(body, "utf-8");
+        System.out.println("接收到的报文======"+requestBody);
+        logger.info("接收到的报文======"+requestBody);
+        // 获取部分request header
+        String wsse = request.getHeader("X-WSSE");
+        HashMap<String, String> map;
+		try {
+			map = this.resolveWSSE(wsse);
+			System.out.println("解析的请求头数据===="+map);
+			logger.info("解析的请求头数据===="+map);
+			//String Username = map.get("Username");
+	        String PasswordDigest = map.get("PasswordDigest");
+	        String Nonce = map.get("Nonce");
+	        String Created = map.get("Created");
+	        // 校验passwordDigest,暂时使用小号作为服务方提供的appkey即password
+	        String digest = Base64.encode(SHA256(Nonce+Created+DbFH.getPprVue().getProperty("hwAppSecret")));
+	        System.out.println("本地的加密结果PasswordDigest=="+digest);
+	        logger.info("本地的加密结果PasswordDigest=="+digest);
+	        if(digest.equals(PasswordDigest)) {
+		        // App不对呼叫进行控制,解析存储通话数据
+	        	this.saveBody(requestBody);
+	        	
+	        	response.setStatus(200);    
+	            response.setHeader("Connection", "Keep-Alive");
+	            
+		        /*if(Const.HW_MODE_NOTIFY.equals(notificationMode)) {
+		        	// App不对呼叫进行控制
+		        	response.setStatus(200);    
+		            response.setHeader("Connection", "Keep-Alive");
+		        } // 此模式目前不会给返回，不予考虑
+		        else if(Const.HW_MODE_BLOCK.equals(notificationMode)){
+		        	// App可以指示小号业务平台做呼叫控制
+		        	response.setStatus(200);
+		        	response.setContentType("application/json; charset=utf-8");
+		        	response.setHeader("Connection", "Keep-Alive");
+		        	// 请求录音,响应消息体
+		        	response.getWriter().write((this.getOperation("", "").toString()));
+		        }else {
+		        	response.setStatus(400);
+		        }*/
+	        }else {
+	        	response.setStatus(400);
+	        }
+		} catch (Exception e) {
+			response.setStatus(400);
+			e.printStackTrace();
+		}
+        
+    }
+	
+	/**
+     * 解析存储请求体body内容
+     * @author shanghaizhao
+     */
+    private void saveBody(String requestBody) throws IOException {
+    	
+    	JSONObject requestJson = JSONObject.fromObject(requestBody);
+        try {
+			String callEvent = requestJson.getString("callEvent");
+			JSONObject call = JSONObject.fromObject(callEvent);
+			String extInfo = call.getString("extInfo");
+			JSONObject ext = JSONObject.fromObject(extInfo);
+			String extParas = ext.getString("extParas");
+			JSONArray paras = JSONArray .fromObject(extParas);
+			PageData pd = new PageData();
+			for (int i = 0; i < paras.size(); i++) {  
+			     JSONObject jsonObject = paras.getJSONObject(i);
+			     if("StartTime".equals(jsonObject.getString("key"))) {
+			    	 pd.put(jsonObject.getString("key").toUpperCase(), DateUtil.fomatTime(jsonObject.getString("value")));
+			     }else {
+			    	 pd.put(jsonObject.getString("key").toUpperCase(), jsonObject.getString("value"));
+			     }
+			} 
+			String extParasId = UuidUtil.get32UUID();
+			pd.put("EXTPARASID", extParasId);
+			voiceService.saveExtParas(pd);
+			String extInfoId = UuidUtil.get32UUID();
+			pd.put("EXTINFOID", extInfoId);
+			pd.put("RALLCALLED", ext.getString("rawCalled"));
+			pd.put("RALLCALLING", ext.getString("rawCalling"));
+			pd.put("RALLCALLEDNOA", ext.getString("rawCalledNOA"));
+			pd.put("RALLCALLINGNOA", ext.getString("rawCallingNOA"));
+			pd.put("EXTPARASID", extParasId);
+			voiceService.saveExtInfo(pd);
+			String callEventId = UuidUtil.get32UUID();
+			pd.put("CALLEVENTID", callEventId);
+			pd.put("EXTINFOID", extInfoId);
+			pd.put("CALLIDENTIFIER", call.getString("callIdentifier"));
+			pd.put("CALLED", call.getString("called"));
+			pd.put("CALLING", call.getString("calling"));
+			pd.put("EVENT", call.getString("event"));
+			pd.put("ISRECORD", call.getString("isRecord"));
+			pd.put("NOTIFICATIONMODE", call.getString("notificationMode"));
+			pd.put("TIMESTAMP", DateUtil.fomatTime(call.getString("timeStamp")));
+			pd.put("VIRTUALNUMBER", call.getString("virtualNumber"));
+			voiceService.saveCallEvent(pd);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    }
+    
+	/**
+     * 获取请求体body内容
+     * @author shanghaizhao
+     */
+    private byte[] readBody(HttpServletRequest request) throws IOException {
+        if (request.getContentLength() > 0) {
+            byte[] body = new byte[request.getContentLength()];
+            IOUtils.readFully(request.getInputStream(), body);
+            return body;
+        } else
+            return null;
+    }
+    
+    /**
+     * SHA256加密
+     * @author shanghaizhao
+     */
+    private byte[] SHA256(String str){
+    	
+    	byte[] digest2=null;
+    	try{
+    		MessageDigest digest = MessageDigest.getInstance("SHA-256");
+    		digest2 = digest.digest(str.getBytes("utf-8"));
+    	}catch(Exception e){
+    		e.printStackTrace();
+    	}
+    	
+    	return digest2;
+    }
+    
+    /**
+     * 解析X-WSSE认证信息
+     * @author shanghaizhao
+     */
+    private HashMap<String, String> resolveWSSE(String wsse) throws Exception{
+    	
+    	HashMap<String, String> map = new HashMap<String, String>();
+		try {
+			String[] split = wsse.split("\",");
+			String[] split2 = split[0].split(" ");
+			String[] split3 = split2[1].split("=\"");
+			map.put(split3[0], split3[1]);
+			map.put(split[1].split("=\"")[0], split[1].split("=\"")[1]);
+			map.put(split[2].split("=\"")[0], split[2].split("=\"")[1]);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return map;
+    }
+    
+    /**
+     * BLOCK模式下返回请求录音消息体(目前不考虑Block模式)
+     * @author shanghaizhao
+     * @param routingAddress 被叫号码
+     * @param callingAddress 主叫号码
+     */
+    public JSONObject getOperation(String routingAddress,String callingAddress) {
+    	
+    	Map<String,List<Map<String,String>>> actions = new HashMap<String,List<Map<String,String>>>();
+		List<Map<String,String>> list = new ArrayList<Map<String,String>>();
+		LinkedHashMap<String,String> map = new LinkedHashMap<String,String>();
+		map.put("operation", "Record");
+		list.add(map);
+		if(!Tools.isEmpty(routingAddress) || !Tools.isEmpty(callingAddress)) {
+			LinkedHashMap<String,String> maps = new LinkedHashMap<String,String>();
+			maps.put("operation", "vNumberRoute");
+			if(!Tools.isEmpty(routingAddress)) {
+				maps.put("routingAddress", routingAddress);
+			}else if(!Tools.isEmpty(callingAddress)) {
+				maps.put("callingAddress", callingAddress);
+			}
+			list.add(maps);
+		}
+		actions.put("actions", list);
+		JSONObject jsonObject = JSONObject.fromObject(actions);
+		return jsonObject;
+    }
+    
+    
+    public static void main(String[] args) {
+    	
+    	/*HashMap<String, String> map = new HashMap<String, String>();
+    	String str = "UsernameToken Username=\"XXXX\", PasswordDigest=\"weYI3nXd8LjMNVksCKFV8t3rgHh3Rw==\", Nonce=\"WScqanjCEAC4mQoBE07sAQ==\",Created=\"2009-03-24T12:30:04Z\"";
+		String[] split = str.split("\",");
+		String[] split2 = split[0].split(" ");
+		String[] split3 = split2[1].split("=\"");
+		map.put(split3[0], split3[1]);
+		map.put(split[1].split("=\"")[0], split[1].split("=\"")[1]);
+		map.put(split[2].split("=\"")[0], split[2].split("=\"")[1]);
+		map.put(split[3].split("=\"")[0], split[3].split("=\"")[1]);
+		System.out.println(map.get("Created"));*/
+    	
+	}
+}

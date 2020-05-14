@@ -1,0 +1,252 @@
+html, body, ul, li, ol, dl, dd, dt, p, h1, h2, h3, h4, h5, h6, form, fieldset, legend, img {
+    margin: 0;
+    padding: 0;
+}
+
+fieldset, img, input, button {
+    border: none;
+    padding: 0;
+    margin: 0;
+    outline-style: none;
+}
+body{
+    color: #333;
+    font-size: 14px;
+    font-family: 'PingFang SC', tahoma, arial, 'helvetica neue', 'hiragino sans gb', 'microsoft yahei ui', 'microsoft yahei', simsun, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+ul, ol,li {
+    list-style: none;
+}
+a{
+    color: #333;
+    text-decoration: none;
+}
+/*题目内容*/
+.contentWrapper{
+    width: 100%;
+    height: auto;
+}
+/*主体部分start*/
+.contentRight .mainEditor{
+    width: 870px;
+    height: 480px;
+    margin: 0 auto;
+}
+.survey_main{
+    width: 870px;
+    background: #fff;
+    height: auto;
+    border: 1px solid #ccc;
+    margin: 20px 0;
+}
+.main_title{
+    width: 80%;
+    padding: 10px;
+    text-align: center;
+    margin: 0 auto;
+    text-indent: 10px;
+}
+.main_title h4{
+    padding-bottom: 20px;
+}
+.main_content{
+    padding-top: 10px;
+    width: 100%;
+    height: 100%;
+    padding-bottom: 20px;
+    background: #fafafa;
+    border-top: 1px solid #ccc;   
+}
+.question_wrapper{
+    width: 90%; 
+    margin: 0 auto;
+}
+.row_title{
+    width: 90px;
+    height: 30px;
+    line-height: 30px;
+    display: block;
+    text-align: right;
+    float: left;
+    margin-right: 3px;
+}
+.question_list select,
+.main_content input[type="text"]{
+    width: 630px;
+    height: 30px;
+    border: 1px solid #ccc;
+    margin-bottom: 20px;
+}
+/*.question_wrapper .mgr{
+    margin-left: 30px;
+}*/
+.main_content input[type="text"]{
+    /*margin-left: 30px;*/
+}
+.row_content{
+    /*float: left;  */
+    margin-left:95px;
+    width: 100%;
+    padding-top: 20px;
+}
+input[type="checkbox"]{
+    margin-left: 20px;
+    margin-bottom: 20px;
+}
+.option_wrapper{
+    position: relative;
+}
+.normal_options_list input[type="text"]{
+    width: 230px;
+    height: 20px;
+    border: 1px solid #ccc;    
+    margin-left: 80px;
+}
+.option_item .handle{
+    background: url(../../img/sprites_survey.png) no-repeat;
+    background-position: -174px -91px;
+    width: 6px;
+    height: 18px;
+    position: absolute;
+    margin-top: 1px;
+    margin-left: 70px;
+    cursor: move;
+}
+.select_options span{
+    width: 50px;
+    margin-left:  10px;
+    margin-right: 10px;
+}
+.options_list{
+    margin-top: 10px;
+}
+.normal_options_list .title_Name {
+    margin-right: 20px;
+}
+.option_item .line{
+    margin-left: 34px;
+    color: #ccc;
+}
+.option_wrapper .options_editor select:focus,
+.option_wrapper .options_editor .range:focus,
+.question_wrapper .question_list input[type="text"]:focus,
+.normal_options_list .option_item input[type="text"]:focus{
+    border: 1px solid #479de6;
+}
+.normal_options_list .btn_del{
+    color: #999;
+}
+.question_wrapper .option_create{
+     border: 1px dashed #e0e0e0;
+     width: 500px;
+     height: 30px;
+     margin-left: 80px;
+}
+.question_wrapper .add_option{
+    color: #ccc;
+    cursor: pointer;
+    padding: 5px 10px;
+    display: block;
+    font-size: 14px;
+}
+.options_control{
+    margin-left: 38px;
+    margin-top: 10px;
+}
+.options_control .add_other{
+    color: #2f8ddc;
+    font-size: 14px;
+    padding: 0 10px;
+}
+.options_control .add_other:hover{
+    color: #58a6e7;
+}
+.options_control .add_other.disabled{
+    color: #b2b2b2;
+    cursor: default;
+}
+.editor_control{
+    padding-top: 20px;
+    text-align: center;
+}
+.editor_control .btn{ 
+    display: inline-block;
+    text-align: center;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+.editor_control .btn.btn_small{
+    /*width: 50px;*/
+    height: 34px;
+    line-height: 34px;
+    padding: 0 20px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+.editor_control .btn.btn_blue{
+    background: #479de6;
+    color: #fff;
+    border: 1px solid #479de6;
+}
+.editor_control .btn.btn_blue:hover{
+     background-color: #53aaf3
+}
+.editor_control .btn.btn_white{
+    background: #fff;
+    color: #333;
+    border: 1px solid #ccc;
+}
+.editor_control .btn.btn_white:hover{
+    background-color: #f2f8ff;
+}
+/*量表start*/
+.option_wrapper .options_editor{
+    margin-left: 33px;
+}
+
+.row_content .mrl,
+.option_wrapper .options_editor .mrl{
+    margin-left: 10px;
+}
+.row_content .range,
+.options_editor .range{
+    border: 1px solid #aaa;
+    width: 80px;
+}
+/*量表end*/
+
+/*高级设置*/
+.options_split{
+    position: relative;
+    margin-top: 15px;
+    margin-bottom: 5px;
+
+}
+.options_split .split{
+    margin-top: 8px;
+    border-top: 1px solid #e0e0e0;
+    width: 96%;
+    text-align: center;
+}
+.options_split a{
+    display: block;
+    width: 124px;
+    background: #fafafa;
+    margin: -10px auto 0;
+    font-size: 14px;
+    color: #000;
+    text-align: center;
+}
+.options_split i{
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-left: 5px;
+    background-color: pink;
+    background: url(../../img/sprites_ico.png) no-repeat;
+    background-position: -338px -475px;
+    transform: rotate(180deg);
+    transition: .2s;
+}
+/*主体部分end*/

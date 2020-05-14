@@ -1,0 +1,87 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%
+	String path = request.getContextPath();
+	String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=750,maximum-scale=1.0,user-scalable=0">
+    <meta content="yes" name="apple-mobile-web-app-capable">
+    <meta content="yes" name="apple-touch-fullscreen">
+    <meta content="black" name="apple-mobile-web-app-status-bar-style">
+    <meta content="telephone=no,email=no" name="format-detection">
+    <meta content="" name="description"/>
+    <meta content="" name="keywords"/>
+    <title></title>
+    <!-- Bootstrap -->
+    <link href="../static/weixin/css/bootstrap.css" rel="stylesheet">
+    <link href="../static/weixin/css/order_style.css" rel="stylesheet">
+    <!--[if lt IE 9]>
+    <script src="../static/weixin/js/html5shiv.min.js"></script>
+    <script src="../static/weixin/js/respond.min.js"></script>
+    <![endif]-->
+    <script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+</head>
+<body onload="clearCookie();" >
+<div class="main">
+    <div class="div_bg01">
+        <img class="bg_img" src="../static/question/img/background.jpg" style="width: "/>
+    </div>
+    <div class="lose_div01">
+    	<audio id="audio1" loop  autoplay="autoplay">
+			<source src="" type="audio/mpeg">
+		</audio>
+    </div>
+    <div class="lose_data">
+	    <div style="margin-top:10%" class="container" >
+	        <button class="btn btn_lose" id="close" onclick="save()">确定</button>  
+	    </div>
+    </div>
+    <div class="foot_data">www.taikangzhijia.com</div>
+</div>
+<script src="../static/weixin/js/jquery-1.11.3.js"></script>
+<script src="../static/weixin/js/bootstrap.js"></script>
+<script src="../static/weixin/js/order.js"></script>
+<script>
+function save(){
+WeixinJSBridge.call('closeWindow');
+}
+//清楚上个页面的cookie
+function clearCookie(){
+	var keys = document.cookie.match(/[^ =;]+(?=\=)/g);  
+    if(keys) {  
+        for(var i = keys.length; i--;)  
+            document.cookie = keys[i] + '=0;expires=' + new Date(0).toUTCString()  
+    }  
+}
+//--创建页面监听，等待微信端页面加载完毕 触发音频播放
+document.addEventListener('DOMContentLoaded', function () {
+    function audioAutoPlay() {
+        var audio = document.getElementById('audio1');
+            audio.play();
+        document.addEventListener("WeixinJSBridgeReady", function () {
+            audio.play();
+        }, false);
+    }
+    audioAutoPlay();
+});
+
+
+
+//--创建触摸监听，当浏览器打开页面时，触摸屏幕触发事件，进行音频播放
+document.addEventListener('touchstart', function () {
+    function audioAutoPlay() {
+        var audio = document.getElementById('audio1');
+            if (audio.paused) {
+            	audio.play();
+			}
+    }
+    audioAutoPlay();
+});
+</script>
+</body>
+</html>

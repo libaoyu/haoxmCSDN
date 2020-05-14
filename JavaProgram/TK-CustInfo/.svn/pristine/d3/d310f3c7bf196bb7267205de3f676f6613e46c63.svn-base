@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="QuestionresultMapper">
+	
+	
+	<!-- 新增-->
+	<insert id="save" parameterType="pd">
+		insert into TB_QUESTIONRESULT(
+			QUESTIONCODE,	
+			ANSWERNUM,	
+			ANSWERDATA,	
+			USERCODE,	
+			ANSWERDATE,	
+			QUESTIONRESULT_ID
+		) values (
+			#{QUESTIONCODE},	
+			#{ANSWERNUM},	
+			#{ANSWERDATA},	
+			#{USERCODE},	
+			#{ANSWERDATE},	
+			#{QUESTIONRESULT_ID}
+		)
+	</insert>
+	
+		<!-- 新增单选题-->
+	<insert id="singleSave" parameterType="pd">
+			insert into TB_QUESTIONRESULT(
+			QUESTIONCODE,	
+			ANSWERNUM,	
+			ANSWERDATE,	
+			USERCODE,	
+			PAGECODE,
+			QUESTIONRESULT_ID
+		) values (
+			#{QUESTIONCODE},	
+			#{ANSWERNUM},	
+			#{ANSWERDATE},	
+			#{USERCODE},	
+			#{PAGECODE},
+			#{QUESTIONRESULT_ID}
+		)
+	</insert>
+	<!-- 新增主观题-->
+	<insert id="saveData" parameterType="pd">
+		insert into TB_QUESTIONRESULT(
+			QUESTIONCODE,	
+			ANSWERDATA,	
+			ANSWERDATE,	
+			USERCODE,	
+			PAGECODE,
+			QUESTIONRESULT_ID
+		) values (
+			#{QUESTIONCODE},	
+			#{ANSWERDATA},	
+			#{ANSWERDATE},	
+			#{USERCODE},	
+			#{PAGECODE},
+			#{QUESTIONRESULT_ID}
+		)
+	</insert>
+	
+	<!-- 删除-->
+	<delete id="delete" parameterType="pd">
+		delete from TB_QUESTIONRESULT
+		where 
+			QUESTIONRESULT_ID = #{QUESTIONRESULT_ID}
+	</delete>
+	
+	
+	<!-- 修改 -->
+	<update id="edit" parameterType="pd">
+		update  TB_QUESTIONRESULT
+			set 
+			QUESTIONRESULT_ID = QUESTIONRESULT_ID
+			where 
+				QUESTIONRESULT_ID = #{QUESTIONRESULT_ID}
+	</update>
+	
+	
+	<!-- 通过ID获取数据 -->
+	<select id="findById" parameterType="pd" resultType="pd">
+		select 
+			QUESTIONCODE,	
+			ANSWERNUM,	
+			ANSWERDATA,	
+			USERCODE,	
+			ANSWERDATE,	
+			QUESTIONRESULT_ID
+		from 
+			TB_QUESTIONRESULT
+		where 
+			QUESTIONRESULT_ID = #{QUESTIONRESULT_ID}
+	</select>
+	
+	<!-- <select id="userAnswer" parameterType="page" resultType="pd">
+			select d.PAGENAME,d.USERNAME,d.BUILDING,d.COMPANY,d.QUESTIONRESULT_ID,d.PAGECODE,d.QUESTIONCODE,d.USERCODE,e.QUESTIONTITLE,e.QUESTIONCODE as QUESTIONNUM,
+					e.QUESTIONTYPE,e.QUESTIONSCORE,d.ANSWERNUM,d.ANSWERDATA,d.ANSWERDATE,d.PHONE
+			from	(select 
+						c.PAGENAME,b.USERNAME,b.BUILDING,b.COMPANY,a.ANSWERNUM,a.ANSWERDATA,a.QUESTIONRESULT_ID,a.PAGECODE,a.QUESTIONCODE,a.USERCODE,a.ANSWERDATE,b.PHONE
+					 from (TB_QUESTIONRESULT a, TB_QUESTIONUSER b ,TB_QUESTIONPAGE c)
+					 where 
+						  a.USERCODE = b.QUESTIONUSER_ID and a.PAGECODE = c.QUESTIONPAGE_ID) d
+			LEFT JOIN TB_QUESTION e on d.QUESTIONCODE = e.QUESTION_ID and e.QUESTIONPAGE = d.PAGECODE
+			where 1=1  
+	</select> -->
+	<!-- 按人查询答案 -->
+	<select id="userAnswer" parameterType="pd" resultType="pd">
+			select a.QUESTIONRESULT_ID,a.QUESTIONCODE ,a.ANSWERNUM,a.ANSWERDATA,e.QUESTIONFLAG,e.QUESTIONCODE as NUM from TB_QUESTIONRESULT a 
+					LEFT JOIN TB_QUESTION e on a.QUESTIONCODE = e.QUESTION_ID
+			where 	a.USERCODE = #{USERCODE}
+					and a.PAGECODE = #{PAGECODE}
+			ORDER BY QUESTIONFLAG,NUM
+	</select> 
+	<!-- 按人分组查询 -->
+	<select id="datalistPage" parameterType="page" resultType="pd">
+		select c.PAGENAME,b.USERNAME,b.BUILDING,b.COMPANY,b.CHECK_IN,b.PHONE,a.ANSWERDATE,a.QUESTIONRESULT_ID,a.PAGECODE,a.QUESTIONCODE,a.USERCODE
+				from (TB_QUESTIONRESULT a, TB_QUESTIONUSER b ,TB_QUESTIONPAGE c)
+			where 1=1
+			<if test="pd.QUESTIONPAGE != null and pd.QUESTIONPAGE!= ''">
+				and a.PAGECODE = #{pd.QUESTIONPAGE}
+			</if>
+			<if test="pd.QUESTIONCODE != null and pd.QUESTIONCODE!= ''">
+				and a.QUESTIONCODE = #{pd.QUESTIONCODE}
+			</if>
+			<if test="pd.NAME != null and pd.NAME!= ''">
+				and b.USERNAME LIKE concat(concat('%',#{pd.NAME}),'%')
+			</if>
+			<if test="pd.COMPANY != null and pd.COMPANY!= ''">
+				and b.COMPANY LIKE concat(concat('%',#{pd.COMPANY}),'%')
+			</if>
+			<if test="pd.PHONE != null and pd.PHONE!= ''">
+				and b.PHONE=#{pd.PHONE}
+			</if>
+			<if test="pd.ANSWERDATE != null and pd.ANSWERDATE!= ''">
+				and b.ANSWERDATE=#{pd.ANSWERDATE}
+			</if>
+				and a.USERCODE = b.QUESTIONUSER_ID and a.PAGECODE = c.QUESTIONPAGE_ID 
+				GROUP BY a.USERCODE
+ 				ORDER BY a.ANSWERDATE
+	</select>
+	
+	<!-- 到处execl查询 -->
+	<select id="execlPage" parameterType="pd" resultType="pd">
+		select c.PAGENAME,b.USERNAME,b.BUILDING,b.COMPANY,b.CHECK_IN,b.PHONE,a.ANSWERDATE,a.QUESTIONRESULT_ID,a.PAGECODE,a.QUESTIONCODE,a.USERCODE
+				from (TB_QUESTIONRESULT a, TB_QUESTIONUSER b ,TB_QUESTIONPAGE c)
+			where 
+				1=1 and a.PAGECODE = #{QUESTIONPAGE}
+				and a.USERCODE = b.QUESTIONUSER_ID and a.PAGECODE = c.QUESTIONPAGE_ID 
+				GROUP BY a.USERCODE
+ 				ORDER BY a.ANSWERDATE
+	</select>
+	
+	<!-- 列表(全部) -->
+	<select id="listAll" parameterType="pd" resultType="pd">
+		select
+				a.QUESTIONCODE,	
+				a.ANSWERNUM,	
+				a.ANSWERDATA,	
+				a.USERCODE,	
+				a.ANSWERDATE,	
+				a.QUESTIONRESULT_ID
+		from 
+				TB_QUESTIONRESULT a
+	</select>
+	
+	<!-- 批量删除 -->
+	<delete id="deleteAll" parameterType="String">
+		delete from TB_QUESTIONRESULT
+		where 
+			QUESTIONRESULT_ID in
+		<foreach item="item" index="index" collection="array" open="(" separator="," close=")">
+                 #{item}
+		</foreach>
+	</delete>
+	
+</mapper>

@@ -1,0 +1,55 @@
+【满意度问卷项目版本说明】
+/**************************************************
+ 	时	     间：2018/01/11
+ 	操  作   人：zhangxiaoqing
+ 	开 发 人 员：zhangxiaoqing、shanghaizhao、zhudingding、yaoning
+ 	=================================================
+ 	【阿里云123.56.223.243:8081测试环境部署路径】
+ 	123.56.223.243：usr/local/apache-tomcat/webapps/TK.war
+ 	测试环境服务地址：http://pay.taikangzhijia.com/TK
+ 	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 	【阿里云生产环境：118.190.78.122部署路径】
+ 	118.190.78.122：usr/local/mytomcat/webapps/
+ 	生产环境服务地址：http://q.taikangzhijia.com/TK
+ 										http://q.taikangzhijia.com:8080/TK
+ 	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 	 【迁移后数据中心生产环境外网IP：119.253.83.139】
+ 	堡垒机访问地址：https://blj.it.taikang.com/
+ 	数据中心生产服务器1：100.126.99.94/10.130.100.172(内网):8080~8083  此环境使用中（前端负载只映射app01:10.130.100.172）
+ 	数据中心生产服务器2：100.126.99.95/10.130.100.173(内网):8080~8083 此环境暂未使用(负载没有映射，暂未实现多台物理机器集群)
+ 	生产系统内网负载：10.130.100.176:80
+ 	生产系统外网负载：119.253.83.139:80
+ 	部署路径：/10.130.100.172 sftp (10.130.100.172)/tomcat/u02/tomcat-8.5.9/8080/TK.war
+  ~~~~~~~~菜单列表~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+菜单名称	菜单链接菜单
+问卷后台	http://q.taikangzhijia.com/TK/main/index
+问卷管理	http://q.taikangzhijia.com/TK/questionnaire/list.do
+就诊数据管理	http://q.taikangzhijia.com/TK/manager/list.do
+联动数据管理	http://q.taikangzhijia.com/TK/linkagePullData/list
+综合问卷结果统计	http://q.taikangzhijia.com/TK/questionStatic/goStatissticsData.do
+数据模板导入问卷	http://q.taikangzhijia.com/TK/questionnaireTemp/list.do
+问卷结果查询			http://q.taikangzhijia.com/TK/qResult/listResult.do
+星级问卷数据项配置		http://q.taikangzhijia.com/TK/recConf/configure.do
+星级问卷结果统计	http://q.taikangzhijia.com/TK/questionStatic/starRat.do
+ 	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 	
+	-------------------------------------------------
+	数据库实例：fhadmin1
+	数据库连接：jdbc:mysql://118.190.78.122:3306/fhadmin1
+	jdbc.username=tk_root
+	jdbc.password=tk123456
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	【数据库sql备份】
+	项目工程目录：
+	--------------------------------------------
+	
+ 	=================================================
+ 	工作说明：客户满意度服务质量评测系统！
+ 	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ 	【业务部门对接人】
+ 	 于乐
+ **************************************************/
+【2017-11-1 新增功能】
+NO	文件	注释-说明
+
+===========================数据库脚本=============================================

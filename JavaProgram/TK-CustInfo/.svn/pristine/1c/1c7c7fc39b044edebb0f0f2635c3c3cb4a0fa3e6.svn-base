@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="QuestionnaireTempMapper">
+	 
+	<resultMap type="QuestionnaireTemp" id="QuestionnaireTempMap">
+		<id column="questionId" property="questionId"/>
+		<result column="allBatchId" property="allBatchId"/>
+		<result column="batchId" property="batchId"/>
+		<result column="isQuestionnaire" property="isQuestionnaire"/>
+		<result column="preface" property="preface"/>
+		<result column="questionnaireId" property="questionnaireId"/>
+		<result column="parentId" property="parentId"/>
+		<result column="questionCode" property="questionCode"/>
+		<result column="title" property="title"/>
+		<result column="level" property="level"/>
+		<result column="classification" property="classification"/>
+		<result column="types" property="types"/>
+		<result column="scaleType" property="scaleType"/>
+		<result column="scaleRange" property="scaleRange"/>
+		<result column="questionData" property="questionData"/>
+		<result column="sort" property="sort"/>
+		<result column="mustFlag" property="mustFlag"/>
+		<result column="description" property="description"/>
+		<result column="createUser" property="createUser"/>
+		<result column="createTime" property="createTime"/>
+		<result column="status" property="status"/>
+		<result column="isRight" property="isRight"/>
+		<result column="whereIsError" property="whereIsError"/>
+		<result column="isImport" property="isImport"/>
+		<result column="modifyUser" property="modifyUser"/>
+		<result column="modifyTime" property="modifyTime"/>
+		
+		<collection property="childTemp" ofType="PageData" column="{parentId=questionId,batchId=batchId}" select="getAllForParentId"/>  
+	</resultMap>
+	
+	<insert id="saveList" useGeneratedKeys="true" parameterType="java.util.List">
+		<![CDATA[	  
+		insert into tb_questionnaire_temp 
+			(questionId,
+			allBatchId,
+			 batchId,
+			 isQuestionnaire,
+			 preface,
+			 questionnaireId,
+			 parentId,
+			 questionCode,
+			 title,
+			 level,
+			 classification,
+			 types,
+			 scaleType,
+			 scaleRange,
+			 questionData,
+			 sort,
+			 mustFlag,
+			 createUser,
+			 createTime,
+			 status,
+			 isRight,
+			 whereIsError,
+			 isImport
+			 )  values
+		]]>
+		<foreach collection="list" item="item" index="index" separator=",">
+			 (
+				#{item.questionId},	
+				#{item.allBatchId},
+				#{item.batchId}, 
+				#{item.isQuestionnaire},
+				#{item.preface},
+				#{item.questionnaireId},	
+				#{item.parentId},	
+				#{item.questionCode},	
+				#{item.title},
+				#{item.level},
+				#{item.classification},
+				#{item.types},
+				#{item.scaleType},
+				#{item.scaleRange},
+				#{item.questionData},
+				#{item.sort},
+				#{item.mustFlag},
+				#{item.createUser},
+				#{item.createTime},
+				#{item.status},
+				#{item.isRight},
+				#{item.whereIsError},
+				#{item.isImport}
+			)
+		</foreach>
+	</insert>
+	<select id="getDatalistPageByListBatchId" parameterType="page" resultMap="QuestionnaireTempMap">
+		select questionId,
+			allBatchId,
+			 batchId,
+			 isQuestionnaire,
+			 preface,
+			 questionnaireId,
+			 parentId,
+			 questionCode,
+			 title,
+			 level,
+			 classification,
+			 types,
+			 scaleType,
+			 scaleRange,
+			 questionData,
+			 sort,
+			 mustFlag,
+			 createUser,
+			 createTime,
+			 status,
+			 isRight,
+			 whereIsError,
+			 isImport
+			  from tb_questionnaire_temp where batchId=#{pd.batchId} and classification!='L2'  ORDER BY questionCode 
+	</select>
+	
+	<select id="getListByListBatchId" parameterType="page" resultMap="QuestionnaireTempMap">
+		select questionId,
+			allBatchId,
+			 batchId,
+			 isQuestionnaire,
+			 preface,
+			 questionnaireId,
+			 parentId,
+			 questionCode,
+			 title,
+			 level,
+			 classification,
+			 types,
+			 scaleType,
+			 scaleRange,
+			 questionData,
+			 sort,
+			 mustFlag,
+			 createUser,
+			 createTime,
+			 status,
+			 isRight,
+			 whereIsError,
+			 isImport
+			  from tb_questionnaire_temp where batchId=#{pd.batchId} and classification!='L2'  ORDER BY questionCode 
+	</select>
+	
+	<select id="getAllForParentId" parameterType="pd" resultMap="QuestionnaireTempMap">
+		select questionId,
+		allBatchId,
+			 batchId,
+			 isQuestionnaire,
+			 preface,
+			 questionnaireId,
+			 parentId,
+			 questionCode,
+			 title,
+			 level,
+			 classification,
+			 types,
+			 scaleType,
+			 scaleRange,
+			 questionData,
+			 sort,
+			 mustFlag,
+			 createUser,
+			 createTime,
+			 status,
+			 isRight,
+			 whereIsError,
+			 isImport
+			  from tb_questionnaire_temp where batchId=#{batchId} and parentId=#{parentId} order by sort 
+	</select>
+	
+	
+	<select id="datalistPage" parameterType="pd" resultMap="QuestionnaireTempMap">
+		select questionId,
+		allBatchId,
+			 batchId,
+			 isQuestionnaire,
+			 preface,
+			 questionnaireId,
+			 parentId,
+			 questionCode,
+			 title,
+			 level,
+			 classification,
+			 types,
+			 scaleType,
+			 scaleRange,
+			 questionData,
+			 sort,
+			 mustFlag,
+			 createUser,
+			 createTime,
+			 status,
+			 isRight,
+			 whereIsError,
+			 isImport
+			  from tb_questionnaire_temp where batchId=#{batchId} and parentId=#{parentId} order by sort 
+	</select>
+	
+	<select id="getBatchIdByQuestionnaireId" parameterType="pd"  resultType="pd">
+		select questionId,
+		allBatchId,
+			 batchId,
+			 isQuestionnaire,
+			 preface,
+			 questionnaireId,
+			 parentId,
+			 questionCode,
+			 title,
+			 level,
+			 classification,
+			 types,
+			 scaleType,
+			 scaleRange,
+			 questionData,
+			 sort,
+			 mustFlag,
+			 createUser,
+			 createTime,
+			 status,
+			 isRight,
+			 whereIsError,
+			 isImport from tb_questionnaire_temp tt where tt.questionId=#{questionId} and tt.isQuestionnaire='questionnaire'
+	</select>
+	<select id="getQuestionnaireTempByAll" parameterType="pd"  resultType="pd">
+		select questionId,
+		allBatchId,
+			 batchId,
+			 isQuestionnaire,
+			 preface,
+			 questionnaireId,
+			 parentId,
+			 questionCode,
+			 title,
+			 level,
+			 classification,
+			 types,
+			 scaleType,
+			 scaleRange,
+			 questionData,
+			 sort,
+			 mustFlag,
+			 createUser,
+			 createTime,
+			 status,
+			 isRight,
+			 whereIsError,
+			 isImport  from tb_questionnaire_temp where
+			 
+			   isQuestionnaire='questionnaire' 
+			   <if test="allBatchId !=null  and  allBatchId !=''">
+			   	and 	allBatchId=#{allBatchId}
+			   </if>
+			   
+			   order by createTime desc
+	</select>
+	<!-- 删除之前的查询 -->
+	<select id="selectOneByIdForDelete" parameterType="pd"  resultType="pd">
+		select questionId,
+		allBatchId,
+			 batchId,
+			 isQuestionnaire,
+			 preface,
+			 questionnaireId,
+			 parentId,
+			 questionCode,
+			 title,
+			 level,
+			 classification,
+			 types,
+			 scaleType,
+			 scaleRange,
+			 questionData,
+			 sort,
+			 mustFlag,
+			 createUser,
+			 createTime,
+			 status,
+			 isRight,
+			 whereIsError,
+			 isImport  from tb_questionnaire_temp 
+			 <where>
+			 	<if test="questionnaireId != null and questionnaireId !='' ">
+			 		questionnaireId=#{questionnaireId}
+			 	</if>
+			 	<if test="parentId != null and parentId !='' ">
+			 		parentId=#{parentId}
+			 	</if>
+			 </where>
+	</select>
+	<delete id="deleteOne" parameterType="pd" >
+		delete  from tb_questionnaire_temp where questionId=#{questionId}
+	</delete>
+	<!-- 查询 -->
+	<select id="selectTempForDelete" parameterType="pd" resultType="pd">
+	 select questionId,
+	 allBatchId,
+			 batchId,
+			 isQuestionnaire,
+			 preface,
+			 questionnaireId,
+			 parentId,
+			 questionCode,
+			 title,
+			 level,
+			 classification,
+			 types,
+			 scaleType,
+			 scaleRange,
+			 questionData,
+			 sort,
+			 mustFlag,
+			 createUser,
+			 createTime,
+			 status,
+			 isRight,
+			 whereIsError,
+			 isImport 
+			 ,
+	(select count(*) from tb_questionnaire_temp  tqt where tqt.parentId=qt.questionId) countChild
+			  from tb_questionnaire_temp qt
+			 where 
+			 ${classification}
+			 <if test="questionId !=null and questionId != ''">
+			 	and  ${questionId}
+			 </if>
+			<if test="parentId != null and parentId !=''">
+				and ${parentId}
+			</if>
+			<if test=" questionnaireId != null and questionnaireId != ''">
+				and questionnaireId=#{questionnaireId}
+			</if>
+	</select>
+	<!-- 批量删除 -->
+	<delete id="deleteAll"  parameterType="pd">
+		delete from tb_questionnaire_temp where ${questionId}
+	</delete>
+	
+	<select id="getAllBatchId" parameterType="pd" resultType="pd">
+		select tt.allBatchId allBatchId from tb_questionnaire_temp tt GROUP BY tt.allBatchId
+	</select>
+	<!-- 根据id获取对应的记录 -->
+	<select id="getTempByQuestionId" parameterType="pd" resultMap="QuestionnaireTempMap">
+		 select questionId,
+	 allBatchId,
+			 batchId,
+			 isQuestionnaire,
+			 preface,
+			 questionnaireId,
+			 parentId,
+			 questionCode,
+			 title,
+			 level,
+			 classification,
+			 types,
+			 scaleType,
+			 scaleRange,
+			 questionData,
+			 sort,
+			 mustFlag,
+			 createUser,
+			 createTime,
+			 status,
+			 isRight,
+			 whereIsError,
+			 isImport 
+			  from tb_questionnaire_temp where questionId=#{questionId}
+	</select>
+	<!-- 修改导入的问卷的问题 -->
+	<update id="editTemp" parameterType="Questions">
+		update tb_questionnaire_temp  set 
+		questionData=#{questionData},
+		classification=#{classification},
+		questionCode=#{questionCode},
+		title=#{title},
+		level=#{level},
+		types=#{types},
+		<if test="scaleType != null  and  scaleType != '' ">
+			scaleType=#{scaleType},
+		</if>
+		<if test="scaleRange != null  and  scaleRange != '' ">
+			scaleRange=#{scaleRange},
+		</if>
+		sort=#{sort},
+		mustFlag=#{mustFlag},
+		parentId=#{parentId},
+		whereIsError=#{whereIsError},
+		isRight=#{isRight},
+		isQuestionnaire=#{isQuestionnaire},
+		preface=#{preface}
+		
+		where questionId=#{questionId}
+	</update>
+	<!-- 根据问卷id查询该问卷下面所有的问题包括问题 -->
+	<select id="findTempByQuestionnaireId" parameterType="pd" resultMap="QuestionnaireTempMap">
+		 select questionId,
+	 		 allBatchId,
+			 batchId,
+			 isQuestionnaire,
+			 preface,
+			 questionnaireId,
+			 parentId,
+			 questionCode,
+			 title,
+			 level,
+			 classification,
+			 types,
+			 scaleType,
+			 scaleRange,
+			 questionData,
+			 sort,
+			 mustFlag,
+			 createUser,
+			 createTime,
+			 status,
+			 isRight,
+			 whereIsError,
+			 isImport 
+			  from tb_questionnaire_temp where isRight=#{isRight} and ( questionId=#{questionId} or questionnaireId=#{questionId})
+	</select>
+	
+	<update id="updateIsImportByQuestionnaireId" parameterType="pd">
+		update tb_questionnaire_temp set isImport=#{isImport} where questionId=#{questionId} or questionnaireId=#{questionId}
+	</update>
+	
+	<!-- 删除业务表导入的问卷   问题 -->
+	<delete id="deleteQuestionsByTempQuestionId" parameterType="pd">
+		delete from tb_questions where questionnaireId =#{questionId}
+	</delete>
+	<!-- 删除业务表   问卷 -->
+	<delete id="deleteQuestionnaireByTempQuestionId" parameterType="pd">
+		delete from tb_questionnaire where  questionnaireId =#{questionId}
+	</delete>
+	<!-- 删除临时表问卷及下属问题 -->
+	<delete id="deleteAllTempByQuestionnaireId" parameterType="pd">
+		delete from tb_questionnaire_temp where questionId=#{questionId} or questionnaireId =#{questionId}
+	</delete>
+</mapper>

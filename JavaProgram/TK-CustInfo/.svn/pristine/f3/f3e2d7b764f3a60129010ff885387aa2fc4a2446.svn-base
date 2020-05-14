@@ -1,0 +1,724 @@
+package com.fh.controller.questionnaire;
+
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.fh.controller.base.BaseController;
+import com.fh.entity.Link;
+import com.fh.entity.Page;
+import com.fh.entity.questionnaire.FileDetails;
+import com.fh.entity.system.MapEntity;
+import com.fh.entity.system.Questionnaire;
+import com.fh.entity.system.QuestionnaireResults;
+import com.fh.entity.system.Questions;
+import com.fh.entity.system.QuestionsHeader;
+import com.fh.service.fhoa.department.DepartmentManager;
+import com.fh.service.questionnaire.FileDetailsService;
+import com.fh.service.questionnaire.LinkagePullDataService;
+import com.fh.service.questionnaire.QuestionnaireService;
+import com.fh.service.questionnaire.QuestionsHeaderService;
+import com.fh.service.questionnaire.QuestionsService;
+import com.fh.service.record.RecordService;
+import com.fh.service.record.SectionBaseService;
+import com.fh.util.AppUtil;
+import com.fh.util.Const;
+import com.fh.util.ConversionUtil;
+import com.fh.util.DateUtil;
+import com.fh.util.FileUtil;
+import com.fh.util.Jurisdiction;
+import com.fh.util.ObjectExcelView;
+import com.fh.util.PageData;
+import com.fh.util.PathUtil;
+import com.fh.util.StringUtil;
+import com.fh.util.Tools;
+import com.mysql.jdbc.Util;
+@Controller
+@RequestMapping(value="/qResult")
+public class QuestionnaireResultController  extends BaseController{
+	@Resource(name="questionnaireService")
+	private QuestionnaireService questionnaireService;
+	@Resource(name="questionsService")
+	private QuestionsService questionsService;
+	@Resource(name="questionsHeaderService")
+	QuestionsHeaderService questionsHeaderService;
+	@Resource(name="fileDetailsService")
+	private FileDetailsService fileDetailsService;
+	@Resource(name="linkagePullDataService")
+	private  LinkagePullDataService linkagePullDataService;
+	
+	//问诊数据service
+	@Resource(name="sectionBaseService")
+	private SectionBaseService sectionBaseService;
+	@Resource(name="recordService")
+	private RecordService recordService;
+	@Resource(name="departmentService")
+	private DepartmentManager departmentService;
+	/**
+	 * by xiaoding
+	 * @param page
+	 * @return
+	 */
+	@RequestMapping(value="getList")
+	public ModelAndView getList(){
+		logBefore(logger, "列表Questions");
+		ModelAndView mv = this.getModelAndView();
+		PageData pd = new PageData();
+		try{
+			pd = this.getPageData();
+			pd.put("questionnaireId", pd.get("id"));
+			//pd.put("releaseStatus", "1");
+			//pd.put("validState", "1");
+			pd.put("nowTime", DateUtil.getDay());
+			PageData data=questionnaireService.findById(pd);
+			String questionnaireType=data.getString("questionnaireType");
+			Integer validState=null;
+			if(data !=null){
+				String releaseStatus=data.getString("releaseStatus");
+				validState=(Integer)data.get("validState");
+				//说明问卷无效
+				if(validState !=null && validState.equals(0)){
+					mv.addObject("validState", validState);
+					mv.setViewName("questionnaire/userPage/questionnaire_success");
+				}else{
+					//问卷处于回收中的状态
+					if(releaseStatus != null && releaseStatus.equals("1")){
+						data.put("fileIds","('"+data.getString("backgroundImgId")+"','"+data.getString("logoImgId")+"')");
+						List<FileDetails> fileDetails=fileDetailsService.getEntityByIds(data);
+						for (FileDetails detail:fileDetails) {
+							if(Const.FILE_CATEGORY_LOGO.equals(detail.getCategory())){
+								data.put("logoImgPath", Const.FILEPATHIMG+detail.getFileId()+detail.getFileExtension());
+							}else if(Const.FILE_CATEGORY_BG.equals(detail.getCategory())){
+								data.put("backgroundImgPath", Const.FILEPATHIMG+detail.getFileId()+detail.getFileExtension());
+							}
+							byte2File(detail.getContent(),this.getRequest().getServletContext().getRealPath("uploadFiles")+File.separator+Const.IMGPATH,detail.getFileId()+detail.getFileExtension());
+						}
+						List<Questions>	varList = questionsService.listQuestionnaireId(pd);	//列出一级Question列表
+					//	List<PageData>	pageList = questionPageService.checkList(page);	//列出Question列表
+						for(int i=0;i<varList.size();i++){
+							Questions questions=varList.get(i);
+							List<Questions> childQuestion=questions.getSUBQUESTIONS();
+							if(childQuestion!=null){
+								for (int j = 0; j < childQuestion.size(); j++) {
+									Questions childQuestions=childQuestion.get(j);
+									String str=childQuestions.getQuestionData();
+									if(str!=null&&!str.isEmpty()&&!str.equals("[]")){
+										List<MapEntity> maps = (List<MapEntity>)JSON.parse(str); 
+										//maps.sort();
+										varList.get(i).getSUBQUESTIONS().get(j).setQuestionDataMap(maps);
+									}
+								}
+							}
+							String classification=questions.getClassification();
+							if(classification!=null&&classification.equals("L0")){
+								String str=questions.getQuestionData();
+								if(str!=null&&!str.isEmpty()&&!str.equals("[]")){
+									List<MapEntity> maps = (List<MapEntity>)JSON.parse(str); 
+									//maps.sort();
+									questions.setQuestionDataMap(maps);
+								}
+							}
+						}
+						mv.addObject("varList", varList);
+						//mv.addObject("pageList", pageList);
+						String jsonList=JSON.toJSONString(varList);
+						mv.addObject("jsonList",jsonList);
+						//综合问卷调用的方法
+						if(Const.QUESTIONNAIRE_TYPE_COMMON.equals(questionnaireType)){
+							mv.setViewName("questionnaire/userPage/questionnaire_survey_page");
+						//星级评定问卷调用方法
+						//星级评定问卷的类型为--------------star_level_questionnaire
+						}else{
+							//调用问诊数据方法查询
+							String visitCode=pd.getString("code");
+							//String hosipitalCode=pd.getString("hCode");
+							String hospitalCode=data.getString("hospitalCode");//医院编码从问卷中取得
+							String interfaceCode=data.getString("interfaceCode");//医院借口编码从问卷中取得
+							PageData pds =null;
+							if(!Tools.isEmpty(hospitalCode)&&!Tools.isEmpty(visitCode)){
+								pd.put("hosipitalCode", hospitalCode);
+								pd.put("visitCode", visitCode);
+								mv.addObject("visitCode",visitCode);
+								mv.addObject("hosipitalCode",hospitalCode);
+								pds = sectionBaseService.getPatientById(pd);
+							}
+							if(pds != null) {
+								// 根据所属医院ID从配置表中获取配置名称及顺序
+								pd.put("isShow", 1);
+								pd.put("hosipitalId", hospitalCode);
+								pd.put("interType", interfaceCode);
+								Page page=new Page();
+								page.setPd(pd);
+								List<PageData> varList2 = recordService.configList(page);
+								LinkedHashMap<String, String> map = new LinkedHashMap<String, String>();
+								for (PageData conf : varList2) {
+									map.put(conf.getString("LABEL"), pds.getString(conf.getString("FIELD_NAME")));
+								}
+								mv.addObject("mapInfo", map);
+								mv.addObject("pds", pds);
+								mv.setViewName("questionnaire/start_level_questionnaire/star_level_survey");
+							}else{
+								//丢失参数跳转页面
+								mv.setViewName("questionnaire/start_level_questionnaire/order_lose");
+							}
+						}
+					}else{
+						//展示问卷发布状态
+						mv.setViewName("questionnaire/userPage/questionnaire_success");
+					}
+				}
+			}else{
+				//问卷已被删除
+				mv.setViewName("questionnaire/userPage/questionnaire_success");
+			}
+			/*mv.addObject("linkageMap", this.map);*/
+			mv.addObject("data",data);
+			mv.addObject("questionnaireData",data);
+			Map<String,String> releaserStatusMap=ConversionUtil.getReleaseStatus();
+			mv.addObject("releaserStatusMap",releaserStatusMap);
+			String batch=ConversionUtil.getBatchByRandom(Const.batchName);
+			getRequest().getSession().setAttribute("batchId", batch);;
+			mv.addObject("batch",batch);
+			mv.addObject("defaultOption",ConversionUtil.getDefaultOption());
+			mv.addObject("pd", pd);
+			mv.addObject("questionnaireId",pd.get("questionnaireId"));
+			//mv.addObject(Const.SESSION_QX,this.getHC(pd.getString("id")));	//按钮权限
+		} catch(Exception e){
+			logger.error(e.toString(), e);
+		}
+		return mv;
+	}
+	/**
+	 * 保存问卷
+	 * by xiaoding
+	 * @return
+	 */
+	
+	
+	@RequestMapping(value="saveQuestionsForList")
+	public ModelAndView saveQuestionsForList(){
+		ModelAndView mv = new ModelAndView();
+		Map properties = this.getRequest().getParameterMap();
+		Iterator entries = properties.entrySet().iterator(); 
+		String batchId=this.getRequest().getParameter("batchId");
+		String batchIdSession=(String) getRequest().getSession().getAttribute("batchId");
+		//问卷头的   list   集合
+		List<QuestionsHeader> listHeader=new ArrayList<QuestionsHeader>();
+		PageData pd=this.getPageData();
+		
+		//问卷正文 list   集合
+		List<QuestionnaireResults> listBody=new ArrayList<QuestionnaireResults>();
+		if(!Tools.isEmpty(batchIdSession) && batchIdSession.equals(batchId)){
+			getRequest().getSession().removeAttribute("batchId");
+			String questionnaireId=this.getRequest().getParameter("questionnaireId");
+			String level=this.getRequest().getParameter("level");
+			String visitCode=this.getRequest().getParameter("code");
+			String hosipitalCode=this.getRequest().getParameter("hosipitalCode");
+			Map.Entry entry; 
+			String name = "";  
+			String column1=this.getRequest().getParameter("column1");
+			while (entries.hasNext()) {
+				String value = ""; 
+//				QuestionsHeader header=new QuestionsHeader();
+				QuestionnaireResults body=new QuestionnaireResults();
+				entry = (Map.Entry) entries.next(); 
+				body.setVisitCode(visitCode);
+				body.setHosipitalCode(hosipitalCode);
+				//获取对应的值
+				Object valueObj = entry.getValue(); 
+				if(null == valueObj){ 
+					value = ""; 
+				}else if(valueObj instanceof String[]){ 
+					String[] values = (String[])valueObj;
+					for(int i=0;i<values.length;i++){ 
+						 value += values[i] + ",";
+					}
+					value = value.substring(0, value.length()-1); 
+				}else{
+					value = valueObj.toString(); 
+				}
+				//获取对应的键
+				name = (String) entry.getKey(); 
+				if(name.indexOf("list_linkage_")>-1){
+					continue;
+				}
+				if(name.indexOf("_title")>-1){
+					//将两张结果表合为一张表
+					// 问卷头的保存信息
+					/*header.setCreateUser("");
+					header.setCreatTime(new Date());
+					if(value.indexOf("%")>-1){
+						header.setTitleValue(value.replace("%", ","));
+					}else{
+						header.setTitleValue(value);
+					}
+					
+					String[] remarksArr=(String[]) properties.get("isRemarks_header_"+questionsId);
+					if(remarksArr!=null){
+						header.setRemarks(remarksArr[0]);
+						entries.remove();
+					}
+					header.setTitleName(name.split("_title")[0]);
+					header.setHeaderId(this.get32UUID());
+					header.setQuestionnaireId(questionnaireId);
+					header.setBatchId(batchId);
+					header.setRespondentCode(level);
+					header.setColumn1(column1);
+					listHeader.add(header);*/
+				}else {
+					if(name.indexOf("isRemarks_header_")>-1|| name.indexOf("isRemarks_body_")>-1){
+						continue;
+					}
+					if(name.indexOf("_")>-1){
+						String[] questionIdType=name.split("_");
+						String types=null;
+						String questionId=null;
+						if(questionIdType!=null){
+							types=questionIdType[1];
+							questionId=questionIdType[0];
+						}
+						String[] remarksArr=(String[]) properties.get("isRemarks_body_"+questionId);
+						if(remarksArr!=null){
+							body.setRemarks(remarksArr[0]);
+						}
+						body.setQuestionResultId(this.get32UUID());
+						body.setQuestionnaireId(questionnaireId);
+						body.setQuestionId(questionId);
+						body.setBatchId(batchId);
+						body.setCreateUser("");
+						body.setCreateTime(new Date());
+						body.setTypes(types);
+						if(value.indexOf("%")>-1){
+							body.setAnswerResult(value.replace("%", ","));
+						}else{
+							body.setAnswerResult(value);
+						}
+						
+						body.setRespondentCode(level);
+						body.setColumn1(column1);
+						listBody.add(body);
+					}
+				}
+			}
+		}
+		try {
+			questionsHeaderService.saveList(listHeader,listBody);
+			PageData data=questionnaireService.findById(pd);
+			if(data!=null ){
+				String finishBackground=data.getString("finishBackground");
+				if(!Tools.isEmpty(finishBackground) && "flowerModel".equals(finishBackground)){
+					mv.setViewName("questionnaire/userPage/survey_success_video");
+				}else{
+					mv.setViewName("questionnaire/userPage/answer_success");
+				}
+			}else{
+				mv.setViewName("questionnaire/userPage/answer_success");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("出现异常,将数据写入文件...");
+			String userMsg = JSONObject.toJSONString(listHeader);
+			String pageMsg = JSONObject.toJSONString(listBody);
+			String filePath = PathUtil.getClassResources();			//文件上传路径
+			FileUtil.infoText(filePath,userMsg+"***"+pageMsg);
+			mv.setViewName("questionnaire/userPage/order_lose");
+		}
+		//1   表示成功    0表示失败
+		return mv;
+	}
+	/**
+	 * 问卷答案  列表    by xiaoding
+	 * @param page
+	 * @return
+	 */
+	@RequestMapping("listResult")
+	public ModelAndView listResult(Page page){
+		Date date=new Date();
+		logBefore(logger, "列表QuestionsnaireResult");
+		ModelAndView mv = this.getModelAndView();
+		PageData pd =this.getPageData();
+		page.setPd(pd);
+		List<MapEntity> dataList=new ArrayList<MapEntity>();
+		//列表标题list
+		List<MapEntity> titleList=new ArrayList<MapEntity>();
+		List<List<String>> listData=new ArrayList<List<String>>();
+		List<Questionnaire> listQuestionnaire=new ArrayList<Questionnaire>();
+		try {
+			this.getUserHC(pd, departmentService);
+			listQuestionnaire=questionnaireService.findQuestionnaireList(pd);
+			// 获取列表标题
+			titleList=questionsHeaderService.findTitleByQuestionsnaireId(pd);
+			listData=questionsHeaderService.listQuestionsResultForNew(page,pd);//listQuestionsResultForListByTest
+//			listData=questionsHeaderService.listQuestionsResultForListByTest(page,pd);
+			if(listQuestionnaire!=null &&listQuestionnaire.size()>0){
+				Questionnaire questionnaire=listQuestionnaire.get(0);
+				String questionnaireId=questionnaire.getQuestionnaireId();
+				String questionnaireIdFor=pd.getString("questionnaireId");
+				pd.put("questionnaireId", questionnaireId);
+				PageData pageData=questionnaireService.findById(pd);
+				String respondents= pageData.getString("respondents");
+				//调差对象变更
+				Map<String,String> map;
+				String respondentsParentId=pageData.getString("respondentsParentId");
+				map=ConversionUtil.getStaffLevelByParentId(respondentsParentId);
+				
+				Set<String> keys=map.keySet();
+				if(!Tools.isEmpty(respondents)){
+					if(respondents.indexOf(",")>-1){
+						String[] respondentsArr=respondents.split(",");
+						for (int i = 0; i < respondentsArr.length; i++) {
+							for (String key : keys) {
+								if(key.equals(respondentsArr[i])){
+									MapEntity entity=new MapEntity();
+									entity.setKey(key);
+									entity.setValue(map.get(key));
+									dataList.add(entity);
+								}
+							}
+						}
+					}else{
+						for (String key : keys) {
+							if(key.equals(respondents)){
+								MapEntity entity=new MapEntity();
+								entity.setKey(key);
+								entity.setValue(map.get(key));
+								dataList.add(entity);
+							}
+						}
+					}
+				}
+				mv.addObject("levelMap",dataList);
+				pd.put("questionnaireId", questionnaireIdFor);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			logger.error(e.toString(), e);
+		}
+		mv.addObject("listQuestionnaire",listQuestionnaire);
+		mv.addObject("page",page);
+		mv.addObject("pd",pd);
+		
+		mv.addObject("defaultColumnName",ConversionUtil.getDefaultColumnName());
+		
+		mv.addObject("listData",listData);
+		mv.addObject("titleList",titleList);
+		mv.addObject(Const.SESSION_QX,Jurisdiction.getHC());	//按钮权限
+		Date date1=new Date();
+		System.out.println("============================================================");
+		System.err.println(date1.getTime()-date.getTime());
+		System.out.println("============================================================");
+		mv.setViewName("/questionnaire/userPage/questionnaire_result_list");
+		return mv;
+	}
+	/**
+	 * 问卷收集的答案的导出
+	 * by xiaoding
+	 * @param page
+	 * @return
+	 */
+	@RequestMapping(value="/exportExcel")
+	public ModelAndView exportExcel(Page page){
+		Date date=new Date();
+		logBefore(logger, "导出VideoLog到excel");
+		ModelAndView mv = new ModelAndView();
+		PageData pd = new PageData();
+		List<MapEntity> titleList=new ArrayList<MapEntity>();
+		List<List<String>> listData=new ArrayList<List<String>>();
+		try{
+			pd = this.getPageData();
+			page.setPd(pd);
+			//标题list
+			titleList=questionsHeaderService.findTitleByQuestionsnaireId(pd);
+			//数据list
+//			listData=questionsHeaderService.listQuestionsResultForExport(page,pd);
+			listData=questionsHeaderService.listQuestionsResultForExportByTest(page,pd);
+			//数据
+			List<PageData> varList = new ArrayList<PageData>();
+			//数据
+			Map<String,Object> dataMap = new HashMap<String,Object>();
+			//标题
+			List<String> titles = new ArrayList<String>();
+			if(titleList!=null){
+				for (int i = 0; i < titleList.size(); i++) {
+					MapEntity entity=titleList.get(i);
+					titles.add(entity.getValue());	//1
+				}
+			}else{
+				List<String> defaultColumnName=ConversionUtil.getDefaultColumnName();
+				for (int i = 0; i < defaultColumnName.size(); i++) {
+					titles.add(defaultColumnName.get(i));	//1
+				}
+			}
+			dataMap.put("titles", titles);
+			if(listData!=null){
+				for (int i = 0; i < listData.size(); i++) {
+					PageData vpd = new PageData();
+					List<String> listLie=listData.get(i);
+					for (int j = 0; j < listLie.size(); j++) {
+						int lieShu=j+1;
+						vpd.put("var"+lieShu, listLie.get(j));	//1
+					}
+					varList.add(vpd);
+				}
+			}
+			dataMap.put("varList", varList);
+			ObjectExcelView erv = new ObjectExcelView();
+			mv = new ModelAndView(erv,dataMap);
+		}catch(Exception e){
+			logger.error(e.toString(), e);
+		}
+		Date date1=new Date();
+		System.err.println(date1.getTime()-date.getTime());
+		return mv;
+	}
+	/**
+	 * 文件写入磁盘目录
+	 * @param buf
+	 * @param filePath
+	 * @param fileName
+	 * @return
+	 */
+	private void byte2File(byte[] buf, String filePath, String fileName){  
+		
+        BufferedOutputStream bos = null;  
+        FileOutputStream fos = null;  
+        File file = null;  
+        try  
+        {  
+            File dir = new File(filePath);  
+            if (!dir.exists() && dir.isDirectory())  
+            {  
+                dir.mkdirs();  
+            }  
+            file = new File(filePath + File.separator + fileName);  
+            fos = new FileOutputStream(file);  
+            bos = new BufferedOutputStream(fos);  
+            bos.write(buf);  
+        }  
+        catch (Exception e)  
+        {  
+            e.printStackTrace();  
+        }  
+        finally  
+        {  
+            if (bos != null)  
+            {  
+                try  
+                {  
+                    bos.close();  
+                }  
+                catch (IOException e)  
+                {  
+                    e.printStackTrace();  
+                }  
+            }  
+            if (fos != null)  
+            {  
+                try  
+                {  
+                    fos.close();  
+                }  
+                catch (IOException e)  
+                {  
+                    e.printStackTrace();  
+                }  
+            }  
+        }  
+    } 
+	/**
+	 * 问卷关联出该问卷下面的级别
+	 * @param out
+	 * xiaoding
+	 */
+	@RequestMapping("/findStaffLevel")
+	@ResponseBody
+	public Object findStaffLevel(){
+		PageData pd=new PageData();
+		List<MapEntity> dataList=new ArrayList<MapEntity>();
+		PageData pdData = new PageData();	
+		Map<String,Object> mapData = new HashMap<String,Object>();
+		try {
+			pd=this.getPageData();
+			PageData pageData=questionnaireService.findById(pd);
+			String respondents= pageData.getString("respondents");
+			Map<String,String> map;
+			String respondentsParentId=pageData.getString("respondentsParentId");
+			map=ConversionUtil.getStaffLevelByParentId(respondentsParentId);
+//			Map<String,String> map=ConversionUtil.getStaffLevel();
+			Set<String> keys=map.keySet();
+			if(!Tools.isEmpty(respondents)){
+				if(respondents.indexOf(",")>-1){
+					String[] respondentsArr=respondents.split(",");
+					for (int i = 0; i < respondentsArr.length; i++) {
+						for (String key : keys) {
+							if(key.equals(respondentsArr[i])){
+								MapEntity entity=new MapEntity();
+								entity.setKey(key);
+								String value=map.get(key);
+								 //value=new String(value.getBytes("iso-8859-1"),"GB2312");
+								entity.setValue(value);
+								dataList.add(entity);
+							}
+						}
+					}
+				}else{
+					for (String key : keys) {
+						if(key.equals(respondents)){
+							MapEntity entity=new MapEntity();
+							entity.setKey(key);
+							String value=map.get(key);
+							//value=new String(value.getBytes("iso-8859-1"),"GB2312");
+							entity.setValue(value);
+							dataList.add(entity);
+						}
+					}
+				}
+			}
+			mapData.put("list", dataList);
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		return AppUtil.returnObject(pd, mapData);
+	}
+	
+	/**
+	 * 删除
+	 */
+	@RequestMapping(value="/delete")
+	public void delete(PrintWriter out){
+		logBefore(logger, "删除QuestionsResult");
+		PageData pd = new PageData();
+		try{
+			pd=this.getPageData();
+			questionsHeaderService.updateStatusForBatchId(pd);
+			out.write("success");
+		} catch(Exception e){
+			out.write("fail");
+			logger.error(e.toString(), e);
+		}finally{
+			out.close();
+		}
+		
+	}
+	/**
+	 * 页面初始化联动题
+	 * 
+	 * xiaoding
+	 */
+	@RequestMapping(value="/findLinkageByQuestionsId")
+	public void findLinkageByQuestionsId(HttpServletResponse response){
+		logBefore(logger, "问卷页面初始化----加载联动题-------");
+		PageData pd=this.getPageData();
+		String result="";
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out=null;
+		//根据问题id获取到对应的。联动题的id
+		try {
+			out=response.getWriter();
+			PageData data=questionsService.findById(pd);
+			if(data!=null){
+				List<PageData> listData=linkagePullDataService.findLinkageByParentId(data);
+				if(listData!=null &&listData.size()>0){
+					result=JSON.toJSONString(listData);
+				}else{
+					result="noChildren";
+				}
+			}else{
+				result="noQuestions";
+			}
+		} catch (Exception e) {
+			result="error";
+			logger.error(e.toString(), e);
+			e.printStackTrace();
+			
+		}finally{
+			if(out!=null){
+				out.print(result);
+				out.close();
+			}
+			
+		}
+	}
+	/**
+	 * 联动加载子类
+	 * @param out
+	 * xiaoding
+	 */
+	@RequestMapping(value="/findChildrenByLinkageId")
+	public void findChildrenByLinkageId(HttpServletResponse response){
+		logBefore(logger, "问卷页面----联动题加载子类-------");
+		PageData pd=this.getPageData();
+		String result="";
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out=null;
+		//根据问题id获取到对应的。联动题的id
+		try {
+			out=response.getWriter();
+			List<PageData> listData=linkagePullDataService.findLinkageByParentId(pd);
+			if(listData!=null &&listData.size()>0){
+				result=JSON.toJSONString(listData);
+			}else{
+				result="noChildren";
+			}
+		} catch (Exception e) {
+			result="error";
+			logger.error(e.toString(), e);
+			e.printStackTrace();
+			
+		}finally{
+			if(out!=null){
+				out.print(result);
+				out.close();
+			}
+		}
+	}
+	/**
+	 * 
+	 * 
+	 * xiaoding
+	 */
+	@RequestMapping(value="/findLinkageByParentIdForLinkage")
+	public  void findLinkageByParentIdForLinkage(HttpServletResponse response){
+		PageData pd=this.getPageData();
+		logBefore(logger, "问卷页面----联动题加载子类-------");
+		String result="";
+		response.setCharacterEncoding("UTF-8");
+		PrintWriter out=null;
+		try {
+			PageData data=questionsService.findById(pd);
+			out=response.getWriter();
+			Link[] listData=linkagePullDataService.findLinkageByParentIdForLinkage(data);
+			result=JSON.toJSONString(listData);
+			System.out.println(result);
+		} catch (Exception e) {
+			logger.error(e.toString(), e);
+			e.printStackTrace();
+		}finally{
+			if(out!=null){
+				out.print(result);
+				out.close();
+			}
+		}
+	}
+	
+}

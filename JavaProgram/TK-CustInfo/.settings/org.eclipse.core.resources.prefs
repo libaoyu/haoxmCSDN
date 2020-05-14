@@ -1,0 +1,9 @@
+#Thu Apr 12 15:35:09 GMT+08:00 2018
+eclipse.preferences.version=1
+encoding//resources/dbconfig.properties=UTF-8
+encoding//resources/dbfh.properties=UTF-8
+encoding//resources/redis.properties=UTF-8
+encoding//src/com/fh/controller/app/appuser/IntAppuserController.java=UTF-8
+encoding//src/com/fh/controller/questionnaire/QuestionnaireResultController.java=UTF-8
+encoding//src/com/fh/controller/system/login/LoginController.java=UTF-8
+encoding/<project>=UTF-8

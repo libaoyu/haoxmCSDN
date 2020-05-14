@@ -1,0 +1,91 @@
+package com.fh.service.questionnaire;
+
+import java.util.List;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+
+import com.fh.dao.DaoSupport;
+import com.fh.entity.Page;
+import com.fh.util.PageData;
+
+
+@Service("questionpageService")
+public class QuestionPageService {
+
+	@Resource(name = "daoSupport")
+	private DaoSupport dao;
+	
+	/*
+	* 新增
+	*/
+	public void save(PageData pd)throws Exception{
+		dao.save("QuestionPageMapper.save", pd);
+		/*boolean  flag= QRcode.encode(pd.getString("PAGEADDRESS")+"?pageId="+pd.getString("QUESTIONPAGE_ID"),pd.getString("SECONDCODE"));
+		if( !flag ){
+			throw new RuntimeException("二维码创建失败");
+		}*/
+	}
+	
+	/*
+	* 删除
+	*/
+	public void delete(PageData pd)throws Exception{
+		dao.delete("QuestionPageMapper.delete", pd);
+	}
+	
+	/*
+	* 修改
+	*/
+	public void edit(PageData pd)throws Exception{
+		dao.update("QuestionPageMapper.edit", pd);
+		/*boolean  flag= QRcode.encode(pd.getString("PAGEADDRESS")+"?pageId="+pd.getString("QUESTIONPAGE_ID"),pd.getString("SECONDCODE"));
+		if( !flag ){
+			throw new RuntimeException("二维码创建失败");
+		}*/
+	}
+	
+	/*
+	*列表
+	*/
+	public List<PageData> list(Page page)throws Exception{
+		return (List<PageData>)dao.findForList("QuestionPageMapper.datalistPage", page);
+	}
+	/*
+	 * 选择列表
+	 */
+	public List<PageData> checkList(Page page)throws Exception{
+		return (List<PageData>)dao.findForList("QuestionPageMapper.checkList", page);
+	}
+	/*
+	 * 选择列表
+	 */
+	public List<PageData> checkPage(Page page)throws Exception{
+		return (List<PageData>)dao.findForList("QuestionPageMapper.checkList", page);
+	}
+	/*
+	*列表(全部)
+	*/
+	public List<PageData> listAll(PageData pd)throws Exception{
+		return (List<PageData>)dao.findForList("QuestionPageMapper.listAll", pd);
+	}
+	
+	/*
+	* 通过id获取数据
+	*/
+	public PageData findById(PageData pd)throws Exception{
+		return (PageData)dao.findForObject("QuestionPageMapper.findById", pd);
+	}
+	public PageData findByIdUser(PageData pd)throws Exception{
+		return (PageData)dao.findForObject("QuestionPageMapper.findByIdUser", pd);
+	}
+	/*
+	* 批量删除
+	*/
+	public void deleteAll(String[] ArrayDATA_IDS)throws Exception{
+		dao.delete("QuestionPageMapper.deleteAll", ArrayDATA_IDS);
+	}
+	
+}
+

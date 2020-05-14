@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="QuestionMapper">
+	<resultMap type="Question" id="QuestionResultMap">
+		<id column="QUESTIONTITLE" property="QUESTIONTITLE"/>
+		<result column="QUESTIONCODE" property="QUESTIONCODE"/>
+		<result column="QUESTIONPAGE" property="QUESTIONPAGE"/>
+		<result column="QUESTIONTYPE" property="QUESTIONTYPE"/>
+		<result column="QUESTIONSCORE" property="QUESTIONSCORE"/>
+		<result column="QUESTION_ID" property="QUESTION_ID"/>
+		<result column="QUESTIONFLAG" property="QUESTIONFLAG"/>
+		<result column="ISPARENT" property="ISPARENT"/>
+	</resultMap>
+	
+	<!-- 新增-->
+	<insert id="save" parameterType="pd">
+		insert into TB_QUESTION(
+			QUESTIONTITLE,	 
+			QUESTIONCODE,	
+			QUESTIONPAGE,	
+			QUESTIONTYPE,	
+			QUESTIONSCORE,	
+			QUESTION_ID,
+			QUESTIONFLAG,
+			ISPARENT
+		) values (
+			#{QUESTIONTITLE},	
+			#{QUESTIONCODE},	
+			#{QUESTIONPAGE},	
+			#{QUESTIONTYPE},	
+			#{QUESTIONSCORE},	
+			#{QUESTION_ID},
+			#{QUESTIONFLAG},
+			#{ISPARENT}
+		)
+	</insert>
+	
+	
+	<!-- 删除-->
+	<delete id="delete" parameterType="pd">
+		delete from TB_QUESTION
+		where 
+			QUESTION_ID = #{QUESTION_ID}
+	</delete>
+	
+	
+	<!-- 修改 -->
+	<update id="edit" parameterType="pd">
+		update  TB_QUESTION
+			set 
+				QUESTIONTITLE = #{QUESTIONTITLE},
+				QUESTIONCODE = #{QUESTIONCODE},
+				QUESTIONPAGE = #{QUESTIONPAGE},
+				QUESTIONTYPE = #{QUESTIONTYPE},
+				QUESTIONSCORE = #{QUESTIONSCORE},
+				QUESTIONFLAG = #{QUESTIONFLAG},
+			QUESTION_ID = QUESTION_ID
+			where 
+				QUESTION_ID = #{QUESTION_ID}
+	</update>
+	
+	<select id="findByFlag" parameterType="pd" resultType="pd">
+		select 
+			QUESTIONTITLE,	
+			QUESTIONCODE,	
+			QUESTIONPAGE,	
+			QUESTION_ID,
+			QUESTIONFLAG,
+			ISPARENT
+		from  TB_QUESTION
+		
+		where ISPARENT is not null  and QUESTIONPAGE = #{pageId}
+		
+		ORDER BY ISPARENT 
+	</select>
+	
+	<!-- 通过ID获取数据 -->
+	<select id="findById" parameterType="pd" resultType="pd">
+		select 
+			QUESTIONTITLE,	
+			QUESTIONCODE,	
+			QUESTIONPAGE,	
+			QUESTIONTYPE,	
+			QUESTIONSCORE,	
+			QUESTION_ID
+		from 
+			TB_QUESTION
+		where 
+			QUESTION_ID = #{QUESTION_ID}
+	</select>
+	<!-- 问卷数据展示模块级联菜单 -->
+	<select id="findByPageId" parameterType="pd" resultType="pd">
+		select 
+			QUESTIONTITLE,	
+			QUESTIONCODE,		
+			QUESTION_ID,
+			QUESTIONTYPE,
+			QUESTIONSCORE
+		from 
+			TB_QUESTION 
+		where 
+			QUESTIONPAGE = #{pageid}
+		ORDER BY QUESTIONCODE 
+	</select>
+	
+	<!-- 用户访问问卷获取问题列表 -->
+	<select id="findByPageIdUser" parameterType="pd" resultType="pd">
+		select 
+			QUESTION_ID,
+			QUESTIONTITLE,	
+			QUESTIONCODE,
+			QUESTIONPAGE,
+			QUESTIONTYPE,
+			QUESTIONSCORE,
+			QUESTIONFLAG,
+			ISPARENT,IF(ISPARENT,0,QUESTIONCODE) ords
+		from 
+			TB_QUESTION 
+		where 
+			QUESTIONPAGE = #{pageId}
+		ORDER BY QUESTIONFLAG,ords
+	</select>
+	
+	<!-- 一级列表 -->
+	<select id="datalistPage" parameterType="page" resultMap="QuestionResultMap">
+		select
+				a.QUESTIONTITLE,	
+				a.QUESTIONCODE,	
+				a.QUESTIONPAGE,	
+				a.QUESTIONTYPE,	
+				a.QUESTIONSCORE,	
+				a.QUESTION_ID,
+				a.QUESTIONFLAG,
+				a.ISPARENT,
+				b.PAGENAME
+		from 
+				TB_QUESTION a left join 
+				TB_QUESTIONPAGE b on b.QUESTIONPAGE_ID = a.QUESTIONPAGE  
+		where 1=1 and a.ISPARENT is not null
+		<if test="pd.QUESTIONPAGE != null and pd.QUESTIONPAGE != ''"><!-- 证件号检索 -->
+			and a.QUESTIONPAGE = #{pd.QUESTIONPAGE}  
+		</if>	order by a.QUESTIONCODE
+	</select>
+	<!-- 二级列表 -->
+	<select id="childList" parameterType="pd" resultMap="QuestionResultMap">
+		select
+				a.QUESTIONTITLE,	
+				a.QUESTIONCODE,	
+				a.QUESTIONPAGE,	
+				a.QUESTIONTYPE,	
+				a.QUESTIONSCORE,	
+				a.QUESTION_ID,
+				a.QUESTIONFLAG,
+				a.ISPARENT
+		from 
+				TB_QUESTION a
+		where 	a.ISPARENT is null and
+				a.QUESTIONPAGE = #{QUESTIONPAGE} 
+				ORDER BY a.QUESTIONCODE
+	</select>
+	
+	<!-- 列表(全部) -->
+	<select id="listAll" parameterType="pd" resultType="pd">
+		select
+				a.QUESTIONTITLE,	
+				a.QUESTIONCODE,	
+				a.QUESTIONPAGE,	
+				a.QUESTIONTYPE,	
+				a.QUESTIONSCORE,	
+				a.QUESTION_ID
+		from 
+				TB_QUESTION a
+	</select>
+	
+	<!-- 批量删除 -->
+	<delete id="deleteAll" parameterType="String">
+		delete from TB_QUESTION
+		where 
+			QUESTION_ID in
+		<foreach item="item" index="index" collection="array" open="(" separator="," close=")">
+                 #{item}
+		</foreach>
+	</delete>
+	
+</mapper>

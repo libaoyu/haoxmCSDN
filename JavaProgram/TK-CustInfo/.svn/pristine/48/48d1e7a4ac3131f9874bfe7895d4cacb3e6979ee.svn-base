@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="SectionBaseMapper">
+
+	<resultMap type="Patient" id="SectionBaseMap">
+		<id column="RECORD_ID" property="recordId"/>
+		<result column="VISIT_CODE" property="visitCode"/>
+		<result column="HOSIPITAL_CODE" property="hosipitalCode"/>
+		<result column="HOSIPIATL_NAME" property="hosipitalName"/>
+		<result column="VISIT_TYPE" property="visitType"/>
+		<result column="SECTION_NAME" property="sectionName"/>
+		<result column="SECTION_CODE" property="sectionCode"/>
+		<result column="EMP_CODE" property="empCode"/>
+		<result column="EMP_NAME" property="empName"/>
+		<result column="DOCTORTYPE" property="doctorType"/>
+		<result column="PATIENT_ID" property="patientId"/>
+		<result column="PATIENT_NAME" property="patientName"/>
+		<result column="SEX" property="sex"/>
+		<result column="PHONE_NUMBER" property="phoneNumber"/>
+		<result column="VISIT_DATE" property="visitDate"/>
+		<result column="TIMES" property="times"/>
+		<result column="EXPERIENCE_TYPE" property="experienceType"/>
+		<!-- 燕园康复医院问诊数据新增字段 -->
+		<result column="OUTHOSPITAL_DATE" property="outHospitalDate"/>
+		<result column="BED" property="bed"/>
+		<result column="BUILDINGNUM" property="buildingNum"/>
+		<result column="ROOTNUM" property="rootNum"/>
+		<!-- 仙林鼓楼医院新增护理病区 -->
+		<result column="NURSE_NAME" property="nurseName"/>
+		<result column="CREATE_TIME" property="createTime"/>
+		<result column="MODIFY_TIME" property="modifyTime"/>
+	</resultMap>
+
+	<!-- 字段 -->
+	<sql id="Field">
+		RECORD_ID,
+		VISIT_CODE,
+		HOSIPITAL_CODE,
+		HOSIPIATL_NAME,
+		VISIT_TYPE,
+		SECTION_NAME,
+		SECTION_CODE,
+		EMP_CODE,
+		EMP_NAME,
+		DOCTORTYPE,
+		PATIENT_ID,
+		PATIENT_NAME,
+		SEX,
+		PHONE_NUMBER,
+		VISIT_DATE,
+		TIMES,
+		EXPERIENCE_TYPE,
+		OUTHOSPITAL_DATE,
+		BED,
+		BUILDINGNUM,
+		ROOTNUM,
+		NURSE_NAME,
+		CREATE_TIME,
+		MODIFY_TIME
+	</sql>
+	
+	<!-- 字段值 -->
+	<sql id="FieldValue">
+		#{recordId},
+		#{visitCode},
+		#{hosipitalCode},
+		#{hosipitalName},
+		#{visitType},
+		#{sectionName},
+		#{sectionCode},
+		#{empCode},
+		#{empName},
+		#{doctorType},
+		#{patientId},
+		#{patientName},
+		#{sex},
+		#{phoneNumber},
+		#{visitDate},
+		#{times},
+		#{experienceType},
+		#{outHospitalDate},
+		#{bed},
+		#{buildingNum},
+		#{rootNum},
+		#{nurseName},
+		#{createTime},
+		#{modifyTime}
+	</sql>
+	
+	<!--表名 -->
+	<sql id="tableName">
+		tb_section_base
+	</sql>
+
+	<!-- 根据id查询单个实体 -->
+	<select id="getInfoById" parameterType="pd" resultType="pd">
+		select
+		<include refid="Field"></include>
+		from
+		<include refid="tableName"></include>
+		where 1=1 
+		and VISIT_CODE = #{visitCode}
+		<if test=" hosipitalCode != null and hosipitalCode !=''">
+			and HOSIPITAL_CODE=#{hosipitalCode}
+		</if>
+	</select>
+	<!-- 新增-->
+	<insert id="save" parameterType="Patient">
+		insert into <include refid="tableName"></include>
+		(
+		<include refid="Field"></include>
+		) values (
+		<include refid="FieldValue"></include>	
+		)
+	</insert>
+</mapper>

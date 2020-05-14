@@ -1,0 +1,821 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="QuestionsMapper">
+	 
+	<resultMap type="Questions" id="QuestionsResultMap1">
+		<id column="questionId" property="questionId"/>
+		<result column="questionnaireId" property="questionnaireId"/>
+		<result column="questionnaireTitle" property="questionnaireTitle"/>
+		<result column="parentId" property="parentId"/>
+		<result column="questionCode" property="questionCode"/>
+		<result column="title" property="title"/>
+		<result column="level" property="level"/>
+		<result column="classification" property="classification"/>
+		<result column="types" property="types"/>
+		<result column="scaleType" property="scaleType"/>
+		<result column="scaleRange" property="scaleRange"/>
+		<result column="questionData" property="questionData"/>
+		<result column="score" property="score"/>
+		<result column="sort" property="sort"/>
+		<result column="mustFlag" property="mustFlag"/>
+		<result column="description" property="description"/>
+		<result column="validState" property="validState"/>
+		<result column="createUser" property="createUser"/>
+		<result column="createTime" property="createTime"/>
+		<result column="modifyUser" property="modifyUser"/>
+		<result column="modifyTime" property="modifyTime"/>
+		<result column="questionLevel" property="questionLevel"/>
+		<result column="isRemarks" property="isRemarks"/>
+		
+		<result column="formatData" property="formatData"/>
+		<result column="typeSetting" property="typeSetting"/>
+		<!-- 联动菜单id -->
+		<result column="linkageId" property="linkageId"/>
+		<!-- 问诊信息排列问题 -->
+		<result column="inquiryInformation" property="inquiryInformation"/>
+		<!-- 分割线类型 -->
+		<result column="cutoffRule" property="cutoffRule"/>
+		<collection property="SUBQUESTIONS" ofType="Questions" column="{parentId=questionId,level=questionLevel}" select="getAllForParentId"/>  
+	</resultMap>
+ 	
+ 	<resultMap type="Questions" id="QuestionsResultMap">
+		<id column="questionId" property="questionId"/>
+		<result column="questionnaireId" property="questionnaireId"/>
+		<result column="questionnaireTitle" property="questionnaireTitle"/>
+		<result column="parentId" property="parentId"/>
+		<result column="questionCode" property="questionCode"/>
+		<result column="title" property="title"/>
+		<result column="classify" property="classify"/>
+		<result column="level" property="level"/>
+		<result column="classification" property="classification"/>
+		<result column="types" property="types"/>
+		<result column="scaleType" property="scaleType"/>
+		<result column="scaleRange" property="scaleRange"/>
+		<result column="questionData" property="questionData"/>
+		<result column="score" property="score"/>
+		<result column="sort" property="sort"/>
+		<result column="mustFlag" property="mustFlag"/>
+		<result column="description" property="description"/>
+		<result column="validState" property="validState"/>
+		<result column="createUser" property="createUser"/>
+		<result column="createTime" property="createTime"/>
+		<result column="modifyUser" property="modifyUser"/>
+		<result column="modifyTime" property="modifyTime"/>
+		<result column="isRemarks" property="isRemarks"/>
+		<result column="formatData" property="formatData"/>
+		<result column="typeSetting" property="typeSetting"/>
+		<result column="linkageId" property="linkageId"/>
+		<!-- 问诊信息排列问题 -->
+		<result column="inquiryInformation" property="inquiryInformation"/>
+		<!-- 分割线类型 -->
+		<result column="cutoffRule" property="cutoffRule"/>
+	</resultMap>
+ 	
+	<!-- 新增-->
+	<insert id="save" parameterType="Questions">
+		insert into tb_questions(
+			questionId,	 
+			questionnaireId,
+			parentId,
+			questionCode,	
+			title,	
+			level,
+			classification,	
+			types,	
+			scaleType,
+			scaleRange,
+			questionData,
+			score,
+			sort,
+			mustFlag,
+			description,
+			validState,
+			createUser,
+			createTime,
+			isRemarks,
+			formatData,
+			typeSetting ,
+			linkageId,
+			inquiryInformation,
+			cutoffRule
+		) values (
+			#{questionId},	 
+			#{questionnaireId},	
+			#{parentId},
+			#{questionCode},
+			#{title},	
+			#{level},
+			#{classification},	
+			#{types},
+			#{scaleType},
+			#{scaleRange},	
+			#{questionData},
+			#{score},
+			#{sort},
+			#{mustFlag},
+			#{description},
+			#{validState},
+			#{createUser},
+			#{createTime},
+			#{isRemarks},
+			#{formatData},
+			#{typeSetting},
+			#{linkageId},
+			#{inquiryInformation},
+			#{cutoffRule}
+		)
+	</insert>
+	
+	
+	<!-- 删除-->
+	<!-- <delete id="delete" parameterType="pd">
+		delete from tb_questions
+		where 
+			questionId = #{questionId}
+	</delete> -->
+	
+	<update id="update" parameterType="pd">
+		update  tb_questions set status =0
+		where 
+			questionId = #{questionId}
+	</update>
+	<!-- 修改 -->
+	<update id="edit" parameterType="pd">
+		update  TB_QUESTIONS
+			set 
+				parentId = #{parentId},
+				questionnaireId = #{questionnaireId},
+				questionCode = #{questionCode},
+				title = #{title},
+				level = #{level},
+				classification = #{classification},
+				types = #{types},
+				scaleType = #{scaleType},
+				scaleRange = #{scaleRange},
+				questionData = #{questionData},
+				score = #{score},
+				sort = #{sort},
+				mustFlag = #{mustFlag},
+				description = #{description},
+				validState = #{validState},
+				modifyUser = #{modifyUser},
+				modifyTime = #{modifyTime},
+				isRemarks=#{isRemarks},
+				formatData=#{formatData},
+			typeSetting = #{typeSetting},
+			linkageId=#{linkageId},
+			inquiryInformation=#{inquiryInformation},
+			cutoffRule=#{cutoffRule}
+			where 
+				questionId = #{questionId}
+	</update>
+
+	<!-- Entity修改 -->
+	<update id="editByEntity" parameterType="Questions">
+		update  TB_QUESTIONS
+			set 
+				parentId = #{parentId},
+				questionnaireId = #{questionnaireId},
+				questionCode = #{questionCode},
+				title = #{title},
+				level = #{level},
+				classification = #{classification},
+				types = #{types},
+				scaleType = #{scaleType},
+				scaleRange = #{scaleRange},
+				questionData = #{questionData},
+				score = #{score},
+				sort = #{sort},
+				mustFlag = #{mustFlag},
+				description = #{description},
+				validState = #{validState},
+				modifyUser = #{modifyUser},
+				modifyTime = #{modifyTime},
+				isRemarks = #{isRemarks},
+				formatData=#{formatData},
+				typeSetting = #{typeSetting},
+				linkageId=#{linkageId},
+				inquiryInformation=#{inquiryInformation},
+				cutoffRule=#{cutoffRule}
+			where 
+				questionId = #{questionId}
+	</update>
+	<select id="findByFlag" parameterType="pd" resultType="pd">
+		select 
+			questionId,	 
+			questionnaireId,
+			parentId,
+			questionCode,	
+			title,	
+			level,
+			classification,	
+			types,
+			scaleType,
+			scaleRange,
+			questionData,
+			score,
+			sort,
+			mustFlag,
+			description,
+			validState,
+			createUser,
+			createTime,
+			isRemarks,
+			formatData,
+			typeSetting ,
+			linkageId,
+			inquiryInformation,
+			cutoffRule
+		from  TB_QUESTIONS
+		
+		where questionId = #{questionId}
+		
+		ORDER BY sort 
+	</select>
+	
+	<!-- 通过ID获取数据 -->
+	<select id="findById" parameterType="pd" resultType="pd">
+		select 
+			questionId,	 
+			questionnaireId,
+			questionCode,
+			parentId,	
+			title,	
+			level,
+			classification,	
+			types,
+			scaleType,
+			scaleRange,	
+			questionData,
+			score,
+			sort,
+			mustFlag,
+			description,
+			validState,
+			createUser,
+			createTime,
+			isRemarks,
+			formatData,
+			typeSetting ,
+			linkageId,
+			inquiryInformation,
+			cutoffRule
+		from 
+			TB_QUESTIONS
+		where 
+			questionId = #{questionId} and status= 1
+	</select>
+	
+	<select id="findByQuestionId" parameterType="pd" resultType="Questions">
+		select 
+			questionId,	 
+			questionnaireId,
+			questionCode,
+			parentId,	
+			title,	
+			level,
+			classification,	
+			types,
+			scaleType,
+			scaleRange,	
+			questionData,
+			score,
+			sort,
+			mustFlag,
+			description,
+			validState,
+			createUser,
+			createTime,
+			isRemarks,
+			formatData,
+			typeSetting ,
+			linkageId,
+			inquiryInformation,
+			cutoffRule
+		from 
+			TB_QUESTIONS
+		where 
+			questionId = #{questionId}
+	</select>
+	<!-- 问卷数据展示模块级联菜单 -->
+	<select id="findByQuestionnaireId" parameterType="pd" resultType="pd">
+		select 
+			questionId,	 
+			questionnaireId,
+			questionCode,
+			parentId,	
+			title,	
+			level,
+			classification,	
+			types,
+			scaleType,
+			scaleRange,	
+			questionData,
+			score,
+			sort,
+			mustFlag,
+			description,
+			validState,
+			createUser,
+			createTime,
+			isRemarks,
+			formatData,
+			typeSetting ,
+			linkageId,
+			inquiryInformation,
+			cutoffRule
+		from 
+			TB_QUESTIONS 
+		where 
+			questionnaireId = #{questionnaireId}
+		ORDER BY sort 
+	</select>
+	
+	<!-- 用户访问问卷获取问题列表 -->
+	<select id="findByPageIdUser" parameterType="pd" resultType="pd">
+		select 
+			questionId,	 
+			questionnaireId,	
+			questionCode,
+			parentId,
+			title,	
+			level,
+			classification,	
+			types,
+			scaleType,
+			scaleRange,		
+			questionData,
+			score,
+			sort,
+			mustFlag,
+			description,
+			validState,
+			createUser,
+			createTime,
+			isRemarks,
+			formatData,
+			typeSetting,
+			linkageId ,
+			inquiryInformation,
+			cutoffRule
+		from 
+			TB_QUESTIONS 
+		where 
+			questionnaireId = #{questionnaireId}
+		ORDER BY sort
+	</select>
+	
+	<!-- 一级列表 -->
+	<select id="datalistPage" parameterType="Page" resultMap="QuestionsResultMap">
+		select
+			a.questionId,	 
+			a.questionnaireId,
+			(select b.title from tb_questionnaire b where a.questionnaireId=b.questionnaireId)questionnaireTitle,	
+			a.questionCode,
+			a.parentId,
+			a.title,
+			(select CONCAT(c.questionCode,c.title) from tb_questions c where c.questionId=a.parentId) classify,
+			a.level,
+			a.classification,	
+			a.types,	
+			a.scaleType,
+			a.scaleRange,
+			a.questionData,
+			a.score,
+			a.sort,
+			a.mustFlag,
+			a.description,
+			a.validState,
+			a.createUser,
+			a.createTime,
+			a.isRemarks,
+			a.formatData,
+			a.typeSetting ,
+			a.linkageId,
+			a.inquiryInformation,
+			a.cutoffRule
+		from 
+			TB_QUESTIONS a
+			where 1=1 
+			<if test="pd.questionnaireId != null and pd.questionnaireId != ''">
+				 and a.questionnaireId = #{pd.questionnaireId}  
+			</if>
+			<if test="pd.title != null and pd.title != ''">
+				and a.title like CONCAT('%','${pd.title}','%') 
+			</if>
+			<if test="pd.startTimeStrHeader != null and pd.startTimeStrHeader != ''">
+				and ${pd.startTimeStrHeader}
+			</if>
+			and status= 1
+			 ORDER BY a.classification,a.questionCode,a.sort
+	</select>
+	
+	<!--只查一级列表 -->
+	<select id="dataOnelistPage" parameterType="Page" resultMap="QuestionsResultMap">
+		select
+			a.questionId,	 
+			a.questionnaireId,
+			(select replace((strip_tags(b.title)),'&amp;nbsp;','') title from tb_questionnaire b where a.questionnaireId=b.questionnaireId)questionnaireTitle,	
+			a.questionCode,
+			a.parentId,
+			a.title,
+			(select CONCAT(c.questionCode,c.title) from tb_questions c where c.questionId=a.parentId) classify,
+			a.level,
+			a.classification,	
+			a.types,	
+			a.scaleType,
+			a.scaleRange,
+			a.questionData,
+			a.score,
+			a.sort,
+			a.mustFlag,
+			a.description,
+			a.validState,
+			a.createUser,
+			a.createTime,
+			a.isRemarks,
+			a.formatData,
+			a.typeSetting ,
+			a.linkageId,
+			a.inquiryInformation,
+			a.cutoffRule
+		from 
+			TB_QUESTIONS a
+			where a.classification in ('L0','L1')
+			<if test="pd.questionnaireId != null and pd.questionnaireId != ''">
+				 and a.questionnaireId = #{pd.questionnaireId}  
+			</if>
+			<if test="pd.title != null and pd.title != ''">
+				and a.title like CONCAT('%','${pd.title}','%') 
+			</if>
+			<if test="pd.startTimeStrHeader != null and pd.startTimeStrHeader != ''">
+				and ${pd.startTimeStrHeader}
+			</if>
+			and status =1
+			 ORDER BY a.classification,a.questionCode desc,a.sort desc,a.createTime desc
+	</select>
+	<select id="statisOnelistPage" parameterType="Page" resultMap="QuestionsResultMap">
+		select
+			a.questionId,	 
+			a.questionnaireId,
+			(select replace((strip_tags(b.title)),'&amp;nbsp;','') title from tb_questionnaire b where a.questionnaireId=b.questionnaireId)questionnaireTitle,	
+			a.questionCode,
+			a.parentId,
+			a.title,
+			(select CONCAT(c.questionCode,c.title) from tb_questions c where c.questionId=a.parentId) classify,
+			a.level,
+			a.classification,	
+			a.types,	
+			a.scaleType,
+			a.scaleRange,
+			a.questionData,
+			a.score,
+			a.sort,
+			a.mustFlag,
+			a.description,
+			a.validState,
+			a.createUser,
+			a.createTime,
+			a.formatData,
+			a.typeSetting ,
+			a.linkageId,
+			a.inquiryInformation,
+			a.cutoffRule
+		from 
+			TB_QUESTIONS a
+			where a.classification in ('L0','L1')
+				 and a.questionnaireId = #{pd.questionnaireId,jdbcType=VARCHAR}  
+			<if test="pd.title != null and pd.title != ''">
+				and a.title like CONCAT('%','${pd.title}','%') 
+			</if>
+			
+			and status =1
+			ORDER BY a.classification,a.questionCode,a.sort
+	</select>
+	<!-- 二级列表 -->
+	<select id="childList" parameterType="pd" resultMap="QuestionsResultMap">
+		select
+			a.questionId,	 
+			a.questionnaireId,	
+			(select questionCode from TB_QUESTIONS where parentId=a.questionCode )questionCode,
+			a.parentId,
+			a.title,	
+			a.level,
+			a.classification,	
+			a.types,
+			a.scaleType,
+			a.scaleRange,
+			a.questionData,
+			a.score,
+			a.sort,
+			a.mustFlag,
+			a.description,
+			a.validState,
+			a.createUser,
+			a.createTime,
+			a.isRemarks,
+			a.formatData,
+			a.typeSetting ,
+			a.linkageId ,
+			a.inquiryInformation,
+			a.cutoffRule
+		from 
+				TB_QUESTIONS a
+		where a.classification='L2' 
+		<if test="questionnaireId != null and questionnaireId != ''">
+			and a.questionnaireId = #{questionnaireId}  
+		</if>
+		and status =1
+			ORDER BY a.sort
+	</select>
+	
+	<!-- 列表(全部) -->
+	<select id="listAll" parameterType="pd" resultType="pd">
+		select
+			a.questionId,	 
+			a.questionnaireId,	
+			a.questionCode,
+			a.parentId,
+			a.title,	
+			a.level,
+			a.classification,	
+			a.types,
+			a.scaleType,
+			a.scaleRange,
+			a.questionData,
+			a.score,
+			a.sort,
+			a.mustFlag,
+			a.description,
+			a.validState,
+			a.createUser,
+			a.createTime
+			a.isRemarks,
+			a.formatData,
+			a.typeSetting ,
+			a.linkageId,
+			a.inquiryInformation,
+			a.cutoffRule
+		from 
+				TB_QUESTIONS a
+	</select>
+	
+	<!-- 批量删除 -->
+	<!-- <delete id="deleteAll" parameterType="String">
+		delete from TB_QUESTIONS
+		where 
+			QUESTIONID in
+		<foreach item="item" index="index" collection="array" open="(" separator="," close=")">
+                 #{item}
+		</foreach>
+	</delete> -->
+	<update id="updateAll" parameterType="String">
+		update  TB_QUESTIONS
+			set status= 0
+		where 
+			QUESTIONID in
+		<foreach item="item" index="index" collection="array" open="(" separator="," close=")">
+                 #{item}
+		</foreach>
+	</update>
+	<select id="getAllForParentId" parameterType="pd" resultMap="QuestionsResultMap">
+		select
+			a.questionId,	 
+			a.questionnaireId,	
+			a.questionCode,
+			a.classification,
+			a.title,	
+			a.level,	
+			a.types,
+			a.scaleType,
+			a.scaleRange,
+			a.questionData,
+			a.score,
+			a.sort,
+			a.mustFlag,
+			a.description,
+			a.validState,
+			a.createUser,
+			a.createTime,
+			a.isRemarks,
+			a.formatData,
+			a.typeSetting ,
+			a.linkageId,
+			(select linkageName from tb_linkage_pull_data where linkageId=a.linkageId) linkageName,
+			inquiryInformation,
+			cutoffRule
+		from 
+				TB_QUESTIONS a where a.parentId=#{parentId} and  `level` like CONCAT('%','${level}','%') and status =1  ORDER BY  a.sort asc 
+	</select>
+	
+	
+	<select id="listQuestionnaireId" parameterType="pd" resultMap="QuestionsResultMap1">
+		select
+			a.questionId,	 
+			a.questionnaireId,	
+			a.classification,
+			a.questionCode,
+			a.title,	
+			a.level,
+			#{level} as questionLevel,
+			a.types,	
+			a.scaleType,
+			a.scaleRange,
+			a.questionData,
+			a.score,
+			a.sort,
+			a.mustFlag,
+			a.description,
+			a.validState,
+			a.createUser,
+			a.createTime,
+			a.isRemarks,
+			a.formatData,
+			a.typeSetting ,
+			a.linkageId,
+			(select linkageName from tb_linkage_pull_data where linkageId=a.linkageId) linkageName,
+			inquiryInformation,
+			cutoffRule
+		from 
+				TB_QUESTIONS a where questionnaireId=#{questionnaireId}  and  `level`  like  CONCAT('%','${level}','%')  and  classification !='L2' and status =1  ORDER BY  a.questionCode,a.sort asc 
+	
+	</select>
+	
+	<select id="findByParentId" parameterType="pd" resultType="pd">
+		select 
+			questionId,	 
+			questionnaireId,
+			questionCode,
+			parentId,	
+			title,	
+			level,
+			classification,	
+			types,
+			scaleType,
+			scaleRange,	
+			questionData,
+			score,
+			sort,
+			mustFlag,
+			description,
+			validState,
+			createUser,
+			createTime,
+			isRemarks,
+			formatData,
+			typeSetting ,
+			linkageId,
+			inquiryInformation,
+			cutoffRule
+		from 
+			TB_QUESTIONS
+		where 
+			questionnaireId = #{questionnaireId} and classification = #{classification} and status= 1
+		    <if test="classification == 'L2'">
+		    	and parentId = #{parentId}
+		    </if>
+			order by questionCode,sort,createTime desc
+	</select>
+	
+	<select id="findQuestionCode" parameterType="pd" resultType="pd">
+		select title,questionCode,sort from tb_questions
+		where 
+		questionnaireId = #{questionnaireId} 
+		and classification =#{classification} and status= 1
+		<if test = "parentId !=null and parentId !=''">
+			and parentId =#{parentId}
+		</if>
+		order by questionCode,sort
+	
+	</select>
+	
+	<!-- 更新排序 -->
+	<update id="updateCodeSort" parameterType="pd">
+		update tb_questions set 
+			<if test="questionCode !=null and questionCode!=''">
+			questionCode = #{questionCode},
+			</if>
+		    sort = #{sort} 
+		where questionId = #{questionId} and status= 1
+	</update>
+	<!-- 公共查询 -->
+	<select id="executeSql" resultType="map">
+	${sql}
+	</select>
+	
+	<!-- 数据统计查询问题 -->
+	<select id="findByStatIdlistPage" parameterType="page" resultType="pd">
+		select 
+			t1.questionId,	 
+			t1.questionnaireId,
+			t2.questionCode,
+			t1.parentId,	
+			t1.title,	
+			t1.level,
+			t1.classification,	
+			t1.types,
+			t1.scaleType,
+			t1.scaleRange,	
+			t1.questionData,
+			t1.score,
+			t1.sort,
+			t1.mustFlag,
+			t1.description,
+			t1.validState,
+			t1.createUser,
+			t1.createTime,
+			t1.isRemarks,
+			t1.formatData,
+			t1.typeSetting ,
+			t1.linkageId ,
+			t1.inquiryInformation,
+			t1.cutoffRule
+		from 
+			TB_QUESTIONS t1 left join TB_QUESTIONS t2 on (t1.parentId=t2.questionId)
+		where t1.questionnaireId =#{pd.questionnaireId} and t1.status=1 
+		and t1.classification in ('L0','L2') order by t1.classification,t2.questionCode,t1.sort
+		
+	</select>
+	
+	<!-- 导入数据新增到业务表-->
+	<insert id="saveList" useGeneratedKeys="true" parameterType="java.util.List">
+		<![CDATA[	  
+		insert into tb_questions(
+			questionId,	 
+			questionnaireId,
+			parentId,
+			questionCode,	
+			title,	
+			level,
+			classification,	
+			types,	
+			scaleType,
+			scaleRange,
+			questionData,
+			score,
+			sort,
+			mustFlag,
+			description,
+			validState,
+			createUser,
+			createTime
+		) values 
+		]]>
+		<foreach collection="list" item="item" index="index" separator=",">
+		(
+			#{item.questionId},	 
+			#{item.questionnaireId},	
+			#{item.parentId},
+			#{item.questionCode},
+			#{item.title},	
+			#{item.level},
+			#{item.classification},	
+			#{item.types},
+			#{item.scaleType},
+			#{item.scaleRange},	
+			#{item.questionData},
+			#{item.score},
+			#{item.sort},
+			#{item.mustFlag},
+			#{item.description},
+			#{item.validState},
+			#{item.createUser},
+			#{item.createTime}
+		)
+		</foreach>
+	</insert>
+	
+	<!-- 复制问题查询一级列表 -->
+	<select id="findCopyQuestion" parameterType="pd" resultMap="QuestionsResultMap">
+		select 
+			questionId,	 
+			questionnaireId,
+			parentId,
+			questionCode,	
+			title,	
+			level,
+			classification,	
+			types,	
+			scaleType,
+			scaleRange,
+			questionData,
+			score,
+			sort,
+			mustFlag,
+			description,
+			validState,
+			createUser,
+			createTime,
+			formatData,
+			typeSetting ,
+			linkageId,
+			inquiryInformation,
+			cutoffRule
+		from 
+			TB_QUESTIONS
+		where questionnaireId =#{questionnaireId}
+		 and ${classifications}
+	</select>
+	
+	
+</mapper>

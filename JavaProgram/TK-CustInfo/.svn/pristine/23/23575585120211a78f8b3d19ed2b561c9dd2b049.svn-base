@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="EnablerMapper">
+
+	<resultMap type="ExtParas" id="extParasResultMap">
+		<id column="EXTPARASID" property="extParasId"/>
+		<result column="RELEASEREASON" property="releaseReason"/>
+		<result column="UNIQUEID" property="uniqueId"/>
+		<result column="BINDID" property="bindId"/>
+		<result column="STARTTIME" property="startTime"/>
+		<result column="DURATION" property="duration"/>
+	</resultMap>
+	<resultMap type="ExtInfo" id="extInfoResultMap">
+		<id column="EXTINFOID" property="extInfoId"/>
+		<result column="RALLCALLED" property="rawCalled"/>
+		<result column="RALLCALLING" property="rawCalling"/>
+		<result column="RALLCALLEDNOA" property="rawCalledNOA"/>
+		<result column="RALLCALLINGNOA" property="rawcallingNOA"/>
+		<result column="EXTPARASID" property="extParasId"/>
+	</resultMap>
+	<resultMap type="NotifyCallEvent" id="callEventResultMap">
+		<id column="CALLEVENTID" property="callEventId"/>
+		<result column="CALLIDENTIFIER" property="callIdentifier"/>
+		<result column="CALLED" property="called"/>
+		<result column="CALLING" property="calling"/>
+		<result column="EVENT" property="event"/>
+		<result column="ISRECORD" property="isRecord"/>
+		<result column="NOTIFICATIONMODE" property="notificationMode"/>
+		<result column="TIMESTAMP" property="timeStamp"/>
+		<result column="VIRTUALNUMBER" property="virtualNumber"/>
+		<result column="EXTINFOID" property="extInfoId"/>
+	</resultMap>
+	
+	<!--表名 -->
+	<sql id="callEventTable">
+		tb_notify_callevent
+	</sql>
+	<sql id="extInfoTable">
+		tb_callevent_extinfo
+	</sql>
+	<sql id="extParasTable">
+		tb_extinfo_extparas
+	</sql>
+	
+	<!-- 字段 -->
+	<sql id="CallEventField">
+		CALLEVENTID,
+		CALLIDENTIFIER,
+		CALLED,
+		CALLING,
+		EVENT,
+		ISRECORD,
+		NOTIFICATIONMODE,
+		TIMESTAMP,
+		VIRTUALNUMBER,
+		EXTINFOID
+	</sql>
+	<sql id="ExtInfoField">
+		EXTINFOID,
+		RALLCALLED,
+		RALLCALLING,
+		RALLCALLEDNOA,
+		RALLCALLINGNOA,
+		EXTPARASID
+	</sql>
+	<sql id="ExtParasField">
+		EXTPARASID,
+		RELEASEREASON,
+		UNIQUEID,
+		BINDID,
+		STARTTIME,
+		DURATION
+	</sql>
+	
+	<!-- 字段值 -->
+	<sql id="CallEventFieldValue">
+		#{CALLEVENTID},
+		#{CALLIDENTIFIER},
+		#{CALLED},
+		#{CALLING},
+		#{EVENT},
+		#{ISRECORD},
+		#{NOTIFICATIONMODE},
+		#{TIMESTAMP},
+		#{VIRTUALNUMBER},
+		#{EXTINFOID}
+	</sql>
+	<sql id="ExtInfoFieldValue">
+		#{EXTINFOID},
+		#{RALLCALLED},
+		#{RALLCALLING},
+		#{RALLCALLEDNOA},
+		#{RALLCALLINGNOA},
+		#{EXTPARASID}
+	</sql>
+	<sql id="ExtParasFieldValue">
+		#{EXTPARASID},
+		#{RELEASEREASON},
+		#{UNIQUEID},
+		#{BINDID},
+		#{STARTTIME},
+		#{DURATION}
+	</sql>
+	
+	
+	<!-- 新增扩展信息 -->
+	<insert id="saveExtParas" parameterType="pd">
+		insert into <include refid="extParasTable"></include> (
+			<include refid="ExtParasField"></include>
+		) values (
+			<include refid="ExtParasFieldValue"></include>
+		)
+	</insert>
+	<!-- 新增扩展呼叫事件 -->
+	<insert id="saveExtInfo" parameterType="pd">
+		insert into <include refid="extInfoTable"></include> (
+			<include refid="ExtInfoField"></include>
+		) values (
+			<include refid="ExtInfoFieldValue"></include>
+		)
+	</insert>
+	<!-- 新增事件信息 -->
+	<insert id="saveCallEvent" parameterType="pd">
+		insert into <include refid="callEventTable"></include> (
+			<include refid="CallEventField"></include>
+		) values (
+			<include refid="CallEventFieldValue"></include>
+		)
+	</insert>
+
+</mapper>

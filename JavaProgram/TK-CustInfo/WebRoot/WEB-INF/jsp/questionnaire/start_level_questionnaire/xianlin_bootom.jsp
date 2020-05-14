@@ -1,0 +1,20 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+ </head>
+ <div class="footer clearfix">
+                <div class="footer_logo">
+                	<h3 class="concat">欢迎联系我们</h3>
+                    <span><i class="phone"></i>4000195522</span>
+                    <span><i class="http"></i>www.xlglyy.com</span>
+                    
+                </div>
+                <a class="QRCode">
+                    <img src="../static/images/ewm.png" alt="">
+                    <span class="xlwx">泰康仙林鼓楼医院<br>官方微信</span>
+                </a>
+            </div>
+</html>

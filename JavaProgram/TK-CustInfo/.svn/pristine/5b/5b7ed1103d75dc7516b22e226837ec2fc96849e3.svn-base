@@ -1,0 +1,120 @@
+package com.fh.util;
+
+import org.springframework.context.ApplicationContext;
+
+/**
+ * 项目名称：
+ * 
+ * @author:fh qq313596790[青苔] 修改日期：2015/11/2
+ */
+public class Const {
+	public static final String SESSION_SECURITY_CODE = "sessionSecCode"; // 验证码
+	public static final String SESSION_USER = "sessionUser"; // session用的用户
+	public static final String SESSION_ROLE_RIGHTS = "sessionRoleRights";
+	public static final String sSESSION_ROLE_RIGHTS = "sessionRoleRights";
+	public static final String SESSION_menuList = "menuList"; // 当前菜单
+	public static final String SESSION_allmenuList = "allmenuList"; // 全部菜单
+	public static final String SESSION_QX = "QX";
+	public static final String SESSION_userpds = "userpds";
+	public static final String SESSION_USERROL = "USERROL"; // 用户对象
+	public static final String SESSION_USERNAME = "USERNAME"; // 用户名
+	public static final String DEPARTMENT_IDS = "DEPARTMENT_IDS"; // 当前用户拥有的最高部门权限集合
+	public static final String DEPARTMENT_ID = "DEPARTMENT_ID"; // 当前用户拥有的最高部门权限
+	public static final String TRUE = "T";
+	public static final String FALSE = "F";
+	public static final String LOGIN = "/login_toLogin.do"; // 登录地址
+	public static final String SYSNAME = "admin/config/SYSNAME.txt"; // 系统名称路径
+	public static final String PAGE = "admin/config/PAGE.txt"; // 分页条数配置路径
+	public static final String EMAIL = "admin/config/EMAIL.txt"; // 邮箱服务器配置路径
+	public static final String SMS1 = "admin/config/SMS1.txt"; // 短信账户配置路径1
+	public static final String SMS2 = "admin/config/SMS2.txt"; // 短信账户配置路径2
+	public static final String FWATERM = "admin/config/FWATERM.txt"; // 文字水印配置路径
+	public static final String IWATERM = "admin/config/IWATERM.txt"; // 图片水印配置路径
+	public static final String WEIXIN = "admin/config/WEIXIN.txt"; // 微信配置路径
+	public static final String IMGPATH = "uploadImgs/";
+	public static final String WEBSOCKET = "admin/config/WEBSOCKET.txt"; // WEBSOCKET配置路径
+	public static final String LOGINEDIT = "admin/config/LOGIN.txt"; // 登录页面配置
+	public static final String FILEPATHIMG = "uploadFiles/uploadImgs/"; // 图片上传路径
+	public static final String FILEPATHFILE = "uploadFiles/file/"; // 文件上传路径
+	public static final String FILEPATHFILEOA = "uploadFiles/uploadFile/"; // 文件上传路径(oa管理)
+	public static final String QUESITONPATH = "uploadFiles/question/"; // 文件上传路径
+	public static final String FILEPATHTWODIMENSIONCODE = "uploadFiles/twoDimensionCode/"; // 二维码存放路径
+	public static final String NO_INTERCEPTOR_PATH = ".*/((login)|(logout)|(code)|(videoInfo)|(weixin)|(questionpage)|(static)|(main)|(uploadFiles)|(websocket)|(qResult)|(zj)|(section)|(wxpage)|(plugins)|(video)).*"; // 不对匹配该值的访问路径拦截（正则）
+	public static ApplicationContext WEB_APP_CONTEXT = null; // 该值会在web容器启动时由WebAppContextListener初始化
+
+	/**
+	 * APP Constants
+	 */
+	// 系统用户注册接口_请求协议参数)
+	public static final String[] SYSUSER_REGISTERED_PARAM_ARRAY = new String[] { "USERNAME", "PASSWORD", "NAME",
+			"EMAIL", "rcode" };
+	public static final String[] SYSUSER_REGISTERED_VALUE_ARRAY = new String[] { "用户名", "密码", "姓名", "邮箱", "验证码" };
+
+	// app根据用户名获取会员信息接口_请求协议中的参数
+	public static final String[] APP_GETAPPUSER_PARAM_ARRAY = new String[] { "USERNAME" };
+	public static final String[] APP_GETAPPUSER_VALUE_ARRAY = new String[] { "用户名" };
+
+	// 文件业务分类FileCategoryType
+	public static String FILE_CATEGORY_LOGO = "C1";
+	public static String FILE_CATEGORY_BG = "C2";
+	public static String FILE_CATEGORY_QR = "QR";
+	public static String FILE_CATEGORY_OTHER = "O";// 其他
+
+	/**
+	 * APP Constants
+	 */
+	// app注册接口_请求协议参数)
+	public static final String[] APP_REGISTERED_PARAM_ARRAY = new String[] { "countries", "uname", "passwd", "title",
+			"full_name", "company_name", "countries_code", "area_code", "telephone", "mobile" };
+	public static final String[] APP_REGISTERED_VALUE_ARRAY = new String[] { "国籍", "邮箱帐号", "密码", "称谓", "名称", "公司名称",
+			"国家编号", "区号", "电话", "手机号" };
+
+	/****************************************
+	 * zhangxq
+	 */
+	// 操作类型：1：增加 2：删 3：改 4：查
+	public static String operationType_1 = "1";
+	public static String operationType_2 = "2";
+	public static String operationType_3 = "3";
+	public static String operationType_4 = "4";
+
+	/****************************************
+	 * 
+	 * 所有：ALL；卷头：Header；内容：Content(题库详情)
+	 * 
+	 * @author zhangxq
+	 */
+	public static String OPTION_ALL = "ALL";// 所有分类
+
+	public static String OPTION_HEADER = "HEADER";// 卷头
+	public static String OPTION_CONTENT = "CONTENT";// 问卷正文(二级分类)
+
+	public static String LEVEL_ZERO = "L0";
+	public static String LEVEL_ONE = "L1";
+	public static String LEVEL_TWO = "L2";
+
+	public static String VISIT_TYPE_MZ = "1";// 星级评价类型门诊
+	public static String VISIT_TYPE_ZY = "2";// 星级评价类型住院
+	public static String VISIT_TYPE_THREE = "3";// 超过三星级的评价选项
+
+	public static String WXPAY_SUCCESS = "SUCCESS";// 微信预付单接口调用成功
+	public static String WXPAY_FAIL = "FAIL";// 微信预付单接口调用失败
+	public static final String HMACSHA256 = "HMAC-SHA256";// 微信支付生成签名加密类型
+	public static final String MD5 = "MD5";// 微信支付生成签名加密类型
+	public static final String FIELD_SIGN = "sign";// 微信支付调用返回参数签名字段名称
+	public static final String FIELD_SIGN_TYPE = "sign_type";// 微信支付生成签名类型
+	public static final String WXPAY_STATUS_SUCCESS = "1";// 已接收支付结果
+	public static final String WXPAY_STATUS_FAIL = "2";// 未接收支付结果
+
+	public enum SignType {
+		MD5, HMACSHA256
+	}
+
+	public static String XL_XJPJ_PATH = "section/goExpress?strIndex=";// 仙林医院星级评价短链接地址映射
+
+	public static String batchName = "BT";// 批次号前缀
+	public static String importBatchName = "IM";// 导入问卷的批次号前缀
+
+	public static String importQuestionsId = "IMP";
+
+}
