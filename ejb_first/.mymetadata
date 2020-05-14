@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="EJB"
+  name="ejb_first"
+  id="myeclipse.1264140743031"
+  j2ee-spec="5.0"
+  archive="ejb_first.jar" />
+
